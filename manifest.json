@@ -1,0 +1,13 @@
+{
+  "domain": "spotcast",
+  "name": "Start Spotify on chromecast",
+  "documentation": "https://www.home-assistant.io",
+  "requirements": [
+    "git+https://github.com/plamere/spotipy.git#spotipy",
+    "pychromecast==3.2.0",
+    "spotify_token==0.1.0"
+  ],
+  "dependencies": [
+  ],
+  "codeowners": []
+}
