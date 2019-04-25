@@ -10,7 +10,7 @@ This component is not meant to be a full Spotify chromecast media_player but onl
 ### Get code
 On your HA
 ```
-cd /config/custom_components && git clone git@github.com:fondberg/spotcast.git
+cd /config/custom_components && git clone https://github.com/fondberg/spotcast.git
 ```
 
 
