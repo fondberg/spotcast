@@ -1,5 +1,7 @@
 import logging
 import voluptuous as vol
+from pprint import pprint
+
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
@@ -13,13 +15,16 @@ CONF_SPOTIFY_URI = "uri"
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Required(CONF_DEVICE_NAME): cv.string,
-    vol.Required(CONF_SPOTIFY_URI): cv.string,
-    vol.Required(CONF_PASSWORD): cv.string,
-    vol.Required(CONF_USERNAME): cv.string,
+    vol.Required(CONF_SPOTIFY_URI): cv.string
 })
 
 def setup(hass, config):
     """Setup the Spotcast service."""
+
+    pprint(config[DOMAIN])
+    username = config[DOMAIN][CONF_USERNAME]
+    password = config[DOMAIN][CONF_PASSWORD]
+    _LOGGER.info("config.user %s %s ", username, password)
 
     def get_chromcase_device(device_name):
         import pychromecast
@@ -45,9 +50,12 @@ def setup(hass, config):
     def play(client, spotify_device_id, uri):
         print("Starting playback on %s " % spotify_device_id)
         _LOGGER.info('Got uri: %s', uri)
-        # client.start_playback(device_id=spotify_device_id, uris=["spotify:track:3Zwu2K0Qa5sT6teCCHPShP"])
-        # client.start_playback(device_id=spotify_device_id, context_uri="spotify:playlist:5zWx4nzIkTxHM5fPS6MHnJ")
-        client.start_playback(device_id=spotify_device_id, context_uri=uri)
+        if uri.find("track") > 0:
+            _LOGGER.info("Playing track using uris=")
+            client.start_playback(device_id=spotify_device_id, uris=[uri])
+        else:
+            _LOGGER.info("Playing context uri using uris=")
+            client.start_playback(device_id=spotify_device_id, context_uri=uri)
 
     def start_casting(call):
         """service called."""
@@ -56,8 +64,6 @@ def setup(hass, config):
         import spotipy
 
         uri = call.data.get(CONF_SPOTIFY_URI)
-        user = call.data.get(CONF_USERNAME)
-        password = call.data.get(CONF_PASSWORD)
         device_name = call.data.get(CONF_DEVICE_NAME)
 
         # Find chromecast device
@@ -65,7 +71,7 @@ def setup(hass, config):
         cast.wait()
 
         # login as real browser to get powerful token
-        access_token, expires = get_spotify_token(username=user, password=password)
+        access_token, expires = get_spotify_token(username=username, password=password)
 
         client = spotipy.Spotify(auth=access_token)
 
@@ -78,7 +84,6 @@ def setup(hass, config):
         devices_available = client.devices()
         for device in devices_available['devices']:
             if device['name'] == device_name:
-                print("Found it! device %s " % device['name'])
                 spotify_device_id = device['id']
                 break
 
@@ -88,14 +93,3 @@ def setup(hass, config):
                            schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
-
-
-# from homeassistant.helpers.aiohttp_client import async_get_clientsession
-# def start_playback(uri, access_token):
-#     websession = async_get_clientsession(hass)
-#     with async_timeout.timeout(15, loop=hass.loop):
-#         req = await websession.put(
-#             cloud.google_actions_sync_url, headers={
-#                 "Authorization": "Bearer {}".format(access_token),
-#                 "Content-Type": 'application/json'
-#             })
