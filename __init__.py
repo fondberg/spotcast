@@ -1,6 +1,5 @@
 import logging
 import voluptuous as vol
-from pprint import pprint
 
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
@@ -21,7 +20,6 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema({
 def setup(hass, config):
     """Setup the Spotcast service."""
 
-    pprint(config[DOMAIN])
     username = config[DOMAIN][CONF_USERNAME]
     password = config[DOMAIN][CONF_PASSWORD]
     _LOGGER.info("config.user %s %s ", username, password)
@@ -31,7 +29,6 @@ def setup(hass, config):
         chromecasts = pychromecast.get_chromecasts()
         cast = None
         for _cast in chromecasts:
-            print("Found cast: %s" % _cast.name )
             if _cast.name == device_name:
                 cast = _cast
                 return cast
@@ -48,13 +45,12 @@ def setup(hass, config):
         return access_token, expires
 
     def play(client, spotify_device_id, uri):
-        print("Starting playback on %s " % spotify_device_id)
         _LOGGER.info('Got uri: %s', uri)
         if uri.find("track") > 0:
-            _LOGGER.info("Playing track using uris=")
+            _LOGGER.info("Playing track using uris= for uri: %s", uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
-            _LOGGER.info("Playing context uri using uris=")
+            _LOGGER.info("Playing context uri using context_uri for uri: %s", uri)
             client.start_playback(device_id=spotify_device_id, context_uri=uri)
 
     def start_casting(call):
