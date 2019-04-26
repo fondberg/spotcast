@@ -22,7 +22,6 @@ def setup(hass, config):
 
     username = config[DOMAIN][CONF_USERNAME]
     password = config[DOMAIN][CONF_PASSWORD]
-    _LOGGER.info("config.user %s %s ", username, password)
 
     def get_chromcase_device(device_name):
         import pychromecast
