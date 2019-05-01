@@ -45,7 +45,7 @@ sensor.chromecast_devices
 ```
 Attributes
 ```
-devices_json: [{"name": "Kök", "cast_type": "audio", "model_name": "Google Home", "uuid": "fa4dda80-24b6-36eb-450c-a54f021a264a", "manufacturer": "Google Inc."}, {"name": "Högtalare uppe", "cast_type": "group", "model_name": "Google Cast Group", "uuid": "6f79c59c-f7af-4790-a0d2-c0cbf52ed71d", "manufacturer": "Google Inc."}, {"name": "Vardagsrum", "cast_type": "cast", "model_name": "HK Citation 300", "uuid": "89799911-c4bd-a97c-ef5d-1c3d95d83e81", "manufacturer": "Harman Kardon"}]
+devices_json: [{"name": "Kök", "cast_type": "audio", "model_name": "Google Home", "uuid": "xxxxx", "manufacturer": "Google Inc."}, {"name": "Högtalare uppe", "cast_type": "group", "model_name": "Google Cast Group", "uuid": "xxxx", "manufacturer": "Google Inc."}, {"name": "Vardagsrum", "cast_type": "cast", "model_name": "HK Citation 300", "uuid": "xxxx", "manufacturer": "Harman Kardon"}]
 
 last_update: 2019-05-01T15:27:49.828553+02:00
 
