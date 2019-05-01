@@ -3,6 +3,9 @@ Home Assistant custom component to start Spotify playback on an idle chromecast 
 
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromcast device and the Spotify playback after the initial start is done in their respective components.
 
+Used by https://github.com/custom-cards/spotify-card.
+
+Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
 ## Installation
 
