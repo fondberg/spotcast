@@ -38,7 +38,7 @@ where
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
  
  ## Known issues
- It doesn't seem to be possible to start playback on a Google Home Chromecast speaker group for some unknown reason.
+ It doesn't seem to be possible to start playback on a Google Home Chromecast speaker group for some unknown reason. Probably due to missing functionality in https://github.com/balloob/pychromecast
  
  
  ## Contribute
