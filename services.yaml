@@ -1,0 +1,6 @@
+start:
+  description: Send a raw packet to device.
+  fields:
+    device_name: {description: The friendly name of the chromecast device., example: "Livingroom"}
+    uri: {description: Supported Spotify URI as string, array not supported.}
+

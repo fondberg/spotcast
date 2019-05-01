@@ -4,7 +4,7 @@
   "documentation": "https://www.home-assistant.io",
   "requirements": [
     "fondberg-spotipy==2.4.5-dev2",
-    "pychromecast==3.2.0",
+    "pychromecast==3.2.1",
     "spotify_token==0.1.0"
   ],
   "dependencies": [

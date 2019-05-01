@@ -23,6 +23,10 @@ def setup(hass, config):
     username = config[DOMAIN][CONF_USERNAME]
     password = config[DOMAIN][CONF_PASSWORD]
 
+    # sensor
+    hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
+
+    # service
     def get_chromcase_device(device_name):
         import pychromecast
         chromecasts = pychromecast.get_chromecasts()
@@ -88,3 +92,4 @@ def setup(hass, config):
                            schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
+
