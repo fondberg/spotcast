@@ -13,7 +13,6 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 class ChromecastDevicesSensor(Entity):
 
     def __init__(self):
-        _LOGGER.info('NIKLAS constructor called')
         self._state = STATE_UNKNOWN
         self._chromecast_devices = []
         self._attributes = {
