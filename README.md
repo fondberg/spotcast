@@ -69,6 +69,16 @@ where
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
 
+#### transfer a ongoing playback to a chromecast device
+```
+{
+	"device_name" : "MultiRoom",
+	"transfer_playback" : true
+}
+```
+where 
+ - `device_name` is the friendly name of the Chromecast
+ - `transfer_playback` (optional) true or false, continue ongoing playback on your Chromecast
 ## Use the sensor
 Sensor name
 ```
