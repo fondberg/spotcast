@@ -8,6 +8,8 @@ Used by https://github.com/custom-cards/spotify-card.
 
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
+__Now with support for speaker groups!__
+
 ## Installation
 
 
@@ -85,8 +87,13 @@ friendly_name: Chromecast Devices
 
  
  ## Known issues
- It doesn't seem to be possible to start playback on a Google Home Chromecast speaker group for some unknown reason. Probably due to missing functionality in https://github.com/balloob/pychromecast
- 
+ It has been reported that updating the sensor takes more than 10s sometimes. 
+ This sensor uses `pychromecast` directly and if you don't need the sensor you can safely comment out the registration 
+ of the sensor. 
+ ```
+     # hass.services.register(DOMAIN, 'start', start_casting,
+     #                       schema=SERVICE_START_COMMAND_SCHEMA)
+ ```
  
  ## Contribute
  Please do

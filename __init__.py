@@ -69,12 +69,12 @@ def setup(hass, config):
         return access_token, expires
 
     def play(client, spotify_device_id, uri):
-        _LOGGER.info('Got uri: %s', uri)
+        _LOGGER.debug('Playing URI: %s on device-id: %s', uri, spotify_device_id)
         if uri.find('track') > 0:
-            _LOGGER.info('Playing track using uris= for uri: %s', uri)
+            _LOGGER.debug('Playing track using uris= for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
-            _LOGGER.info('Playing context uri using context_uri for uri: %s', uri)
+            _LOGGER.debug('Playing context uri using context_uri for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, context_uri=uri)
 
     def start_casting(call):
@@ -86,7 +86,7 @@ def setup(hass, config):
         uri = call.data.get(CONF_SPOTIFY_URI)
         device_name = call.data.get(CONF_DEVICE_NAME)
 
-        _LOGGER.info('Starting spotify on %s', device_name)
+        _LOGGER.debug('Starting spotify on %s', device_name)
 
         # Find chromecast device
         cast = get_chromcase_device(device_name)
@@ -96,7 +96,7 @@ def setup(hass, config):
         user = username
         pwd = password
         if account is not None:
-            _LOGGER.info('setting up with different account than default %s', account)
+            _LOGGER.debug('setting up with different account than default %s', account)
             user = accounts.get(account).get(CONF_USERNAME)
             pwd = accounts.get(account).get(CONF_PASSWORD)
 
@@ -110,12 +110,22 @@ def setup(hass, config):
         cast.register_handler(sp)
         sp.launch_app()
 
+        if not sp.is_launched and not sp.credential_error:
+            raise HomeAssistantError('Failed to launch spotify controller due to timeout')
+        if not sp.is_launched and sp.credential_error:
+            raise HomeAssistantError('Failed to launch spotify controller due to credentials error')
+
         spotify_device_id = None
         devices_available = client.devices()
         for device in devices_available['devices']:
-            if device['name'] == device_name:
+            if device['id'] == sp.device:
                 spotify_device_id = device['id']
                 break
+
+        if not spotify_device_id:
+            _LOGGER.error('No device with id "{}" known by Spotify'.format(sp.device))
+            _LOGGER.error('Known devices: {}'.format(devices_available['devices']))
+            return
 
         play(client, spotify_device_id, uri)
 
@@ -123,4 +133,3 @@ def setup(hass, config):
                            schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
-
