@@ -101,7 +101,7 @@ def setup(hass, config):
             pwd = accounts.get(account).get(CONF_PASSWORD)
 
         # login as real browser to get powerful token
-        access_token, expires = get_spotify_token(username=username, password=password)
+        access_token, expires = get_spotify_token(username=user, password=pwd)
 
         client = spotipy.Spotify(auth=access_token)
 
