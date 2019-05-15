@@ -92,11 +92,6 @@ last_update: 2019-05-01T15:27:49.828553+02:00
 
 friendly_name: Chromecast Devices
 ```
-
- 
- ## Known issues
- It doesn't seem to be possible to start playback on a Google Home Chromecast speaker group for some unknown reason. Probably due to missing functionality in https://github.com/balloob/pychromecast
- 
  
  ## Contribute
  Please do
