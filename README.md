@@ -97,6 +97,7 @@ friendly_name: Chromecast Devices
  
  ## Donate
  If you like what I do and want to support me then I love coffee
+
 <a href="https://www.buymeacoffee.com/fondberg" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
  ## Contribute
