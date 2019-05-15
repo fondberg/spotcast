@@ -95,6 +95,9 @@ friendly_name: Chromecast Devices
      #                       schema=SERVICE_START_COMMAND_SCHEMA)
  ```
  
+ ## Donate
+ If you like what I do and want to support me then I love coffee - https://www.buymeacoffee.com/fondberg
+ 
  ## Contribute
  Please do
  
