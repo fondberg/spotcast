@@ -1,3 +1,4 @@
+
 import logging
 import voluptuous as vol
 
@@ -11,10 +12,11 @@ _VERSION = '1.1.0'
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'spotcast'
-CONF_DEVICE_NAME = 'device_name'
+CONF_DEVICE_NAME = 'entity_id'
 CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
 CONF_SPOTIFY_ACCOUNT = 'account'
+
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Required(CONF_DEVICE_NAME): cv.string,
@@ -43,12 +45,13 @@ def setup(hass, config):
     username = conf[CONF_USERNAME]
     password = conf[CONF_PASSWORD]
     accounts = conf.get(CONF_ACCOUNTS)
-
+	
     # sensor
     hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
 
+
     # service
-    def get_chromcase_device(device_name):
+    def get_chromcast_device(device_name):
         import pychromecast
         chromecasts = pychromecast.get_chromecasts()
         cast = None
@@ -84,12 +87,12 @@ def setup(hass, config):
         import spotipy
 
         uri = call.data.get(CONF_SPOTIFY_URI)
-        device_name = call.data.get(CONF_DEVICE_NAME)
+        device_name = hass.states.get(call.data.get(CONF_DEVICE_NAME)).attributes.get('friendly_name')
 
         _LOGGER.debug('Starting spotify on %s', device_name)
 
         # Find chromecast device
-        cast = get_chromcase_device(device_name)
+        cast = get_chromcast_device(device_name)
         cast.wait()
 
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
@@ -129,7 +132,7 @@ def setup(hass, config):
 
         play(client, spotify_device_id, uri)
 
-    hass.services.register(DOMAIN, 'start', start_casting,
-                           schema=SERVICE_START_COMMAND_SCHEMA)
+    # hass.services.register(DOMAIN, 'start', start_casting,
+                           # schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
