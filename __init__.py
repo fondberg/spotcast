@@ -1,16 +1,16 @@
 import logging
 import voluptuous as vol
-
+from homeassistant.util import slugify
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
-    CONF_PASSWORD, CONF_USERNAME)
+    CONF_PASSWORD, CONF_USERNAME, STATE_PLAYING)
 
 _VERSION = '1.1.0'
+DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'spotcast'
 CONF_DEVICE_NAME = 'device_name'
 CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
@@ -43,6 +43,10 @@ def setup(hass, config):
     username = conf[CONF_USERNAME]
     password = conf[CONF_PASSWORD]
     accounts = conf.get(CONF_ACCOUNTS)
+
+    hass.data[DOMAIN] = {
+        'chromecasts': []
+    }
 
     # sensor
     hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
@@ -77,6 +81,10 @@ def setup(hass, config):
             _LOGGER.debug('Playing context uri using context_uri for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, context_uri=uri)
 
+    def transfer_pb(client, spotify_device_id):
+        _LOGGER.debug('Transfering playback')
+        client.transfer_playback(device_id=spotify_device_id, force_play = True)
+
     def start_casting(call):
         """service called."""
 
@@ -85,10 +93,33 @@ def setup(hass, config):
 
         uri = call.data.get(CONF_SPOTIFY_URI)
         device_name = call.data.get(CONF_DEVICE_NAME)
+        _LOGGER.info('HHHHHHHEEEEEEERRRRRREEEEEE')
+        _LOGGER.info('Starting spotify on %s (%s)', device_name, slugify(device_name))
+        _LOGGER.info('Is something playing on any of these: %s', hass.data[DOMAIN]['chromecasts'])
 
-        _LOGGER.debug('Starting spotify on %s', device_name)
+        transfer_playback = False
+
+        """ 
+        PR: add transfer discuss
+        The below could possiblty be replaced with
+        spotipy.current_playback()['device] and look for name (which is the CC friendly name) and `type` 
+        which  is "CastAudio" at least for audio only devies.
+        This would require the logic to be moved below `client = spotipy.Spotify(auth=access_token)` 
+        """
+        for cd in hass.data[DOMAIN]['chromecasts']:
+            entity_id = 'media_player.' + slugify(cd['name'])
+            entity = hass.states.get(entity_id)
+            _LOGGER.debug('entity (%s): %s', entity_id, entity.state)
+            if entity is None:
+                _LOGGER.error('Could not get entity for chromecast device with name %s (%s)', cd['name'], entity_id)
+                continue
+            if entity.state == STATE_PLAYING and entity.attributes.get('app_name') == 'Spotify':
+                _LOGGER.debug('Found playing chromcast device (%s), will transfer playback.', cd['name'])
+                transfer_playback = True
+                break
 
         # Find chromecast device
+        # PR: Should use the list already in shared mem from the sensor to cut the scan time for pychromecast (2-3 secs)
         cast = get_chromcase_device(device_name)
         cast.wait()
 
@@ -127,7 +158,10 @@ def setup(hass, config):
             _LOGGER.error('Known devices: {}'.format(devices_available['devices']))
             return
 
-        play(client, spotify_device_id, uri)
+        if transfer_playback == True:
+            transfer_pb(client, spotify_device_id)
+        else:
+            play(client, spotify_device_id, uri)
 
     hass.services.register(DOMAIN, 'start', start_casting,
                            schema=SERVICE_START_COMMAND_SCHEMA)
