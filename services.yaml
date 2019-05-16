@@ -4,4 +4,3 @@ start:
     device_name: {description: The friendly name of the chromecast device or group., example: "Livingroom"}
     uri: {description: Supported Spotify URI as string, array not supported.}
     transfer_playback: {description: Transfer current playback to Chromecast device or group., example: "true"}
-
