@@ -1,6 +1,11 @@
 start:
   description: Send a raw packet to device.
   fields:
-    device_name: {description: The friendly name of the chromecast device or group., example: "Livingroom"}
-    uri: {description: Supported Spotify URI as string, array not supported.}
-    transfer_playback: {description: Transfer current playback to Chromecast device or group., example: "true"}
+    entity_id: 
+      description: Name of entity of the cast media player you want to play Spotify from.
+      example: 'media_player.livingroom'
+    device_name:
+      description: Name of the Cast Device
+      example: Livingroom
+    uri: 
+      description: Supported Spotify URI as string, array not supported.
