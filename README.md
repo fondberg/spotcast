@@ -73,6 +73,17 @@ Omitting `uri` will check if something is playing on any of the accounts devices
 	"device_name" : "Högtalare uppe"
 }
 ```
+or use the parameter `transfer_playback` which will only transfer if something is playing otherwise use the specified `uri`.
+```
+{
+	"device_name" : "MultiRoom",
+	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
+	"transfer_playback" : true
+}
+```
+where 
+ - `device_name` is the friendly name of the Chromecast
+ - `transfer_playback` (optional) true or false, continue ongoing playback on your Chromecast
 
 
 #### start playback on a device with non default account
