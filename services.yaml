@@ -1,6 +1,9 @@
 start:
-  description: Send a raw packet to device.
+  description: Starts spotify playback on chromecast devices
   fields:
-    device_name: {description: The friendly name of the chromecast device., example: "Livingroom"}
-    uri: {description: Supported Spotify URI as string, array not supported.}
+    device_name: {description: The friendly name of the chromecast device. (not used together with entity_id), example: "Livingroom"}
+    entity_id: {description: The entity_id of the chromecast mediaplayer (not used together with device_name)., example:  "media_player.vardagsrum"}
+    uri: {description: Supported Spotify URI as string (if omitted will try to transfer current playback)., example: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"}
+    account: {description: Optionally starts Spotify using an alternative account specified in config., example: "my_wifes"}
+
 

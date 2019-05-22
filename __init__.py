@@ -1,6 +1,5 @@
 import logging
 import voluptuous as vol
-from homeassistant.util import slugify
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
@@ -12,15 +11,16 @@ DOMAIN = 'spotcast'
 _LOGGER = logging.getLogger(__name__)
 
 CONF_DEVICE_NAME = 'device_name'
+CONF_ENTITY_ID = 'entity_id'
 CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
 CONF_SPOTIFY_ACCOUNT = 'account'
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
-    vol.Required(CONF_DEVICE_NAME): cv.string,
-    vol.Required(CONF_SPOTIFY_URI): cv.string,
+    vol.Optional(CONF_DEVICE_NAME): cv.string,
+    vol.Optional(CONF_ENTITY_ID): cv.string,
+    vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string
-
 })
 
 ACCOUNTS_SCHEMA = vol.Schema({
@@ -90,36 +90,29 @@ def setup(hass, config):
 
         from pychromecast.controllers.spotify import SpotifyController
         import spotipy
-
-        uri = call.data.get(CONF_SPOTIFY_URI)
-        device_name = call.data.get(CONF_DEVICE_NAME)
-        _LOGGER.info('HHHHHHHEEEEEEERRRRRREEEEEE')
-        _LOGGER.info('Starting spotify on %s (%s)', device_name, slugify(device_name))
-        _LOGGER.info('Is something playing on any of these: %s', hass.data[DOMAIN]['chromecasts'])
-
         transfer_playback = False
 
-        """ 
-        PR: add transfer discuss
-        The below could possiblty be replaced with
-        spotipy.current_playback()['device] and look for name (which is the CC friendly name) and `type` 
-        which  is "CastAudio" at least for audio only devies.
-        This would require the logic to be moved below `client = spotipy.Spotify(auth=access_token)` 
-        """
-        for cd in hass.data[DOMAIN]['chromecasts']:
-            entity_id = 'media_player.' + slugify(cd['name'])
-            entity = hass.states.get(entity_id)
-            _LOGGER.debug('entity (%s): %s', entity_id, entity.state)
-            if entity is None:
-                _LOGGER.error('Could not get entity for chromecast device with name %s (%s)', cd['name'], entity_id)
-                continue
-            if entity.state == STATE_PLAYING and entity.attributes.get('app_name') == 'Spotify':
-                _LOGGER.debug('Found playing chromcast device (%s), will transfer playback.', cd['name'])
-                transfer_playback = True
-                break
+        uri = call.data.get(CONF_SPOTIFY_URI)
+
+        # Get device name from tiehr device_name or entity_id
+        device_name = None
+        if call.data.get(CONF_DEVICE_NAME) is None:
+            entity_id = call.data.get(CONF_ENTITY_ID)
+            if entity_id is None:
+                raise HomeAssistantError('Either entity_id or device_name must be specified')
+            entity_states = hass.states.get(entity_id)
+            if entity_states is None:
+                _LOGGER.error('Could not find entity_id: %s', entity_id)
+            else:
+                device_name = entity_states.attributes.get('friendly_name')
+        else:
+            device_name = call.data.get(CONF_DEVICE_NAME)
+
+        if device_name is None or device_name.strip() == '':
+            raise HomeAssistantError('device_name is empty')
 
         # Find chromecast device
-        # PR: Should use the list already in shared mem from the sensor to cut the scan time for pychromecast (2-3 secs)
+        # TODO: test if the cached devices from the sensor can be used, hass.data[DOMAIN]['chromecasts']
         cast = get_chromcase_device(device_name)
         cast.wait()
 
@@ -134,7 +127,15 @@ def setup(hass, config):
         # login as real browser to get powerful token
         access_token, expires = get_spotify_token(username=user, password=pwd)
 
+        # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
+
+        # Check if something is playing
+        if uri is None or uri.strip() == '':
+            current_playback = client.current_playback()
+            if current_playback is not None:
+                _LOGGER.debug('current_playback from spotipy: %s', current_playback)
+                transfer_playback = True
 
         # launch the app on chromecast
         sp = SpotifyController(access_token, expires)
