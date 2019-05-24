@@ -8,7 +8,7 @@ Used by https://github.com/custom-cards/spotify-card.
 
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
-__Now with support for speaker groups!__
+__Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name.
 
 ## Installation
 
@@ -46,6 +46,7 @@ spotcast:
 ```
 
 ## Call the service
+
 #### start playback on a device with default account
 ```
 {
@@ -56,7 +57,34 @@ spotcast:
 where 
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
- 
+
+optionally you can specify the `entity_id` of an existing home assistant chromecast mediaplayer like:
+```
+{
+	"entity_id" : "media_player.vardagsrum",
+	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+}
+```
+
+### transfer current playback for the account
+Omitting `uri` will check if something is playing on any of the accounts devices and transfer the playback to the specified device.
+```
+{
+	"device_name" : "Högtalare uppe"
+}
+```
+or use the parameter `transfer_playback` which will only transfer if something is playing otherwise use the specified `uri`.
+```
+{
+	"device_name" : "MultiRoom",
+	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
+	"transfer_playback" : true
+}
+```
+where 
+ - `device_name` is the friendly name of the Chromecast
+ - `transfer_playback` (optional) true or false, continue ongoing playback on your Chromecast
+
 
 #### start playback on a device with non default account
 ```
