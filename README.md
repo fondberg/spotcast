@@ -34,14 +34,14 @@ be able to initiate playback using diffferent accounts than the default.
 ```
 
 spotcast:
-  username: !secret spotify_primary_password
+  username: !secret spotify_primary_username
   password: !secret spotify_primary_password
   accounts:
     niklas:
-      username: !secret spotify_niklas_password
+      username: !secret spotify_niklas_username
       password: !secret spotify_niklas_password
     ming:
-      username: !secret spotify_ming_password
+      username: !secret spotify_ming_username
       password: !secret spotify_ming_password
 ```
 
