@@ -95,6 +95,9 @@ def setup(hass, config):
         import spotipy
         transfer_playback = False
 
+        spotipy.trace = True
+        spotipy.trace_out = True
+
         uri = call.data.get(CONF_SPOTIFY_URI)
 
         # Get device name from tiehr device_name or entity_id
@@ -145,11 +148,12 @@ def setup(hass, config):
         sp = SpotifyController(access_token, expires)
         cast.register_handler(sp)
         sp.launch_app()
-
+        _LOGGER.debug('Launching app')
         if not sp.is_launched and not sp.credential_error:
             raise HomeAssistantError('Failed to launch spotify controller due to timeout')
         if not sp.is_launched and sp.credential_error:
             raise HomeAssistantError('Failed to launch spotify controller due to credentials error')
+        _LOGGER.debug('App is launched on: %s with spotify device id: %s', cast.name, sp.device)
 
         spotify_device_id = None
         devices_available = client.devices()
@@ -157,7 +161,7 @@ def setup(hass, config):
             if device['id'] == sp.device:
                 spotify_device_id = device['id']
                 break
-
+        _LOGGER.debug('Found spotify device: %s', spotify_device_id)
         if not spotify_device_id:
             _LOGGER.error('No device with id "{}" known by Spotify'.format(sp.device))
             _LOGGER.error('Known devices: {}'.format(devices_available['devices']))
