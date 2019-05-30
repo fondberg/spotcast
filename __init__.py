@@ -93,6 +93,7 @@ def setup(hass, config):
 
         from pychromecast.controllers.spotify import SpotifyController
         import spotipy
+        import time
         transfer_playback = False
 
         spotipy.trace = True
@@ -149,10 +150,16 @@ def setup(hass, config):
         cast.register_handler(sp)
         sp.launch_app()
         _LOGGER.debug('Launching app')
+        time.sleep(0.2)
         if not sp.is_launched and not sp.credential_error:
+            _LOGGER.error('Failed to launch spotify controller due to timeout')
             raise HomeAssistantError('Failed to launch spotify controller due to timeout')
         if not sp.is_launched and sp.credential_error:
+            _LOGGER.error('Failed to launch spotify controller due to credentials error')
             raise HomeAssistantError('Failed to launch spotify controller due to credentials error')
+        if not sp.device:
+            _LOGGER.error('Failed to get device from spotify controller')
+            raise HomeAssistantError('Failed to get device from spotify controller')
         _LOGGER.debug('App is launched on: %s with spotify device id: %s', cast.name, sp.device)
 
         spotify_device_id = None
