@@ -2,8 +2,8 @@ import logging
 import voluptuous as vol
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (
-    CONF_PASSWORD, CONF_USERNAME)
+from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 
 _VERSION = '1.1.0'
 DOMAIN = 'spotcast'
@@ -47,24 +47,26 @@ def setup(hass, config):
     password = conf[CONF_PASSWORD]
     accounts = conf.get(CONF_ACCOUNTS)
 
-    hass.data[DOMAIN] = {
-        'chromecasts': []
-    }
-
-    # sensor
-    hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
-
     # service
-    def get_chromcase_device(device_name):
+    def get_chromecast_device(device_name):
         import pychromecast
-        chromecasts = pychromecast.get_chromecasts()
-        cast = None
-        for _cast in chromecasts:
-            if _cast.name == device_name:
-                cast = _cast
-                return cast
-        if cast == None:
-            raise HomeAssistantError('Could not find device with name {}'.format(device_name))
+
+        # Get cast from discovered devices of cast platform
+        known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+        cast_info = next((x for x in known_devices if x.friendly_name == device_name), None)
+        if cast_info:
+            return pychromecast._get_chromecast_from_host((
+                cast_info.host, cast_info.port, cast_info.uuid,
+                cast_info.model_name, cast_info.friendly_name
+            ))
+
+        # Discover devices manually
+        casts = pychromecast.get_chromecasts()
+        cast = next((x for x in casts if x.name == device_name), None)
+        if cast:
+            return cast
+
+        raise HomeAssistantError('Could not find device with name {}'.format(device_name))
 
 
     def get_spotify_token(username, password):
@@ -115,8 +117,7 @@ def setup(hass, config):
             raise HomeAssistantError('device_name is empty')
 
         # Find chromecast device
-        # TODO: test if the cached devices from the sensor can be used, hass.data[DOMAIN]['chromecasts']
-        cast = get_chromcase_device(device_name)
+        cast = get_chromecast_device(device_name)
         cast.wait()
 
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
@@ -134,7 +135,6 @@ def setup(hass, config):
         client = spotipy.Spotify(auth=access_token)
 
         # Check if something is playing
-
         if uri is None or uri.strip() == '' or call.data.get(CONF_TRANSFER_PLAYBACK):
             current_playback = client.current_playback()
             if current_playback is not None:
@@ -151,22 +151,16 @@ def setup(hass, config):
         if not sp.is_launched and sp.credential_error:
             raise HomeAssistantError('Failed to launch spotify controller due to credentials error')
 
-        spotify_device_id = None
-        devices_available = client.devices()
-        for device in devices_available['devices']:
-            if device['id'] == sp.device:
-                spotify_device_id = device['id']
-                break
-
-        if not spotify_device_id:
+        known_devices = client.devices()['devices']
+        if sp.device not in (x['id'] for x in known_devices):
             _LOGGER.error('No device with id "{}" known by Spotify'.format(sp.device))
-            _LOGGER.error('Known devices: {}'.format(devices_available['devices']))
+            _LOGGER.error('Known devices: {}'.format(known_devices))
             return
 
         if transfer_playback == True:
-            transfer_pb(client, spotify_device_id)
+            transfer_pb(client, sp.device)
         else:
-            play(client, spotify_device_id, uri)
+            play(client, sp.device, uri)
 
     hass.services.register(DOMAIN, 'start', start_casting,
                            schema=SERVICE_START_COMMAND_SCHEMA)

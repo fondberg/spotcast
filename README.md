@@ -94,30 +94,6 @@ where
  - `account` is the name of account key in the accounts dictionary in the configuration
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
-
-## Use the sensor
-Sensor name
-```
-sensor.chromecast_devices
-```
-Attributes
-```
-devices_json: [{"name": "Kök", "cast_type": "audio", "model_name": "Google Home", "uuid": "xxxxx", "manufacturer": "Google Inc."}, {"name": "Högtalare uppe", "cast_type": "group", "model_name": "Google Cast Group", "uuid": "xxxx", "manufacturer": "Google Inc."}, {"name": "Vardagsrum", "cast_type": "cast", "model_name": "HK Citation 300", "uuid": "xxxx", "manufacturer": "Harman Kardon"}]
-
-last_update: 2019-05-01T15:27:49.828553+02:00
-
-friendly_name: Chromecast Devices
-```
-
- 
- ## Known issues
- It has been reported that updating the sensor takes more than 10s sometimes. 
- This sensor uses `pychromecast` directly and if you don't need the sensor you can safely comment out the registration 
- of the sensor. 
- ```
-     # hass.services.register(DOMAIN, 'start', start_casting,
-     #                       schema=SERVICE_START_COMMAND_SCHEMA)
- ```
  
  ## Donate
  If you like what I do and want to support me then I love coffee
