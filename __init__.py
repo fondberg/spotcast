@@ -5,7 +5,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
     CONF_PASSWORD, CONF_USERNAME)
 
-_VERSION = '1.1.0'
+_VERSION = '1.2.0'
 DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,14 +16,16 @@ CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
 CONF_SPOTIFY_ACCOUNT = 'account'
 CONF_TRANSFER_PLAYBACK = 'transfer_playback'
-
+CONF_SHUFFLE = 'shuffle'
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Optional(CONF_DEVICE_NAME): cv.string,
     vol.Optional(CONF_ENTITY_ID): cv.string,
     vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string,
-    vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean
+    vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean,
+    vol.Optional(CONF_SHUFFLE): cv.boolean
+
 })
 
 ACCOUNTS_SCHEMA = vol.Schema({
@@ -75,7 +77,7 @@ def setup(hass, config):
         expires = data[1] - int(time.time())
         return access_token, expires
 
-    def play(client, spotify_device_id, uri):
+    def play(client, spotify_device_id, uri, shuffle):
         _LOGGER.debug('Playing URI: %s on device-id: %s', uri, spotify_device_id)
         if uri.find('track') > 0:
             _LOGGER.debug('Playing track using uris= for uri: %s', uri)
@@ -83,6 +85,9 @@ def setup(hass, config):
         else:
             _LOGGER.debug('Playing context uri using context_uri for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, context_uri=uri)
+        if shuffle is True:
+            _LOGGER.debug('Shuffling...')
+            client.shuffle(shuffle)
 
     def transfer_pb(client, spotify_device_id):
         _LOGGER.debug('Transfering playback')
@@ -94,6 +99,9 @@ def setup(hass, config):
         from pychromecast.controllers.spotify import SpotifyController
         import spotipy
         transfer_playback = False
+
+        # spotipy.trace = True
+        # spotipy.trace_out = True
 
         uri = call.data.get(CONF_SPOTIFY_URI)
 
@@ -120,6 +128,7 @@ def setup(hass, config):
         cast.wait()
 
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
+        shuffle = call.data.get(CONF_SHUFFLE, False)
         user = username
         pwd = password
         if account is not None:
@@ -145,11 +154,17 @@ def setup(hass, config):
         sp = SpotifyController(access_token, expires)
         cast.register_handler(sp)
         sp.launch_app()
-
+        _LOGGER.debug('Launching spotify app on %s', cast.name)
         if not sp.is_launched and not sp.credential_error:
+            _LOGGER.error('Failed to launch spotify controller due to timeout')
             raise HomeAssistantError('Failed to launch spotify controller due to timeout')
         if not sp.is_launched and sp.credential_error:
+            _LOGGER.error('Failed to launch spotify controller due to credentials error')
             raise HomeAssistantError('Failed to launch spotify controller due to credentials error')
+        if not sp.device:
+            _LOGGER.error('Failed to get device from spotify controller')
+            raise HomeAssistantError('Failed to get device from spotify controller')
+        _LOGGER.debug('App is launched on: %s with spotify device id: %s', cast.name, sp.device)
 
         spotify_device_id = None
         devices_available = client.devices()
@@ -157,7 +172,7 @@ def setup(hass, config):
             if device['id'] == sp.device:
                 spotify_device_id = device['id']
                 break
-
+        _LOGGER.debug('Found spotify device: %s', spotify_device_id)
         if not spotify_device_id:
             _LOGGER.error('No device with id "{}" known by Spotify'.format(sp.device))
             _LOGGER.error('Known devices: {}'.format(devices_available['devices']))
@@ -166,7 +181,7 @@ def setup(hass, config):
         if transfer_playback == True:
             transfer_pb(client, spotify_device_id)
         else:
-            play(client, spotify_device_id, uri)
+            play(client, spotify_device_id, uri, shuffle)
 
     hass.services.register(DOMAIN, 'start', start_casting,
                            schema=SERVICE_START_COMMAND_SCHEMA)
