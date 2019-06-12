@@ -8,7 +8,9 @@ Used by https://github.com/custom-cards/spotify-card.
 
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
-__Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name.
+__Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_. 
+
+***This version requires pychromecast version 3.2.2 and is not yet released by home assistant as per 0.94.2, use the master branch of HA or wait for it to be released (PR is merged)***
 
 ## Installation
 
