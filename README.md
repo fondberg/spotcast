@@ -14,13 +14,7 @@ __Now with support for speaker groups, transferring playback to and between chro
 
 ## Installation
 
-
-### Get code
-On your HA
-```
-cd /config/custom_components && git clone https://github.com/fondberg/spotcast.git
-```
-
+Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
 
 ### Configuration
 #### Single account
