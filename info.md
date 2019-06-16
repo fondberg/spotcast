@@ -12,7 +12,7 @@ __Now with support for speaker groups, transferring playback to and between chro
 
 ***This version requires pychromecast version 3.2.2 and is not yet released by home assistant as per 0.94.2, use the master branch of HA, wait for it to be released (PR is merged) or use an older version of this component (no support for groups or transfer playback) found [here](https://github.com/fondberg/spotcast/tree/6ea00c55289fb33b935a0103c29afe4e63fd72e7)***
 
-### Configuration
+# Configuration
 #### Single account
 Add the following to your config
 ```
