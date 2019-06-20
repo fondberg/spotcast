@@ -12,11 +12,7 @@ __Now with support for speaker groups, transferring playback to and between chro
 
 ***This version requires pychromecast version 3.2.2 and is not yet released by home assistant as per 0.94.2, use the master branch of HA, wait for it to be released (PR is merged) or use an older version of this component (no support for groups or transfer playback) found [here](https://github.com/fondberg/spotcast/tree/6ea00c55289fb33b935a0103c29afe4e63fd72e7)***
 
-## Installation
-
-Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
-
-### Configuration
+# Configuration
 #### Single account
 Add the following to your config
 ```
@@ -109,23 +105,7 @@ last_update: 2019-05-01T15:27:49.828553+02:00
 friendly_name: Chromecast Devices
 ```
 
- 
- ## Known issues
- It has been reported that updating the sensor takes more than 10s sometimes. 
- This sensor uses `pychromecast` directly and if you don't need the sensor you can safely comment out the registration 
- of the sensor. 
- ```
-     # hass.services.register(DOMAIN, 'start', start_casting,
-     #                       schema=SERVICE_START_COMMAND_SCHEMA)
- ```
- 
- ## Donate
+## Donate
  If you like what I do and want to support me then I love coffee
 
 <a href="https://www.buymeacoffee.com/fondberg" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
-
- ## Contribute
- Please do
- 
- ## License
- Apache 2.0
