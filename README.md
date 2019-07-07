@@ -10,7 +10,7 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 
 _Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_. 
 
-***This version requires hass >= 0.95
+***This version requires hass >= 0.95***
 
 ## Installation
 
