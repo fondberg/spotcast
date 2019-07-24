@@ -2,10 +2,11 @@ import logging
 import voluptuous as vol
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (
-    CONF_PASSWORD, CONF_USERNAME)
+from homeassistant.const import (CONF_PASSWORD, CONF_USERNAME)
+from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
+import random
 
-_VERSION = '1.1.0'
+_VERSION = '2.0.0.b1'
 DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,14 +17,17 @@ CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
 CONF_SPOTIFY_ACCOUNT = 'account'
 CONF_TRANSFER_PLAYBACK = 'transfer_playback'
-
+CONF_SHUFFLE = 'shuffle'
+CONF_RANDOM = 'random_song'
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Optional(CONF_DEVICE_NAME): cv.string,
     vol.Optional(CONF_ENTITY_ID): cv.string,
     vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string,
-    vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean
+    vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean,
+    vol.Optional(CONF_SHUFFLE): cv.boolean,
+    vol.Optional(CONF_RANDOM): cv.boolean
 })
 
 ACCOUNTS_SCHEMA = vol.Schema({
@@ -39,6 +43,7 @@ CONFIG_SCHEMA = vol.Schema({
     }),
 }, extra=vol.ALLOW_EXTRA)
 
+
 def setup(hass, config):
     """Setup the Spotcast service."""
     conf = config[DOMAIN]
@@ -47,24 +52,33 @@ def setup(hass, config):
     password = conf[CONF_PASSWORD]
     accounts = conf.get(CONF_ACCOUNTS)
 
-    hass.data[DOMAIN] = {
-        'chromecasts': []
-    }
-
     # sensor
-    hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
+    # hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
 
     # service
-    def get_chromcase_device(device_name):
+    def get_chromcast_device(device_name):
         import pychromecast
+
+        # Get cast from discovered devices of cast platform
+        known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+        cast_info = next((x for x in known_devices if x.friendly_name == device_name), None)
+        _LOGGER.debug('cast info: %s', cast_info)
+        if cast_info:
+            return pychromecast._get_chromecast_from_host((
+                cast_info.host, cast_info.port, cast_info.uuid,
+                cast_info.model_name, cast_info.friendly_name
+            ))
+
+        _LOGGER.error('Could not find device %s from hass.data, falling back to pychromecast scan', device_name)
+
+        # Discover devices manually
         chromecasts = pychromecast.get_chromecasts()
         cast = None
         for _cast in chromecasts:
             if _cast.name == device_name:
-                cast = _cast
                 return cast
-        if cast == None:
-            raise HomeAssistantError('Could not find device with name {}'.format(device_name))
+
+        raise HomeAssistantError('Could not find device with name {}'.format(device_name))
 
 
     def get_spotify_token(username, password):
@@ -75,18 +89,27 @@ def setup(hass, config):
         expires = data[1] - int(time.time())
         return access_token, expires
 
-    def play(client, spotify_device_id, uri):
+    def play(client, spotify_device_id, uri, shuffle, random_song):
         _LOGGER.debug('Playing URI: %s on device-id: %s', uri, spotify_device_id)
         if uri.find('track') > 0:
             _LOGGER.debug('Playing track using uris= for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
-            _LOGGER.debug('Playing context uri using context_uri for uri: %s', uri)
-            client.start_playback(device_id=spotify_device_id, context_uri=uri)
+            _LOGGER.debug('Playing context uri using context_uri for uri: %s (shuffle: %s, random_song: %s)', uri, shuffle, random_song)
+            kwargs = {'device_id': spotify_device_id, 'context_uri': uri}
+            if random_song:
+                results = client.user_playlist_tracks("me", uri)
+                position = random.randint(0, results['total'] - 1)
+                _LOGGER.debug('Start playback at random position: %s', position)
+                kwargs['offset'] = {'position': position}
+            client.start_playback(**kwargs)
+            if shuffle:
+                _LOGGER.debug('Shuffling...')
+                client.shuffle(shuffle)
 
     def transfer_pb(client, spotify_device_id):
         _LOGGER.debug('Transfering playback')
-        client.transfer_playback(device_id=spotify_device_id, force_play = True)
+        client.transfer_playback(device_id=spotify_device_id, force_play=True)
 
     def start_casting(call):
         """service called."""
@@ -96,6 +119,8 @@ def setup(hass, config):
         transfer_playback = False
 
         uri = call.data.get(CONF_SPOTIFY_URI)
+        shuffle = call.data.get(CONF_SHUFFLE, False)
+        random_song = call.data.get(CONF_RANDOM, False)
 
         # Get device name from tiehr device_name or entity_id
         device_name = None
@@ -115,8 +140,7 @@ def setup(hass, config):
             raise HomeAssistantError('device_name is empty')
 
         # Find chromecast device
-        # TODO: test if the cached devices from the sensor can be used, hass.data[DOMAIN]['chromecasts']
-        cast = get_chromcase_device(device_name)
+        cast = get_chromcast_device(device_name)
         cast.wait()
 
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
@@ -166,7 +190,7 @@ def setup(hass, config):
         if transfer_playback == True:
             transfer_pb(client, spotify_device_id)
         else:
-            play(client, spotify_device_id, uri)
+            play(client, spotify_device_id, uri, shuffle, random_song)
 
     hass.services.register(DOMAIN, 'start', start_casting,
                            schema=SERVICE_START_COMMAND_SCHEMA)
