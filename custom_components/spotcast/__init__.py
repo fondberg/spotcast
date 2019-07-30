@@ -18,7 +18,6 @@ CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
 CONF_SPOTIFY_ACCOUNT = 'account'
 CONF_TRANSFER_PLAYBACK = 'transfer_playback'
-CONF_SHUFFLE = 'shuffle'
 CONF_RANDOM = 'random_song'
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
@@ -27,7 +26,6 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string,
     vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean,
-    vol.Optional(CONF_SHUFFLE): cv.boolean,
     vol.Optional(CONF_RANDOM): cv.boolean
 })
 
@@ -89,7 +87,7 @@ def setup(hass, config):
         expires = data[1] - int(time.time())
         return access_token, expires
 
-    def play(client, spotify_device_id, uri, shuffle, random_song):
+    def play(client, spotify_device_id, uri, random_song):
         # import spotipy
         # import http.client as http_client
         # spotipy.trace = True
@@ -101,7 +99,7 @@ def setup(hass, config):
             _LOGGER.debug('Playing track using uris= for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
-            _LOGGER.debug('Playing context uri using context_uri for uri: %s (shuffle: %s, random_song: %s)', uri, shuffle, random_song)
+            _LOGGER.debug('Playing context uri using context_uri for uri: %s (random_song: %s)', uri, random_song)
             kwargs = {'device_id': spotify_device_id, 'context_uri': uri}
             if uri == 'random':
                 _LOGGER.debug('Cool, you found the easter egg with playing a random playlist')
@@ -115,14 +113,9 @@ def setup(hass, config):
                 _LOGGER.debug('Start playback at random position: %s', position)
                 kwargs['offset'] = {'position': position}
 
-            time.sleep(1.0)
             devices_available = client.devices()
             _LOGGER.debug('Right before playing the devices are: %s', devices_available)
             client.start_playback(**kwargs)
-            if shuffle:
-                _LOGGER.debug('Shuffling...')
-                time.sleep(0.5)
-                client.shuffle(shuffle)
 
     def transfer_pb(client, spotify_device_id):
         _LOGGER.debug('Transfering playback')
@@ -136,7 +129,6 @@ def setup(hass, config):
         transfer_playback = False
 
         uri = call.data.get(CONF_SPOTIFY_URI)
-        shuffle = call.data.get(CONF_SHUFFLE, False)
         random_song = call.data.get(CONF_RANDOM, False)
 
         # Get device name from tiehr device_name or entity_id
@@ -208,7 +200,7 @@ def setup(hass, config):
         if transfer_playback == True:
             transfer_pb(client, spotify_device_id)
         else:
-            play(client, spotify_device_id, uri, shuffle, random_song)
+            play(client, spotify_device_id, uri, random_song)
 
     hass.services.register(DOMAIN, 'start', start_casting,
                            schema=SERVICE_START_COMMAND_SCHEMA)
