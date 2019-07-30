@@ -99,22 +99,19 @@ def setup(hass, config):
             _LOGGER.debug('Playing track using uris= for uri: %s', uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
-            _LOGGER.debug('Playing context uri using context_uri for uri: %s (random_song: %s)', uri, random_song)
-            kwargs = {'device_id': spotify_device_id, 'context_uri': uri}
             if uri == 'random':
                 _LOGGER.debug('Cool, you found the easter egg with playing a random playlist')
                 playlists = client.user_playlists('me', 50)
                 no_playlists = len(playlists['items'])
                 uri = playlists['items'][random.randint(0, no_playlists - 1)]['uri']
-
+            kwargs = {'device_id': spotify_device_id, 'context_uri': uri}
             if random_song:
                 results = client.user_playlist_tracks("me", uri)
                 position = random.randint(0, results['total'] - 1)
                 _LOGGER.debug('Start playback at random position: %s', position)
                 kwargs['offset'] = {'position': position}
 
-            devices_available = client.devices()
-            _LOGGER.debug('Right before playing the devices are: %s', devices_available)
+            _LOGGER.debug('Playing context uri using context_uri for uri: "%s" (random_song: %s)', uri, random_song)
             client.start_playback(**kwargs)
 
     def transfer_pb(client, spotify_device_id):
