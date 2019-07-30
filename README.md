@@ -10,7 +10,8 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 
 _Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_. 
 
-***This version requires hass >= 0.95***
+***Important***
+As of release 2 the sensor is optional. To add it add it to the configs sensor section. 
 
 ## Installation
 
@@ -47,12 +48,14 @@ spotcast:
 ```
 {
 	"device_name" : "Kök",
-	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
+	"random_song": true
 }
 ```
 where 
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
+ - `random_song` optional parameter that starts the playback at a random position in the playlist
 
 optionally you can specify the `entity_id` of an existing home assistant chromecast mediaplayer like:
 ```
@@ -96,6 +99,12 @@ where
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
 
 ## Use the sensor
+Add the following to the sensor section of the configuration:
+```
+sensor: 
+    - platform: spotcast
+```
+
 Sensor name
 ```
 sensor.chromecast_devices
@@ -109,15 +118,10 @@ last_update: 2019-05-01T15:27:49.828553+02:00
 friendly_name: Chromecast Devices
 ```
 
+
  
  ## Known issues
  It has been reported that updating the sensor takes more than 10s sometimes. 
- This sensor uses `pychromecast` directly and if you don't need the sensor you can safely comment out the registration 
- of the sensor. 
- ```
-     # hass.services.register(DOMAIN, 'start', start_casting,
-     #                       schema=SERVICE_START_COMMAND_SCHEMA)
- ```
  
  ## Donate
  If you like what I do and want to support me then I love coffee

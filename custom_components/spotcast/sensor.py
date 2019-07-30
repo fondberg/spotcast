@@ -17,8 +17,10 @@ class ChromecastDevicesSensor(Entity):
         self._chromecast_devices = []
         self._attributes = {
             'devices_json': [],
+            'devices': [],
             'last_update': None
         }
+        _LOGGER.debug('initiating sensor')
 
     @property
     def name(self):
@@ -52,8 +54,8 @@ class ChromecastDevicesSensor(Entity):
                 'manufacturer': cast.device.manufacturer
             }
             chromecasts.append(device)
-        self.hass.data[DOMAIN]['chromecasts'] = chromecasts
         self._attributes['devices_json'] = json.dumps(chromecasts, ensure_ascii=False)
+        # self._attributes['devices'] = chromecasts
         self._attributes['last_update'] = dt.now().isoformat('T')
         self._state = STATE_OK
 
