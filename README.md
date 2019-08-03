@@ -1,3 +1,5 @@
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) [![fronius](https://img.shields.io/github/release/fondberg/spotcast.svg)](https://github.com/fondberg/spotcast) ![Maintenance](https://img.shields.io/maintenance/yes/2019.svg)
+
 # Spotcast 
 Home Assistant custom component to start Spotify playback on an idle chromecast device
 
