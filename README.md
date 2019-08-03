@@ -19,6 +19,9 @@ As of release 2 the sensor is optional. To add it add it to the configs sensor s
 
 ## Installation
 
+### This component is easiest installed using [HACS](https://github.com/custom-components/hac)
+
+### Manual
 Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
 
 ### Configuration
