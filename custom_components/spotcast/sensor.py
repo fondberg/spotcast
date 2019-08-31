@@ -54,7 +54,7 @@ class ChromecastDevicesSensor(Entity):
                 'manufacturer': cast.device.manufacturer
             }
             chromecasts.append(device)
-        self._attributes['devices_json'] = json.dumps(chromecasts, ensure_ascii=False)
+        self._attributes['devices_json'] = chromecasts
         # self._attributes['devices'] = chromecasts
         self._attributes['last_update'] = dt.now().isoformat('T')
         self._state = STATE_OK
