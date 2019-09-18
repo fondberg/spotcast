@@ -4,7 +4,7 @@
   "documentation": "https://github.com/fondberg/spotcast",
   "requirements": [
     "fondberg-spotipy==2.4.5-dev2",
-    "pychromecast==3.2.2",
+    "pychromecast==4.0.1",
     "spotify_token==0.1.0"
   ],
   "dependencies": [
