@@ -7,6 +7,7 @@
     "pychromecast==4.0.1",
     "spotify_token==0.1.0"
   ],
+  "homeassistant": "0.99.0",
   "dependencies": [
   ],
   "codeowners": [

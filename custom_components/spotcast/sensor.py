@@ -43,7 +43,6 @@ class ChromecastDevicesSensor(Entity):
 
         self._chromecast_devices = pychromecast.get_chromecasts()
         _LOGGER.debug('Found chromecast devices: %s', self._chromecast_devices)
-        # self._attributes['devices'] = [cast.name for cast in self._chromecast_devices]
         chromecasts = []
         for cast in self._chromecast_devices:
             device = {
