@@ -15,6 +15,7 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 _Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_. 
 
 ***Important***
+Release 2.1 requires Home Assistant 0.99 due to update in pychromecast version.
 As of release 2 the sensor is optional. To add it add it to the configs sensor section. 
 
 ## Installation
@@ -106,6 +107,7 @@ where
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
 
 ## Use the sensor
+The sensor has the discovered chromecasts as both json and since v.2.1 as an array of objects.
 Add the following to the sensor section of the configuration:
 ```
 sensor: 
