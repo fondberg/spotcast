@@ -79,10 +79,9 @@ def setup(hass, config):
 
         raise HomeAssistantError('Could not find device with name {}'.format(device_name))
 
-
     def get_spotify_token(username, password):
-        import spotify_token as st
-        data = st.start_session(username, password)
+        from .spotify_token import start_session as st
+        data = st(username, password)
         access_token = data[0]
         expires = data[1] - int(time.time())
         return access_token, expires
