@@ -1,9 +1,10 @@
 #Links for local development
-__init__.py
-manifest.json
-reuse.py
-sensor.py
-services.yaml
+/__init__.py
+/spotify_token.py
+/manifest.json
+/reuse.py
+/sensor.py
+/services.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -7,7 +7,7 @@ from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 import random
 import time
 
-_VERSION = '2.2.0'
+_VERSION = '2.3.0'
 DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,8 +80,8 @@ def setup(hass, config):
         raise HomeAssistantError('Could not find device with name {}'.format(device_name))
 
     def get_spotify_token(username, password):
-        from .spotify_token import start_session as st
-        data = st(username, password)
+        from .spotify_token import start_session
+        data = start_session(username, password)
         access_token = data[0]
         expires = data[1] - int(time.time())
         return access_token, expires

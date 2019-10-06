@@ -6,7 +6,6 @@
     "fondberg-spotipy==2.4.5-dev2",
     "pychromecast==4.0.1",
     "beautifulsoup4==4.8.0",
-    "spotify_token==0.1.0"
     "lxml==4.4.1"
   ],
   "homeassistant": "0.99.0",
