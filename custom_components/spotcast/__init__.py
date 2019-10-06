@@ -55,7 +55,7 @@ def setup(hass, config):
     # hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
 
     # service
-    def get_chromcast_device(device_name):
+    def get_chromecast_device(device_name):
         import pychromecast
 
         # Get cast from discovered devices of cast platform
@@ -79,10 +79,9 @@ def setup(hass, config):
 
         raise HomeAssistantError('Could not find device with name {}'.format(device_name))
 
-
     def get_spotify_token(username, password):
-        import spotify_token as st
-        data = st.start_session(username, password)
+        from .spotify_token import start_session as st
+        data = st(username, password)
         access_token = data[0]
         expires = data[1] - int(time.time())
         return access_token, expires
@@ -146,7 +145,7 @@ def setup(hass, config):
             raise HomeAssistantError('device_name is empty')
 
         # Find chromecast device
-        cast = get_chromcast_device(device_name)
+        cast = get_chromecast_device(device_name)
         _LOGGER.debug('Found cast device: %s', cast)
         cast.wait()
 
