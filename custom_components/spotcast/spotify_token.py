@@ -3,7 +3,9 @@
 Retrieves a web player access_token from Spotify
 
 Written by Alex Ladd http://github.com/AlexLadd
+
 Original Code from spotify_token: https://github.com/enriquegh/spotify-webplayer-token
+License: MIT https://github.com/enriquegh/spotify-webplayer-token/blob/master/LICENSE
 
 Contributors:
 Daniel Lashua http://github.com/dlashua

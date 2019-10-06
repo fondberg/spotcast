@@ -2,7 +2,7 @@
 
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)
 
-# Spotcast 
+# Spotcast
 Home Assistant custom component to start Spotify playback on an idle chromecast device
 
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromcast device and the Spotify playback after the initial start is done in their respective components.
@@ -12,11 +12,12 @@ Used by https://github.com/custom-cards/spotify-card.
 
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
-_Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_. 
+_Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_.
 
 ***Important***
+Release 2.2 Uses a quick fix for getting the spotify webplayer token.
 Release 2.1 requires Home Assistant 0.99 due to update in pychromecast version.
-As of release 2 the sensor is optional. To add it add it to the configs sensor section. 
+As of release 2 the sensor is optional. To add it add it to the configs sensor section.
 
 ## Installation
 
@@ -34,7 +35,7 @@ spotcast:
   password: !secret spotify_password
 ```
 #### Multiple accounts
-Add `accounts` dict to the configuration and populate with a list of accounts to 
+Add `accounts` dict to the configuration and populate with a list of accounts to
 be able to initiate playback using diffferent accounts than the default.
 ```
 
@@ -60,7 +61,7 @@ spotcast:
 	"random_song": true
 }
 ```
-where 
+where
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
  - `random_song` optional parameter that starts the playback at a random position in the playlist
@@ -88,7 +89,7 @@ or use the parameter `transfer_playback` which will only transfer if something i
 	"transfer_playback" : true
 }
 ```
-where 
+where
  - `device_name` is the friendly name of the Chromecast
  - `transfer_playback` (optional) true or false, continue ongoing playback on your Chromecast
 
@@ -101,7 +102,7 @@ where
 	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
 ```
-where 
+where
  - `account` is the name of account key in the accounts dictionary in the configuration
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
@@ -110,7 +111,7 @@ where
 The sensor has the discovered chromecasts as both json and since v.2.1 as an array of objects.
 Add the following to the sensor section of the configuration:
 ```
-sensor: 
+sensor:
     - platform: spotcast
 ```
 
@@ -128,10 +129,10 @@ friendly_name: Chromecast Devices
 ```
 
 
- 
+
  ## Known issues
- It has been reported that updating the sensor takes more than 10s sometimes. 
- 
+ It has been reported that updating the sensor takes more than 10s sometimes.
+
  ## Donate
  If you like what I do and want to support me then I love coffee
 
@@ -139,6 +140,6 @@ friendly_name: Chromecast Devices
 
  ## Contribute
  Please do
- 
+
  ## License
  Apache 2.0
