@@ -55,7 +55,7 @@ def setup(hass, config):
     # hass.helpers.discovery.load_platform('sensor', DOMAIN, {}, config)
 
     # service
-    def get_chromcast_device(device_name):
+    def get_chromecast_device(device_name):
         import pychromecast
 
         # Get cast from discovered devices of cast platform
@@ -145,7 +145,7 @@ def setup(hass, config):
             raise HomeAssistantError('device_name is empty')
 
         # Find chromecast device
-        cast = get_chromcast_device(device_name)
+        cast = get_chromecast_device(device_name)
         _LOGGER.debug('Found cast device: %s', cast)
         cast.wait()
 
