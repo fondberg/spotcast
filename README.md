@@ -65,6 +65,7 @@ where
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
  - `random_song` optional parameter that starts the playback at a random position in the playlist
+ - `repeat` optional parameter that repeats the playlist/track
 
 optionally you can specify the `entity_id` of an existing home assistant chromecast mediaplayer like:
 ```

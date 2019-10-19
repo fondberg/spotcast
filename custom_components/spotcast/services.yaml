@@ -7,3 +7,4 @@ start:
     account: {description: Optionally starts Spotify using an alternative account specified in config., example: "my_wifes"}
     transfer_playback: {description: Transfer playback if something is playing on the account otherwise play specified URI., example: "true"}
     random_song: {description: Starts the playback at a random position in the playlist., example: "true"}
+    repeat: {description: "Set repeat mode for playback. Available options are track, context and off", example: "track"}
