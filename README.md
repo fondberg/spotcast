@@ -15,7 +15,6 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 _Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_.
 
 ***Important***
-Release 2.2 Uses a quick fix for getting the spotify webplayer token.
 Release 2.1 requires Home Assistant 0.99 due to update in pychromecast version.
 As of release 2 the sensor is optional. To add it add it to the configs sensor section.
 
