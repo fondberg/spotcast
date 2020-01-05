@@ -7,7 +7,7 @@ from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 import random
 import time
 
-_VERSION = '2.4.0'
+_VERSION = '2.4.1'
 DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
@@ -73,10 +73,9 @@ def setup(hass, config):
 
         # Discover devices manually
         chromecasts = pychromecast.get_chromecasts()
-        cast = None
         for _cast in chromecasts:
             if _cast.name == device_name:
-                _LOGGER.debug('Found cast device: %s', cast)
+                _LOGGER.debug('Fallback, found cast device: %s', _cast)
                 return _cast
 
         raise HomeAssistantError('Could not find device with name {}'.format(device_name))
