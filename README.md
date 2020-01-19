@@ -15,8 +15,7 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 _Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_.
 
 ***Important***
-Release 2.1 requires Home Assistant 0.99 due to update in pychromecast version.
-As of release 2 the sensor is optional. To add it add it to the configs sensor section.
+Release 2.6 has a dependency to zeroconf 0.24.3 to make HASS work until proper upstream fix exists.
 
 ## Installation
 
