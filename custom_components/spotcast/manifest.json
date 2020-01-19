@@ -5,8 +5,7 @@
   "requirements": [
     "spotipy==2.6.3",
     "pychromecast==4.0.1",
-    "spotify_token==0.1.2",
-    "zeroconf==0.24.3"
+    "spotify_token==0.1.2"
   ],
   "homeassistant": "0.99.0",
   "dependencies": [
