@@ -215,14 +215,10 @@ class SpotifyCastDevice:
         known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
         cast_info = next((x for x in known_devices if x.friendly_name == device_name), None)
         _LOGGER.debug('cast info: %s', cast_info)
-        host = str(cast_info.host)
-
-        if host.startswith('record'):
-            host = cast_info.host.rpartition(',')[-1]
 
         if cast_info:
             return pychromecast._get_chromecast_from_host((
-                host, cast_info.port, cast_info.uuid,
+                cast_info.host, cast_info.port, cast_info.uuid,
                 cast_info.model_name, cast_info.friendly_name
             ))
         _LOGGER.error('Could not find device %s from hass.data, falling back to pychromecast scan', device_name)
