@@ -15,7 +15,7 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 _Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_.
 
 ***Important***
-Release 2.6.1 has a woraround for zeroconf 0.24.4 so it is no longer needed to use older version.
+Release 2.7.0 requires home-assistant >= 1.105.0
 
 ## Installation
 

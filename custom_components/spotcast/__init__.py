@@ -10,7 +10,7 @@ from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 import random
 import time
 
-_VERSION = '2.6.1'
+_VERSION = '2.7.0'
 DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
