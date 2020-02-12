@@ -3,7 +3,7 @@
   "name": "Start Spotify on chromecast",
   "documentation": "https://github.com/fondberg/spotcast",
   "requirements": [
-    "spotipy==2.6.3",
+    "spotipy==2.7.1",
     "pychromecast==4.1.1",
     "spotify_token==0.1.2"
   ],
