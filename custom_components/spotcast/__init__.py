@@ -104,9 +104,12 @@ async def async_setup(hass, config):
             if random_song:
                 if uri.find('album') > 0:
                     results = client.album_tracks(uri)
-                if uri.find('playlist') > 0:
+                    position = random.randint(0, results['total'] - 1)
+                elif uri.find('playlist') > 0:
                     results = client.playlist_tracks(uri)
-                position = random.randint(0, results['total'] - 1)
+                    position = random.randint(0, results['total'] - 1)
+                else:
+                    position = 0
                 _LOGGER.debug('Start playback at random position: %s', position)
                 kwargs['offset'] = {'position': position}
 
