@@ -102,7 +102,10 @@ async def async_setup(hass, config):
                 uri = playlists['items'][random.randint(0, no_playlists - 1)]['uri']
             kwargs = {'device_id': spotify_device_id, 'context_uri': uri}
             if random_song:
-                results = client.user_playlist_tracks("me", uri)
+                if uri.find('album') > 0:
+                    results = client.album_tracks(uri)
+                if uri.find('playlist') > 0:
+                    results = client.playlist_tracks(uri)
                 position = random.randint(0, results['total'] - 1)
                 _LOGGER.debug('Start playback at random position: %s', position)
                 kwargs['offset'] = {'position': position}
