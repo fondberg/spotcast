@@ -10,11 +10,12 @@ from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 import random
 import time
 
-_VERSION = '2.7.2'
+_VERSION = '2.8.0'
 DOMAIN = 'spotcast'
 
 _LOGGER = logging.getLogger(__name__)
 
+CONF_SPOTIFY_DEVICE_ID = 'spotify_device_id'
 CONF_DEVICE_NAME = 'device_name'
 CONF_ENTITY_ID = 'entity_id'
 CONF_SPOTIFY_URI = 'uri'
@@ -32,13 +33,13 @@ SCHEMA_PLAYLISTS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
     {vol.Required("type"): WS_TYPE_SPOTCAST_PLAYLISTS}
 )
 
-
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Optional(CONF_DEVICE_NAME): cv.string,
+    vol.Optional(CONF_SPOTIFY_DEVICE_ID): cv.string,
     vol.Optional(CONF_ENTITY_ID): cv.string,
     vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string,
-    vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean,
+    vol.Optional(CONF_TRANSFER_PLAYBACK, default=False): cv.boolean,
     vol.Optional(CONF_RANDOM, default=False): cv.boolean,
     vol.Optional(CONF_REPEAT, default='off'): cv.string,
     vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
@@ -114,7 +115,6 @@ async def async_setup(hass, config):
                     position = random.randint(0, results['total'] - 1)
                 _LOGGER.debug('Start playback at random position: %s', position)
             kwargs['offset'] = {'position': position}
-
             _LOGGER.debug('Playing context uri using context_uri for uri: "%s" (random_song: %s)', uri, random_song)
             client.start_playback(**kwargs)
         if shuffle or repeat:
@@ -143,11 +143,15 @@ async def async_setup(hass, config):
         """ Check if something is playing """
         uri = call.data.get(CONF_SPOTIFY_URI)
         if uri is None or uri.strip() == '' or call.data.get(CONF_TRANSFER_PLAYBACK):
-            current_playback = client.current_playback()
-            if current_playback is not None:
-                _LOGGER.debug('current_playback from spotipy: %s', current_playback)
-                return True
+            return True
         return False
+
+    def getSpotifyConnectDeviceId(client, device_name):
+        devices_available = client.devices()
+        for device in devices_available['devices']:
+            if device['name'] == device_name:
+                return device['id']
+        return None
 
     async def start_casting(call):
         """service called."""
@@ -157,6 +161,7 @@ async def async_setup(hass, config):
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT)
         shuffle = call.data.get(CONF_SHUFFLE)
+        spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
 
         # Account
@@ -168,16 +173,24 @@ async def async_setup(hass, config):
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
 
-        # launch the app on chromecast
-        spotify_cast_device = SpotifyCastDevice(hass, call.data.get(CONF_DEVICE_NAME), call.data.get(CONF_ENTITY_ID))
-        spotify_cast_device.startSpotifyController(access_token, expires)
-        spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
+        # first, rely on spotify id given in config
+        if not spotify_device_id:
+		    # if not present, check if there's a spotify connect device with that name
+            spotify_device_id = getSpotifyConnectDeviceId(client, call.data.get(CONF_DEVICE_NAME))
+        if not spotify_device_id:
+            # if still no id available, check cast devices and launch the app on chromecast
+            spotify_cast_device = SpotifyCastDevice(hass, call.data.get(CONF_DEVICE_NAME), call.data.get(CONF_ENTITY_ID))
+            spotify_cast_device.startSpotifyController(access_token, expires)
+            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
 
         transfer_playback = shouldTransferPlayback(call, client)
         if transfer_playback == True:
             _LOGGER.debug('Transfering playback')
-            client.transfer_playback(
-                device_id=spotify_device_id, force_play=True)
+            current_playback = client.current_playback()
+            if current_playback is not None:
+                client.transfer_playback(device_id=spotify_device_id, force_play=True)
+            else:
+                client.transfer_playback(device_id=spotify_device_id, force_play=False)
         else:
             play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
 

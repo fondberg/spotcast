@@ -2,10 +2,13 @@ start:
   description: Starts spotify playback on chromecast devices
   fields:
     device_name:
-      description: "The friendly name of the chromecast device (not used together with entity_id)."
+      description: "The friendly name of the chromecast device (not used together with entity_id and spotify_device_name)."
       example: "Livingroom"
+    spotify_device_id:
+      description: "The spotify device id (not used together with entity_id or device_name)."
+      example: "4363634563457346xcyvydgf3qwa"
     entity_id:
-      description: "The entity_id of the chromecast mediaplayer (not used together with device_name)."
+      description: "The entity_id of the chromecast mediaplayer (not used together with device_name and spotify_device_name)."
       example:  "media_player.vardagsrum"
     uri:
       description: "Supported Spotify URI as string (if omitted will try to transfer current playback)."
