@@ -23,6 +23,8 @@ CONF_SPOTIFY_ACCOUNT = 'account'
 CONF_TRANSFER_PLAYBACK = 'transfer_playback'
 CONF_RANDOM = 'random_song'
 CONF_REPEAT = 'repeat'
+CONF_SHUFFLE = 'shuffle'
+CONF_OFFSET = 'offset'
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
@@ -37,8 +39,10 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string,
     vol.Optional(CONF_TRANSFER_PLAYBACK): cv.boolean,
-    vol.Optional(CONF_RANDOM): cv.boolean,
-    vol.Optional(CONF_REPEAT): cv.string
+    vol.Optional(CONF_RANDOM, default=False): cv.boolean,
+    vol.Optional(CONF_REPEAT, default='off'): cv.string,
+    vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
+    vol.Optional(CONF_OFFSET, default=0): cv.string
 })
 
 ACCOUNTS_SCHEMA = vol.Schema({
@@ -83,7 +87,7 @@ async def async_setup(hass, config):
         expires = data[1] - int(time.time())
         return access_token, expires
 
-    def play(client, spotify_device_id, uri, random_song, repeat):
+    def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
         # import spotipy
         # import http.client as http_client
         # spotipy.trace = True
@@ -111,14 +115,20 @@ async def async_setup(hass, config):
                 else:
                     position = 0
                 _LOGGER.debug('Start playback at random position: %s', position)
-                kwargs['offset'] = {'position': position}
+            kwargs['offset'] = {'position': position}
 
             _LOGGER.debug('Playing context uri using context_uri for uri: "%s" (random_song: %s)', uri, random_song)
             client.start_playback(**kwargs)
-        if repeat:
-            _LOGGER.debug('Turning repeat on')
-            time.sleep(5)
-            client.repeat(state=repeat, device_id=spotify_device_id)
+        if shuffle or repeat:
+            time.sleep(3)
+            if shuffle:
+                _LOGGER.debug('Turning shuffle on')
+                time.sleep(2)
+                client.shuffle(state=shuffle, device_id=spotify_device_id)
+            if repeat:
+                _LOGGER.debug('Turning repeat on')
+                time.sleep(2)
+                client.repeat(state=repeat, device_id=spotify_device_id)
 
     def get_account_credentials(call):
         """ Get credentials for account """
@@ -148,6 +158,8 @@ async def async_setup(hass, config):
         uri = call.data.get(CONF_SPOTIFY_URI)
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT)
+        shuffle = call.data.get(CONF_SHUFFLE)
+        position = call.data.get(CONF_OFFSET)
 
         # Account
         user, pwd = get_account_credentials(call)
@@ -169,7 +181,7 @@ async def async_setup(hass, config):
             client.transfer_playback(
                 device_id=spotify_device_id, force_play=True)
         else:
-            play(client, spotify_device_id, uri, random_song, repeat)
+            play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
 
     # Register websocket and service
     hass.components.websocket_api.async_register_command(
