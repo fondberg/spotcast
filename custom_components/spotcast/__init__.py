@@ -175,7 +175,7 @@ async def async_setup(hass, config):
 
         # first, rely on spotify id given in config
         if not spotify_device_id:
-		    # if not present, check if there's a spotify connect device with that name
+            # if not present, check if there's a spotify connect device with that name
             spotify_device_id = getSpotifyConnectDeviceId(client, call.data.get(CONF_DEVICE_NAME))
         if not spotify_device_id:
             # if still no id available, check cast devices and launch the app on chromecast
