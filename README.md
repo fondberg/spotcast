@@ -3,7 +3,7 @@
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)
 
 # Spotcast
-Home Assistant custom component to start Spotify playback on an idle chromecast device
+Home Assistant custom component to start Spotify playback on an idle chromecast device. As of version 2.8.0 it also supports playback on Spotify Connect devices (thanks to @kleinc80) which means that you can target your automation for chromecast as well as connect devices.
 
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromcast device and the Spotify playback after the initial start is done in their respective components.
 Becasue starting playback using the API requires more powerful token the username and password used for browser login is used.
@@ -12,14 +12,13 @@ Used by https://github.com/custom-cards/spotify-card.
 
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
-_Now with support for speaker groups, transferring playback to and between chromecast devices and using HA entity id instead of device_name_.
-
 ***Important***
 Release 2.7.0 requires home-assistant >= 0.105.0
+Release 2.8.0 now supports Spotify connect devices (thanks to @kleinc80). And no, Sonos would still require extra integration, send one to me and I'll integrate it.
 
 ## Installation
 
-### This component is easiest installed using [HACS](https://github.com/custom-components/hac)
+### This component is easiest installed using [HACS](https://github.com/custom-components/hacs)
 
 ### Manual
 Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
@@ -64,6 +63,8 @@ where
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
  - `random_song` optional parameter that starts the playback at a random position in the playlist
  - `repeat` optional parameter that repeats the playlist/track
+ - `shuffle` optional parameter to set shuffle mode for playback.
+ - `offset` optional paramter to set offset mode for playback. 0 is the first song.
 
 optionally you can specify the `entity_id` of an existing home assistant chromecast mediaplayer like:
 ```

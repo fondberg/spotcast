@@ -20,7 +20,7 @@ start:
       description: "Transfer playback if something is playing on the account otherwise play specified URI."
       example: true
     random_song:
-      description: "Starts the playback at a random position in the playlist."
+      description: "Starts the playback at a random position in the playlist or album."
       example: true
     repeat:
       description: Set repeat mode for playback. Available options are track, context and off.

@@ -188,6 +188,7 @@ async def async_setup(hass, config):
             _LOGGER.debug('Transfering playback')
             current_playback = client.current_playback()
             if current_playback is not None:
+                _LOGGER.debug('current_playback from spotipy: %s', current_playback)
                 client.transfer_playback(device_id=spotify_device_id, force_play=True)
             else:
                 client.transfer_playback(device_id=spotify_device_id, force_play=False)
