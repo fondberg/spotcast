@@ -163,6 +163,7 @@ async def async_setup(hass, config):
         shuffle = call.data.get(CONF_SHUFFLE)
         spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
+        transfer_playback = call.data.get(CONF_TRANSFER_PLAYBACK)
 
         # Account
         user, pwd = get_account_credentials(call)
@@ -183,11 +184,10 @@ async def async_setup(hass, config):
             spotify_cast_device.startSpotifyController(access_token, expires)
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
 
-        transfer_playback = shouldTransferPlayback(call, client)
-        if transfer_playback == True:
+        if shouldTransferPlayback(call, client) == True:
             _LOGGER.debug('Transfering playback')
             current_playback = client.current_playback()
-            if current_playback is not None:
+            if current_playback is not None or transfer_playback == True:
                 _LOGGER.debug('current_playback from spotipy: %s', current_playback)
                 client.transfer_playback(device_id=spotify_device_id, force_play=True)
             else:
