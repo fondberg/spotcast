@@ -13,8 +13,16 @@ Used by https://github.com/custom-cards/spotify-card.
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
 
 ***Important***
+
 Release 2.7.0 requires home-assistant >= 0.105.0
+
 Release 2.8.0 now supports Spotify connect devices (thanks to @kleinc80). And no, Sonos would still require extra integration, send one to me and I'll integrate it.
+
+Release 2.9.0 now supports possibility to "Transfer Playback" even when there is nothing currently playing
+
+***Required configuration change with release 2.9.0***
+
+The parameter transfer_playback does not exist anymore and if you use it, you need to update your configuration. Use and empty uri and optionally the new parameter force_playback instead.
 
 ## Installation
 
@@ -75,23 +83,22 @@ optionally you can specify the `entity_id` of an existing home assistant chromec
 ```
 
 ### transfer current playback for the account
-Omitting `uri` will check if something is playing on any of the accounts devices and transfer the playback to the specified device.
+Omitting `uri` will transfer the playback to the specified device.
 ```
 {
 	"device_name" : "Högtalare uppe"
 }
 ```
-or use the parameter `transfer_playback` which will only transfer if something is playing otherwise use the specified `uri`.
+Use the parameter `force_playback` to continue the user's playback even if nothing is currently playing.
 ```
 {
 	"device_name" : "MultiRoom",
-	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
-	"transfer_playback" : true
+	"force_playback" : true
 }
 ```
 where
  - `device_name` is the friendly name of the Chromecast
- - `transfer_playback` (optional) true or false, continue ongoing playback on your Chromecast
+ - `force_playback` (optional) true or false, true to continue the user's playback even if nothing is currently playing
 
 
 #### start playback on a device with non default account
