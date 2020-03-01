@@ -21,7 +21,7 @@ CONF_ENTITY_ID = 'entity_id'
 CONF_SPOTIFY_URI = 'uri'
 CONF_ACCOUNTS = 'accounts'
 CONF_SPOTIFY_ACCOUNT = 'account'
-CONF_TRANSFER_PLAYBACK = 'transfer_playback'
+CONF_FORCE_PLAYBACK = 'force_playback'
 CONF_RANDOM = 'random_song'
 CONF_REPEAT = 'repeat'
 CONF_SHUFFLE = 'shuffle'
@@ -39,7 +39,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema({
     vol.Optional(CONF_ENTITY_ID): cv.string,
     vol.Optional(CONF_SPOTIFY_URI): cv.string,
     vol.Optional(CONF_SPOTIFY_ACCOUNT): cv.string,
-    vol.Optional(CONF_TRANSFER_PLAYBACK, default=False): cv.boolean,
+    vol.Optional(CONF_FORCE_PLAYBACK, default=False): cv.boolean,
     vol.Optional(CONF_RANDOM, default=False): cv.boolean,
     vol.Optional(CONF_REPEAT, default='off'): cv.string,
     vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
@@ -139,13 +139,6 @@ async def async_setup(hass, config):
             pwd = accounts.get(account).get(CONF_PASSWORD)
         return user, pwd
 
-    def shouldTransferPlayback(call, client):
-        """ Check if something is playing """
-        uri = call.data.get(CONF_SPOTIFY_URI)
-        if uri is None or uri.strip() == '' or call.data.get(CONF_TRANSFER_PLAYBACK):
-            return True
-        return False
-
     def getSpotifyConnectDeviceId(client, device_name):
         devices_available = client.devices()
         for device in devices_available['devices']:
@@ -163,7 +156,7 @@ async def async_setup(hass, config):
         shuffle = call.data.get(CONF_SHUFFLE)
         spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
-        transfer_playback = call.data.get(CONF_TRANSFER_PLAYBACK)
+        force_playback = call.data.get(CONF_FORCE_PLAYBACK)
 
         # Account
         user, pwd = get_account_credentials(call)
@@ -184,14 +177,14 @@ async def async_setup(hass, config):
             spotify_cast_device.startSpotifyController(access_token, expires)
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
 
-        if shouldTransferPlayback(call, client) == True:
+        if uri is None or uri.strip() == '':
             _LOGGER.debug('Transfering playback')
             current_playback = client.current_playback()
-            if current_playback is not None or transfer_playback == True:
-                _LOGGER.debug('current_playback from spotipy: %s', current_playback)
-                client.transfer_playback(device_id=spotify_device_id, force_play=True)
-            else:
-                client.transfer_playback(device_id=spotify_device_id, force_play=False)
+            if current_playback is not None:
+                _LOGGER.debug('Current_playback from spotipy: %s', current_playback)
+                force_playback = True
+            _LOGGER.debug('Force playback: %s', force_playback)
+            client.transfer_playback(device_id=spotify_device_id, force_play=force_playback)
         else:
             play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
 
