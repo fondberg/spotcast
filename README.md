@@ -22,7 +22,7 @@ Release 2.9.0 now supports possibility to "Transfer Playback" even when there is
 
 ***Required configuration change with release 2.9.0***
 
-The parameter transfer_playback does not exist anymore and if you use it, you need to update your configuration. Use and empty uri and optionally the new parameter force_playback instead.
+The parameter transfer_playback does not exist anymore and if you use it, you need to update your configuration. Use an empty uri and optionally the new parameter force_playback instead.
 
 ## Installation
 
