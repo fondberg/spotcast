@@ -1,5 +1,4 @@
 import logging
-import asyncio
 import voluptuous as vol
 from homeassistant.components import http, websocket_api
 from homeassistant.core import callback
@@ -60,7 +59,7 @@ CONFIG_SCHEMA = vol.Schema({
 }, extra=vol.ALLOW_EXTRA)
 
 
-async def async_setup(hass, config):
+def setup(hass, config):
     """Setup the Spotcast service."""
     conf = config[DOMAIN]
 
@@ -114,7 +113,8 @@ async def async_setup(hass, config):
                     results = client.playlist_tracks(uri)
                     position = random.randint(0, results['total'] - 1)
                 _LOGGER.debug('Start playback at random position: %s', position)
-            kwargs['offset'] = {'position': position}
+            if uri.find('artist') < 1:
+                kwargs['offset'] = {'position': position}
             _LOGGER.debug('Playing context uri using context_uri for uri: "%s" (random_song: %s)', uri, random_song)
             client.start_playback(**kwargs)
         if shuffle or repeat:
@@ -146,7 +146,7 @@ async def async_setup(hass, config):
                 return device['id']
         return None
 
-    async def start_casting(call):
+    def start_casting(call):
         """service called."""
         import spotipy
 
@@ -193,7 +193,7 @@ async def async_setup(hass, config):
         WS_TYPE_SPOTCAST_PLAYLISTS, websocket_handle_playlists, SCHEMA_PLAYLISTS
     )
 
-    hass.services.async_register(DOMAIN, 'start', start_casting,
+    hass.services.register(DOMAIN, 'start', start_casting,
                                  schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
