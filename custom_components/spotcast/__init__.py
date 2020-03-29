@@ -1,5 +1,4 @@
 import logging
-import asyncio
 import voluptuous as vol
 from homeassistant.components import http, websocket_api
 from homeassistant.core import callback
@@ -60,7 +59,7 @@ CONFIG_SCHEMA = vol.Schema({
 }, extra=vol.ALLOW_EXTRA)
 
 
-async def async_setup(hass, config):
+def setup(hass, config):
     """Setup the Spotcast service."""
     conf = config[DOMAIN]
 
@@ -114,7 +113,8 @@ async def async_setup(hass, config):
                     results = client.playlist_tracks(uri)
                     position = random.randint(0, results['total'] - 1)
                 _LOGGER.debug('Start playback at random position: %s', position)
-            kwargs['offset'] = {'position': position}
+            if uri.find('artist') < 1:
+                kwargs['offset'] = {'position': position}
             _LOGGER.debug('Playing context uri using context_uri for uri: "%s" (random_song: %s)', uri, random_song)
             client.start_playback(**kwargs)
         if shuffle or repeat:
@@ -146,7 +146,7 @@ async def async_setup(hass, config):
                 return device['id']
         return None
 
-    async def start_casting(call):
+    def start_casting(call):
         """service called."""
         import spotipy
 
@@ -193,7 +193,7 @@ async def async_setup(hass, config):
         WS_TYPE_SPOTCAST_PLAYLISTS, websocket_handle_playlists, SCHEMA_PLAYLISTS
     )
 
-    hass.services.async_register(DOMAIN, 'start', start_casting,
+    hass.services.register(DOMAIN, 'start', start_casting,
                                  schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
@@ -257,10 +257,16 @@ class SpotifyCastDevice:
 
     def startSpotifyController(self, access_token, expires):
         from pychromecast.controllers.spotify import SpotifyController
+        # get the volume so we can remove the bloink
+        volume = self.castDevice.status.volume_level
+        self.castDevice.set_volume(0)
 
         sp = SpotifyController(access_token, expires)
         self.castDevice.register_handler(sp)
         sp.launch_app()
+
+        # reset the volume
+        self.castDevice.set_volume(volume)
 
         if not sp.is_launched and not sp.credential_error:
             raise HomeAssistantError('Failed to launch spotify controller due to timeout')

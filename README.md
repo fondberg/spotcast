@@ -18,7 +18,7 @@ Release 2.7.0 requires home-assistant >= 0.105.0
 
 Release 2.8.0 now supports Spotify connect devices (thanks to @kleinc80). And no, Sonos would still require extra integration, send one to me and I'll integrate it.
 
-Release 2.9.0 now supports possibility to "Transfer Playback" even when there is nothing currently playing
+Release 2.9.0 transfer_playback removed! Now supports possibility to "Transfer Playback" even when there is nothing currently playing
 
 ***Required configuration change with release 2.9.0***
 
