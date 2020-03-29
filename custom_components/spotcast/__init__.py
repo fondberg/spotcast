@@ -264,10 +264,16 @@ class SpotifyCastDevice:
 
     def startSpotifyController(self, access_token, expires):
         from pychromecast.controllers.spotify import SpotifyController
+        # get the volume so we can remove the bloink
+        volume = self.castDevice.status.volume_level
+        self.castDevice.set_volume(0)
 
         sp = SpotifyController(access_token, expires)
         self.castDevice.register_handler(sp)
         sp.launch_app()
+
+        # reset the volume
+        self.castDevice.set_volume(volume)
 
         if not sp.is_launched and not sp.credential_error:
             raise HomeAssistantError('Failed to launch spotify controller due to timeout')
