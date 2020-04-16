@@ -4,7 +4,7 @@
   "documentation": "https://github.com/fondberg/spotcast",
   "requirements": [
     "spotipy==2.10.0",
-    "pychromecast==4.1.1",
+    "pychromecast==4.2.0",
     "spotify_token==0.1.2"
   ],
   "homeassistant": "0.108.3",
