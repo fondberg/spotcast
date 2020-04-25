@@ -3,11 +3,11 @@
   "name": "Start Spotify on chromecast",
   "documentation": "https://github.com/fondberg/spotcast",
   "requirements": [
-    "spotipy==2.10.0",
-    "pychromecast==4.1.1",
+    "spotipy==2.11.1",
+    "pychromecast==5.0.0",
     "spotify_token==0.1.2"
   ],
-  "homeassistant": "0.108.3",
+  "homeassistant": "0.109.0",
   "dependencies": [
   ],
   "codeowners": [
