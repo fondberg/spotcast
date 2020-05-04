@@ -2,6 +2,9 @@
 
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)
 
+## right now defunct due to https://github.com/enriquegh/spotify-webplayer-token/issues/6
+
+
 # Spotcast 
 Home Assistant custom component to start Spotify playback on an idle chromecast device
 
