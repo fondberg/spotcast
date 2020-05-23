@@ -163,7 +163,7 @@ def setup(hass, config):
         dc, key = get_account_credentials(call)
 
         # login as real browser to get powerful token
-        access_token, expires = get_spotify_token(sp_dc=user, sp_key=key)
+        access_token, expires = get_spotify_token(sp_dc=dc, sp_key=key)
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
