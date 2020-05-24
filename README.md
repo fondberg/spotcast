@@ -41,12 +41,14 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
 
 To obtain the cookies:
-• Open a new __Incognito window__ in Chrome (or other browser) at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
-• Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
-• Login to Spotify.
-• Search/Filter for `get_access_token` in Developer tools under Network.
-• Under cookies for the request save `sp_dc` and `sp_key`.
-• Close the window without logging out (Otherwise the cookies are made invalid).
+* Open a new __Incognito window__ in Chrome (or another browser) at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
+* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
+* Login to Spotify.
+* Search/Filter for `get_access_token` in Developer tools under Network.
+* Under cookies for the request save the values for `sp_dc` and `sp_key`.
+* Close the window without logging out (Otherwise the cookies are made invalid).
+
+![Screenshots](images/cookies_1.jpg)
 
 #### Single account
 Add the following to your config
