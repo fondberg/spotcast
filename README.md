@@ -2,8 +2,6 @@
 
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)
 
-## right now defunct due to https://github.com/enriquegh/spotify-webplayer-token/issues/6
-
 # Spotcast
 Home Assistant custom component to start Spotify playback on an idle chromecast device. As of version 2.8.0 it also supports playback on Spotify Connect devices (thanks to @kleinc80) which means that you can target your automation for chromecast as well as connect devices.
 
@@ -16,17 +14,11 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 
 ***Important***
 
-Release 2.7.0 requires home-assistant >= 0.105.0
-
 Release 2.8.0 now supports Spotify connect devices (thanks to @kleinc80). And no, Sonos would still require extra integration, send one to me and I'll integrate it.
 
 Release 2.9.0 transfer_playback removed! Now supports possibility to "Transfer Playback" even when there is nothing currently playing.
 
-Release 2.10.0 New method for obtaining access token from Spotify. Please read [Configuration](#configuration) for new instruction.
-
-***Required configuration change with release 2.9.0***
-
-The parameter transfer_playback does not exist anymore and if you use it, you need to update your configuration. Use an empty uri and optionally the new parameter force_playback instead.
+Release 3.0.0 New method for obtaining access token from Spotify. Please read [Configuration](#configuration) for new instruction.
 
 ## Installation
 
