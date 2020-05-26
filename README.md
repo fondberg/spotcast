@@ -22,6 +22,8 @@ Release 2.8.0 now supports Spotify connect devices (thanks to @kleinc80). And no
 
 Release 2.9.0 transfer_playback removed! Now supports possibility to "Transfer Playback" even when there is nothing currently playing.
 
+Release 2.10.0 New method for obtaining access token from Spotify. Please read [Configuration](#configuration) for new instruction.
+
 ***Required configuration change with release 2.9.0***
 
 The parameter transfer_playback does not exist anymore and if you use it, you need to update your configuration. Use an empty uri and optionally the new parameter force_playback instead.
@@ -34,12 +36,26 @@ The parameter transfer_playback does not exist anymore and if you use it, you ne
 Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
 
 ### Configuration
+
+#### Obtaining `sp_dc` and `sp_key` cookies
+Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
+
+To obtain the cookies:
+* Open a new __Incognito window__ in Chrome (or another browser) at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
+* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
+* Login to Spotify.
+* Search/Filter for `get_access_token` in Developer tools under Network.
+* Under cookies for the request save the values for `sp_dc` and `sp_key`.
+* Close the window without logging out (Otherwise the cookies are made invalid).
+
+![Screenshots](images/cookies_1.jpg)
+
 #### Single account
 Add the following to your config
 ```
 spotcast:
-  username: !secret spotify_username
-  password: !secret spotify_password
+  sp_dc: !secret sp_dc
+  sp_key: !secret sp_key
 ```
 #### Multiple accounts
 Add `accounts` dict to the configuration and populate with a list of accounts to
@@ -47,15 +63,15 @@ be able to initiate playback using diffferent accounts than the default.
 ```
 
 spotcast:
-  username: !secret spotify_primary_username
-  password: !secret spotify_primary_password
+  sp_dc: !secret primary_sp_dc
+  sp_key: !secret primary_sp_key
   accounts:
     niklas:
-      username: !secret spotify_niklas_username
-      password: !secret spotify_niklas_password
+      sp_dc: !secret niklas_sp_dc
+      sp_key: !secret niklas_sp_key
     ming:
-      username: !secret spotify_ming_username
-      password: !secret spotify_ming_password
+      sp_dc: !secret ming_sp_dc
+      sp_key: !secret ming_sp_key
 ```
 
 ## Call the service

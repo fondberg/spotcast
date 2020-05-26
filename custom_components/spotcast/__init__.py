@@ -4,7 +4,6 @@ from homeassistant.components import http, websocket_api
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (CONF_PASSWORD, CONF_USERNAME)
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 import random
 import time
@@ -25,6 +24,8 @@ CONF_RANDOM = 'random_song'
 CONF_REPEAT = 'repeat'
 CONF_SHUFFLE = 'shuffle'
 CONF_OFFSET = 'offset'
+CONF_SP_DC = 'sp_dc'
+CONF_SP_KEY = 'sp_key'
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
@@ -46,14 +47,14 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema({
 })
 
 ACCOUNTS_SCHEMA = vol.Schema({
-    vol.Required(CONF_USERNAME): cv.string,
-    vol.Required(CONF_PASSWORD): cv.string,
+    vol.Required(CONF_SP_DC): cv.string,
+    vol.Required(CONF_SP_KEY): cv.string,
 })
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
-        vol.Required(CONF_USERNAME): cv.string,
-        vol.Required(CONF_PASSWORD): cv.string,
+        vol.Required(CONF_SP_DC): cv.string,
+        vol.Required(CONF_SP_KEY): cv.string,
         vol.Optional(CONF_ACCOUNTS): cv.schema_with_slug_keys(ACCOUNTS_SCHEMA),
     }),
 }, extra=vol.ALLOW_EXTRA)
@@ -63,15 +64,15 @@ def setup(hass, config):
     """Setup the Spotcast service."""
     conf = config[DOMAIN]
 
-    username = conf[CONF_USERNAME]
-    password = conf[CONF_PASSWORD]
+    sp_dc = conf[CONF_SP_DC]
+    sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
 
     @callback
     def websocket_handle_playlists(hass, connection, msg):
         """Handle get playlist"""
         import spotipy
-        access_token, expires = get_spotify_token(username=username, password=password)
+        access_token, expires = get_spotify_token(sp_dc=sp_dc, sp_key=sp_key)
         client = spotipy.Spotify(auth=access_token)
         resp = client._get('views/made-for-x?content_limit=10&locale=en&platform=web&types=album%2Cplaylist%2Cartist%2Cshow%2Cstation', limit=10,
                            offset=0)
@@ -79,9 +80,9 @@ def setup(hass, config):
             websocket_api.result_message(msg["id"], resp)
         )
 
-    def get_spotify_token(username, password):
+    def get_spotify_token(sp_dc, sp_key):
         import spotify_token as st
-        data = st.start_session(username, password)
+        data = st.start_session(sp_dc, sp_key)
         access_token = data[0]
         # token_expires = data[1]
         expires = data[1] - int(time.time())
@@ -131,13 +132,13 @@ def setup(hass, config):
     def get_account_credentials(call):
         """ Get credentials for account """
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
-        user = username
-        pwd = password
+        dc = sp_dc
+        key = sp_key
         if account is not None:
             _LOGGER.debug('setting up with different account than default %s', account)
-            user = accounts.get(account).get(CONF_USERNAME)
-            pwd = accounts.get(account).get(CONF_PASSWORD)
-        return user, pwd
+            dc = accounts.get(account).get(CONF_SP_DC)
+            key = accounts.get(account).get(CONF_SP_KEY)
+        return dc, key
 
     def getSpotifyConnectDeviceId(client, device_name):
         devices_available = client.devices()
@@ -159,10 +160,10 @@ def setup(hass, config):
         force_playback = call.data.get(CONF_FORCE_PLAYBACK)
 
         # Account
-        user, pwd = get_account_credentials(call)
+        dc, key = get_account_credentials(call)
 
         # login as real browser to get powerful token
-        access_token, expires = get_spotify_token(username=user, password=pwd)
+        access_token, expires = get_spotify_token(sp_dc=dc, sp_key=key)
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
