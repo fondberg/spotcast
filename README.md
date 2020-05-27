@@ -38,7 +38,7 @@ To obtain the cookies:
 >* If no cookies appear go to [`https://open.spotify.com`](https://open.spotify.com) and sign-in
 >* Copy content from `sp_dc` and `sp_key` cookies
 * Using another browser
->* Use a browser extension like "Export cookies".
+>* Use a browser extension like "Export cookies" and look for `sp_dc` and `sp_key` cookies
 
 or
 >* Open a new __Incognito window__ at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
@@ -170,7 +170,7 @@ friendly_name: Chromecast Devices
  ## License
  Apache 2.0
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzc5MjU2MjkyLDE2OTc2NTM5MTgsLTEyNT
-M2MjM0OTIsLTcwMDE0NjI4LDE1MDA5ODc2MDgsLTIwMDM5MTgw
-OTBdfQ==
+eyJoaXN0b3J5IjpbMTYzNDU1MzEwOSw3NzkyNTYyOTIsMTY5Nz
+Y1MzkxOCwtMTI1MzYyMzQ5MiwtNzAwMTQ2MjgsMTUwMDk4NzYw
+OCwtMjAwMzkxODA5MF19
 -->
