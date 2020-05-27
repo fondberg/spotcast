@@ -169,8 +169,3 @@ friendly_name: Chromecast Devices
 
  ## License
  Apache 2.0
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbMTYzNDU1MzEwOSw3NzkyNTYyOTIsMTY5Nz
-Y1MzkxOCwtMTI1MzYyMzQ5MiwtNzAwMTQ2MjgsMTUwMDk4NzYw
-OCwtMjAwMzkxODA5MF19
--->
