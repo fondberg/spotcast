@@ -33,6 +33,7 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
 
 To obtain the cookies:
+####Usi
 * Open a new __Incognito window__ in Chrome (or another browser) at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
 * Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
 * Login to Spotify.
@@ -160,3 +161,6 @@ friendly_name: Chromecast Devices
 
  ## License
  Apache 2.0
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbMTAwMDM2MDk2MF19
+-->
