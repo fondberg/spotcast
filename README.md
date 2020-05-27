@@ -46,7 +46,7 @@ To obtain the cookies:
 >* Close the window without logging out (Otherwise the cookies are made invalid).
 >
 >![Screenshots](images/cookies_1.jpg)
-* Alternatively you can use a browser plugin like "cookies.txt" or `Export cookies`
+* Alternatively you can use a browser plugin like "cookies.txt" or "Export cookies"
 
 #### Single account
 Add the following to your config
@@ -167,6 +167,6 @@ friendly_name: Chromecast Devices
  ## License
  Apache 2.0
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExNjE2Mzk3MzQsLTcwMDE0NjI4LDE1MD
+eyJoaXN0b3J5IjpbLTEyNTM2MjM0OTIsLTcwMDE0NjI4LDE1MD
 A5ODc2MDgsLTIwMDM5MTgwOTBdfQ==
 -->
