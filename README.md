@@ -34,12 +34,13 @@ Spotcast uses two cookies to authenticate against Spotify in order to have acces
 
 To obtain the cookies:
 *  Using Chrome
->* Use a browser plugin like "Export cookies".
-or
 >* Open url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
 >* If no cookies appear go to [`https://open.spotify.com`](https://open.spotify.com) and sign-in
 >* Copy content from `sp_dc` and `sp_key` cookies
 * Using another browser
+>* Use a browser extension like "Export cookies".
+
+or
 >* Open a new __Incognito window__ at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
 >* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
 >* Login to Spotify.
@@ -169,7 +170,7 @@ friendly_name: Chromecast Devices
  ## License
  Apache 2.0
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTcyMDU4Njk0OCwxNjk3NjUzOTE4LC0xMj
-UzNjIzNDkyLC03MDAxNDYyOCwxNTAwOTg3NjA4LC0yMDAzOTE4
-MDkwXX0=
+eyJoaXN0b3J5IjpbNzc5MjU2MjkyLDE2OTc2NTM5MTgsLTEyNT
+M2MjM0OTIsLTcwMDE0NjI4LDE1MDA5ODc2MDgsLTIwMDM5MTgw
+OTBdfQ==
 -->
