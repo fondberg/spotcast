@@ -33,14 +33,23 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
 
 To obtain the cookies:
-* Open a new __Incognito window__ in Chrome (or another browser) at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
-* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
-* Login to Spotify.
-* Search/Filter for `get_access_token` in Developer tools under Network.
-* Under cookies for the request save the values for `sp_dc` and `sp_key`.
-* Close the window without logging out (Otherwise the cookies are made invalid).
+*  Using Chrome
+>* Open url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
+>* If no cookies appear go to [`https://open.spotify.com`](https://open.spotify.com) and sign-in
+>* Copy content from `sp_dc` and `sp_key` cookies
+* Using another browser
+>* Use a browser extension like "Export cookies" and look for `sp_dc` and `sp_key` cookies
 
-![Screenshots](images/cookies_1.jpg)
+or
+>* Open a new __Incognito window__ at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
+>* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
+>* Login to Spotify.
+>* Search/Filter for `get_access_token` in Developer tools under Network.
+>* Under cookies for the request save the values for `sp_dc` and `sp_key`.
+>* Close the window without logging out (Otherwise the cookies are made invalid).
+>
+>![Screenshots](images/cookies_1.jpg)
+* Alternatively you can use a browser plugin like "Export cookies".
 
 #### Single account
 Add the following to your config
