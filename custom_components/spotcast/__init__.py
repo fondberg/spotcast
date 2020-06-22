@@ -30,7 +30,13 @@ CONF_SP_KEY = 'sp_key'
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
 SCHEMA_PLAYLISTS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SPOTCAST_PLAYLISTS}
+    {
+        vol.Required("type"): WS_TYPE_SPOTCAST_PLAYLISTS,
+        vol.Required("playlist_type"): str,
+        vol.Optional("limit"): int,
+        vol.Optional("country_code"): str,
+        vol.Optional("locale"): str,
+    }
 )
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema({
@@ -67,34 +73,49 @@ def setup(hass, config):
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
+    spotifyToken = SpotifyToken(sp_dc, sp_key)
 
     @callback
     def websocket_handle_playlists(hass, connection, msg):
-        """Handle get playlist"""
+        """Handle to get playlist"""
         import spotipy
-        access_token, expires = get_spotify_token(sp_dc=sp_dc, sp_key=sp_key)
-        client = spotipy.Spotify(auth=access_token)
-        resp = client._get('views/made-for-x?content_limit=10&locale=en&platform=web&types=album%2Cplaylist%2Cartist%2Cshow%2Cstation', limit=10,
-                           offset=0)
+        playlistType = msg.get('playlist_type')
+        countryCode = msg.get('country_code')
+        locale = msg.get('locale', 'en')
+        limit = msg.get('limit', 10)
+
+        _LOGGER.debug('websocket msg: %s', msg)
+
+        client = spotipy.Spotify(auth=spotifyToken.access_token)
+        resp = {}
+
+        if playlistType == 'discover-weekly':
+            resp = client._get('views/made-for-x',
+                               content_limit=limit,
+                               locale=locale,
+                               platform='web',
+                               types='album,playlist,artist,show,station',
+                               limit=limit,
+                               offset=0
+                               )
+            resp = resp.get('content')
+        elif playlistType == 'featured':
+            resp = client.featured_playlists(
+                locale=locale,
+                country=countryCode,
+                timestamp=None,
+                limit=limit,
+                offset=0
+            )
+            resp = resp.get('playlists')
+        else:
+            resp = client.user_playlists('me', limit)
+
         connection.send_message(
             websocket_api.result_message(msg["id"], resp)
         )
 
-    def get_spotify_token(sp_dc, sp_key):
-        import spotify_token as st
-        data = st.start_session(sp_dc, sp_key)
-        access_token = data[0]
-        # token_expires = data[1]
-        expires = data[1] - int(time.time())
-        return access_token, expires
-
     def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
-        # import spotipy
-        # import http.client as http_client
-        # spotipy.trace = True
-        # spotipy.trace_out = True
-        # http_client.HTTPConnection.debuglevel = 1
-
         _LOGGER.debug('Version: %s, playing URI: %s on device-id: %s', _VERSION, uri, spotify_device_id)
         if uri.find('track') > 0:
             _LOGGER.debug('Playing track using uris= for uri: %s', uri)
@@ -163,7 +184,7 @@ def setup(hass, config):
         dc, key = get_account_credentials(call)
 
         # login as real browser to get powerful token
-        access_token, expires = get_spotify_token(sp_dc=dc, sp_key=key)
+        access_token, expires = spotifyToken.get_spotify_token(sp_dc=dc, sp_key=key)
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
@@ -198,6 +219,34 @@ def setup(hass, config):
                                  schema=SERVICE_START_COMMAND_SCHEMA)
 
     return True
+
+class SpotifyToken:
+    """Represents a spotify token."""
+    sp_dc = None
+    sp_key = None
+    _access_token = None
+    _token_expires = 0
+
+    def __init__(self, sp_dc, sp_key):
+        self.sp_dc = sp_dc
+        self.sp_key = sp_key
+
+    def ensure_token_valid(self):
+        if float(self._token_expires) > time.time():
+            return True
+        self.get_spotify_token()
+
+    @property
+    def access_token(self):
+        self.ensure_token_valid()
+        _LOGGER.debug('expires: %s time: %s', self._token_expires, time.time())
+        return self._access_token
+
+    def get_spotify_token(self):
+        import spotify_token as st
+        self._access_token, self._token_expires = st.start_session(self.sp_dc, self.sp_key)
+        expires = self._token_expires - int(time.time())
+        return self._access_token, expires
 
 
 class SpotifyCastDevice:
