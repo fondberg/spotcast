@@ -20,6 +20,8 @@ Release 2.9.0 transfer_playback removed! Now supports possibility to "Transfer P
 
 Release 3.0.0 New method for obtaining access token from Spotify. Please read [Configuration](#configuration) for new instruction.
 
+Release 3.2.0 New websocket methods to retrieve playlists
+
 ## Installation
 
 ### This component is easiest installed using [HACS](https://github.com/custom-components/hacs)
@@ -123,9 +125,9 @@ where
 #### start playback on a device with non default account
 ```
 {
-    "account":"niklas",
-	"device_name" : "Kök",
-	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+  "account":"niklas",
+  "device_name" : "Kök",
+  "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
 ```
 where
@@ -154,7 +156,18 @@ last_update: 2019-05-01T15:27:49.828553+02:00
 friendly_name: Chromecast Devices
 ```
 
-
+## Websocket API
+The components websocket api is used to retrieve playlists.
+Example usage:
+```
+const res = await this.props.hass.callWS({
+  type: 'spotcast/playlists',
+  playlist_type: 'featured', // one of 'user', 'discover-weekly' and 'featured'
+  country_code: 'SV', // Optional country code used by featured playlists
+  limit: 20 // Optional limit, default is 10
+});
+playlists = res.items;
+```
 
  ## Known issues
  It has been reported that updating the sensor takes more than 10s sometimes.
