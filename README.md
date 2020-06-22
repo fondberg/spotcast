@@ -20,7 +20,7 @@ Release 2.9.0 transfer_playback removed! Now supports possibility to "Transfer P
 
 Release 3.0.0 New method for obtaining access token from Spotify. Please read [Configuration](#configuration) for new instruction.
 
-Release 3.1.0 New websocket methods to retrieve playlists
+Release 3.2.0 New websocket methods to retrieve playlists
 
 ## Installation
 
