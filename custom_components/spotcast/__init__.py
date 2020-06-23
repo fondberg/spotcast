@@ -8,7 +8,7 @@ from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 import random
 import time
 
-_VERSION = "3.2.0"
+_VERSION = "3.2.1"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -79,7 +79,22 @@ def setup(hass, config):
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
-    spotifyToken = SpotifyToken(sp_dc, sp_key)
+    spotifyTokenInstances = {}
+
+    def get_token_instance(account = None):
+        """ Get token instance for account """
+        if account is None:
+            account = "default"
+            dc = sp_dc
+            key = sp_key
+        else:
+            dc = accounts.get(account).get(CONF_SP_DC)
+            key = accounts.get(account).get(CONF_SP_KEY)
+
+        _LOGGER.debug("setting up with  account %s", account)
+        if account not in spotifyTokenInstances:
+            spotifyTokenInstances[account] = SpotifyToken(dc, key)
+        return spotifyTokenInstances[account]
 
     @callback
     def websocket_handle_playlists(hass, connection, msg):
@@ -93,7 +108,7 @@ def setup(hass, config):
 
         _LOGGER.debug("websocket msg: %s", msg)
 
-        client = spotipy.Spotify(auth=spotifyToken.access_token)
+        client = spotipy.Spotify(auth=get_token_instance().access_token)
         resp = {}
 
         if playlistType == "discover-weekly":
@@ -159,16 +174,6 @@ def setup(hass, config):
                 time.sleep(2)
                 client.repeat(state=repeat, device_id=spotify_device_id)
 
-    def get_account_credentials(call):
-        """ Get credentials for account """
-        account = call.data.get(CONF_SPOTIFY_ACCOUNT)
-        dc = sp_dc
-        key = sp_key
-        if account is not None:
-            _LOGGER.debug("setting up with different account than default %s", account)
-            dc = accounts.get(account).get(CONF_SP_DC)
-            key = accounts.get(account).get(CONF_SP_KEY)
-        return dc, key
 
     def getSpotifyConnectDeviceId(client, device_name):
         devices_available = client.devices()
@@ -188,12 +193,10 @@ def setup(hass, config):
         spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
         force_playback = call.data.get(CONF_FORCE_PLAYBACK)
-
-        # Account
-        dc, key = get_account_credentials(call)
+        account = call.data.get(CONF_SPOTIFY_ACCOUNT)
 
         # login as real browser to get powerful token
-        access_token, expires = spotifyToken.get_spotify_token(sp_dc=dc, sp_key=key)
+        access_token, expires = get_token_instance(account).get_spotify_token()
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
@@ -256,7 +259,6 @@ class SpotifyToken:
 
     def get_spotify_token(self):
         import spotify_token as st
-
         self._access_token, self._token_expires = st.start_session(self.sp_dc, self.sp_key)
         expires = self._token_expires - int(time.time())
         return self._access_token, expires
@@ -330,16 +332,9 @@ class SpotifyCastDevice:
     def startSpotifyController(self, access_token, expires):
         from pychromecast.controllers.spotify import SpotifyController
 
-        # get the volume so we can remove the bloink
-        # volume = self.castDevice.status.volume_level
-        # self.castDevice.set_volume(0)
-
         sp = SpotifyController(access_token, expires)
         self.castDevice.register_handler(sp)
         sp.launch_app()
-
-        # reset the volume
-        # self.castDevice.set_volume(volume)
 
         if not sp.is_launched and not sp.credential_error:
             raise HomeAssistantError("Failed to launch spotify controller due to timeout")
