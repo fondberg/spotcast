@@ -1,14 +1,16 @@
+import asyncio
 import logging
 import voluptuous as vol
+import random
+import time
+from functools import wraps, partial
 from homeassistant.components import http, websocket_api
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
-import random
-import time
 
-_VERSION = "3.2.1"
+_VERSION = "3.2.2"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,6 +73,16 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+# Async wrap sync function
+def async_wrap(func):
+    @wraps(func)
+    async def run(*args, loop=None, executor=None, **kwargs):
+        if loop is None:
+            loop = asyncio.get_event_loop()
+        pfunc = partial(func, *args, **kwargs)
+        return await loop.run_in_executor(executor, pfunc)
+    return run
+
 
 def setup(hass, config):
     """Setup the Spotcast service."""
@@ -98,39 +110,44 @@ def setup(hass, config):
 
     @callback
     def websocket_handle_playlists(hass, connection, msg):
-        """Handle to get playlist"""
-        import spotipy
 
-        playlistType = msg.get("playlist_type")
-        countryCode = msg.get("country_code")
-        locale = msg.get("locale", "en")
-        limit = msg.get("limit", 10)
+        @async_wrap
+        def get_playlist():
+            """Handle to get playlist"""
+            import spotipy
 
-        _LOGGER.debug("websocket msg: %s", msg)
+            playlistType = msg.get("playlist_type")
+            countryCode = msg.get("country_code")
+            locale = msg.get("locale", "en")
+            limit = msg.get("limit", 10)
 
-        client = spotipy.Spotify(auth=get_token_instance().access_token)
-        resp = {}
+            _LOGGER.debug("websocket msg: %s", msg)
 
-        if playlistType == "discover-weekly":
-            resp = client._get(
-                "views/made-for-x",
-                content_limit=limit,
-                locale=locale,
-                platform="web",
-                types="album,playlist,artist,show,station",
-                limit=limit,
-                offset=0,
-            )
-            resp = resp.get("content")
-        elif playlistType == "featured":
-            resp = client.featured_playlists(
-                locale=locale, country=countryCode, timestamp=None, limit=limit, offset=0
-            )
-            resp = resp.get("playlists")
-        else:
-            resp = client.user_playlists("me", limit)
+            client = spotipy.Spotify(auth=get_token_instance().access_token)
+            resp = {}
 
-        connection.send_message(websocket_api.result_message(msg["id"], resp))
+            if playlistType == "discover-weekly":
+                resp = client._get(
+                    "views/made-for-x",
+                    content_limit=limit,
+                    locale=locale,
+                    platform="web",
+                    types="album,playlist,artist,show,station",
+                    limit=limit,
+                    offset=0,
+                )
+                resp = resp.get("content")
+            elif playlistType == "featured":
+                resp = client.featured_playlists(
+                    locale=locale, country=countryCode, timestamp=None, limit=limit, offset=0
+                )
+                resp = resp.get("playlists")
+            else:
+                resp = client.user_playlists("me", limit)
+
+            connection.send_message(websocket_api.result_message(msg["id"], resp))
+
+        hass.async_add_job(get_playlist())
 
     def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
         _LOGGER.debug(
@@ -217,7 +234,7 @@ def setup(hass, config):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
             if current_playback is not None:
-                _LOGGER.debug("Current_playback from spotipy: %s", current_playback)
+                _LOGGER.debug("Current_playback from spotify: %s", current_playback)
                 force_playback = True
             _LOGGER.debug("Force playback: %s", force_playback)
             client.transfer_playback(device_id=spotify_device_id, force_play=force_playback)
@@ -345,17 +362,14 @@ class SpotifyCastDevice:
 
     def getSpotifyDeviceId(self, client):
         # Look for device
-        spotify_device_id = None
         devices_available = client.devices()
         for device in devices_available["devices"]:
             if device["id"] == self.spotifyController.device:
-                spotify_device_id = device["id"]
-                break
+                return device["id"]
 
-        if not spotify_device_id:
-            _LOGGER.error(
-                'No device with id "{}" known by Spotify'.format(self.spotifyController.device)
-            )
-            _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
-            raise HomeAssistantError("Failed to get device id from Spotify")
-        return spotify_device_id
+
+        _LOGGER.error(
+            'No device with id "{}" known by Spotify'.format(self.spotifyController.device)
+        )
+        _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
+        raise HomeAssistantError("Failed to get device id from Spotify")
