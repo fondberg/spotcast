@@ -3,7 +3,7 @@ import json
 from datetime import timedelta
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import dt
-from homeassistant.const import STATE_OK, STATE_UNKNOWN, SENSOR_SCAN_INTERVAL_SECS
+from homeassistant.const import STATE_OK, STATE_UNKNOWN
 from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)

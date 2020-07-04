@@ -276,9 +276,12 @@ class SpotifyToken:
 
     def get_spotify_token(self):
         import spotify_token as st
-        self._access_token, self._token_expires = st.start_session(self.sp_dc, self.sp_key)
-        expires = self._token_expires - int(time.time())
-        return self._access_token, expires
+        try:
+            self._access_token, self._token_expires = st.start_session(self.sp_dc, self.sp_key)
+            expires = self._token_expires - int(time.time())
+            return self._access_token, expires
+        except:
+            raise HomeAssistantError("Could not get spotify token")
 
 
 class SpotifyCastDevice:
