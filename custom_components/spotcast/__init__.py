@@ -10,7 +10,7 @@ from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 
-_VERSION = "3.2.2"
+_VERSION = "3.2.3"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
