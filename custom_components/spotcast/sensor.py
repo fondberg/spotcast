@@ -1,11 +1,16 @@
 import logging
 import json
+from datetime import timedelta
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import dt
-from homeassistant.const import (STATE_OK, STATE_UNKNOWN)
+from homeassistant.const import STATE_OK, STATE_UNKNOWN, SENSOR_SCAN_INTERVAL_SECS
 from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
+SENSOR_SCAN_INTERVAL_SECS = 60
+SCAN_INTERVAL = timedelta(seconds=SENSOR_SCAN_INTERVAL_SECS)
+
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices([ChromecastDevicesSensor()])
