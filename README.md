@@ -3,7 +3,7 @@
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)
 
 # Spotcast
-Home Assistant custom component to start Spotify playback on an idle chromecast device. As of version 2.8.0 it also supports playback on Spotify Connect devices (thanks to @kleinc80) which means that you can target your automation for chromecast as well as connect devices.
+Home Assistant custom component to start Spotify playback on an idle chromecast devics or a Spotify Connect device (thanks to @kleinc80) which means that you can target your automation for chromecast as well as connect devices.
 
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromcast device and the Spotify playback after the initial start is done in their respective components.
 Becasue starting playback using the API requires more powerful token the username and password used for browser login is used.
@@ -11,16 +11,6 @@ Becasue starting playback using the API requires more powerful token the usernam
 Used by https://github.com/custom-cards/spotify-card.
 
 Community post: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232
-
-***Important***
-
-Release 2.8.0 now supports Spotify connect devices (thanks to @kleinc80). And no, Sonos would still require extra integration, send one to me and I'll integrate it.
-
-Release 2.9.0 transfer_playback removed! Now supports possibility to "Transfer Playback" even when there is nothing currently playing.
-
-Release 3.0.0 New method for obtaining access token from Spotify. Please read [Configuration](#configuration) for new instruction.
-
-Release 3.2.0 New websocket methods to retrieve playlists
 
 ## Installation
 
@@ -78,6 +68,14 @@ spotcast:
 ```
 
 ## Call the service
+
+### start playback on spotify connect device
+```
+{
+	"spotify_device_id" : "Kök",
+	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
+	"random_song": true
+}
 
 #### start playback on a device with default account
 ```
@@ -157,16 +155,30 @@ friendly_name: Chromecast Devices
 ```
 
 ## Websocket API
-The components websocket api is used to retrieve playlists.
+The components websocket api.
 Example usage:
+
 ```
+// Retrieve playlists
 const res = await this.props.hass.callWS({
   type: 'spotcast/playlists',
   playlist_type: 'featured', // one of 'user', 'discover-weekly' and 'featured'
   country_code: 'SV', // Optional country code used by featured playlists
-  limit: 20 // Optional limit, default is 10
+  limit: 20, // Optional limit, default is 10
+  account: 'ming' // optional account name
 });
-playlists = res.items;
+
+// Retrieve devices
+const res = await this.props.hass.callWS({
+  type: 'spotcast/devices',
+  account: 'ming' // optional account name
+});
+
+// Retrieve player
+const res = await this.props.hass.callWS({
+  type: 'spotcast/player',
+  account: 'ming' // optional account name
+});
 ```
 
  ## Known issues
