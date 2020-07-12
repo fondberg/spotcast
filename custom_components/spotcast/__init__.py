@@ -11,7 +11,7 @@ from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 
-__VERSION__ = "3.3.1"
+__VERSION__ = "3.3.2"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +56,11 @@ SCHEMA_WS_PLAYER = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
 WS_TYPE_SPOTCAST_ACCOUNTS = "spotcast/accounts"
 SCHEMA_WS_ACCOUNTS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
     {vol.Required("type"): WS_TYPE_SPOTCAST_ACCOUNTS,}
+)
+
+WS_TYPE_SPOTCAST_CASTDEVICES = "spotcast/castdevices"
+SCHEMA_WS_CASTDEVICES = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
+    {vol.Required("type"): WS_TYPE_SPOTCAST_CASTDEVICES,}
 )
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema(
@@ -159,7 +164,7 @@ def setup(hass, config):
                 )
                 resp = resp.get("playlists")
             else:
-                resp = client.user_playlists("me", limit)
+                resp = client.current_user_playlists(limit=limit)
 
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
@@ -197,6 +202,25 @@ def setup(hass, config):
         _LOGGER.debug("websocket_handle_accounts msg: %s", msg)
         resp = list(accounts.keys()) if accounts is not None else []
         resp.append("default")
+        connection.send_message(websocket_api.result_message(msg["id"], resp))
+
+    @callback
+    def websocket_handle_castdevices(hass, connection, msg):
+        """Handle to get cast devices for debug purposes"""
+        _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
+        known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+
+        resp = [
+            {
+                "host": str(known_devices[k].host),
+                "port": known_devices[k].port,
+                "uuid": known_devices[k].uuid,
+                "model_name": known_devices[k].model_name,
+                "friendly_name": known_devices[k].friendly_name,
+            }
+            for k in known_devices
+        ]
+
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
     def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
@@ -301,6 +325,10 @@ def setup(hass, config):
 
     hass.components.websocket_api.async_register_command(
         WS_TYPE_SPOTCAST_ACCOUNTS, websocket_handle_accounts, SCHEMA_WS_ACCOUNTS
+    )
+
+    hass.components.websocket_api.async_register_command(
+        WS_TYPE_SPOTCAST_CASTDEVICES, websocket_handle_castdevices, SCHEMA_WS_CASTDEVICES
     )
 
     hass.services.register(DOMAIN, "start", start_casting, schema=SERVICE_START_COMMAND_SCHEMA)
