@@ -11,7 +11,7 @@ from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 
-__VERSION__ = "3.3.3"
+__VERSION__ = "3.3.4"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -209,17 +209,30 @@ def setup(hass, config):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
         known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
-        _LOGGER.debug("websocket_handle_castdevices -> known_devices: %s", known_devices)
-        resp = [
-            {
-                "host": str(known_devices[k].host),
-                "port": known_devices[k].port,
-                "uuid": known_devices[k].uuid,
-                "model_name": known_devices[k].model_name,
-                "friendly_name": known_devices[k].friendly_name,
-            }
-            for k in known_devices
-        ]
+        if type(known_devices) == set:
+            # HA 0.112
+            resp = [
+                {
+                    "host": str(k.host),
+                    "port": k.port,
+                    "uuid": k.uuid,
+                    "model_name": k.model_name,
+                    "friendly_name": k.friendly_name,
+                }
+                for k in known_devices
+            ]
+        else:
+            # HA > 0.112
+            resp = [
+                {
+                    "host": str(known_devices[k].host),
+                    "port": known_devices[k].port,
+                    "uuid": known_devices[k].uuid,
+                    "model_name": known_devices[k].model_name,
+                    "friendly_name": known_devices[k].friendly_name,
+                }
+                for k in known_devices
+            ]
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
