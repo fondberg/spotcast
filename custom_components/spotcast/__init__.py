@@ -11,7 +11,7 @@ from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 
-__VERSION__ = "3.3.2"
+__VERSION__ = "3.3.3"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -209,7 +209,7 @@ def setup(hass, config):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
         known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
-
+        _LOGGER.debug("websocket_handle_castdevices -> known_devices: %s", known_devices)
         resp = [
             {
                 "host": str(known_devices[k].host),
