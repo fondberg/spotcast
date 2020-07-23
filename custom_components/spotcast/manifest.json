@@ -5,11 +5,10 @@
   "requirements": [
     "spotify_token==1.0.0"
   ],
-  "homeassistant": "0.111.0",
+  "homeassistant": "0.113.0",
   "dependencies": [
   ],
   "codeowners": [
-    "@fondberg",
-    "@kleinc80"
+    "@fondberg"
   ]
 }
