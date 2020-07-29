@@ -76,7 +76,7 @@ spotcast:
 	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
 	"random_song": true
 }
-
+```
 #### start playback on a device with default account
 ```
 {
