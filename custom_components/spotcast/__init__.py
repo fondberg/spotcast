@@ -11,7 +11,7 @@ from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 
-__VERSION__ = "3.3.5"
+__VERSION__ = "3.4.0"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -209,30 +209,16 @@ def setup(hass, config):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
         known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
-        if type(known_devices) == set:
-            # HA 0.112
-            resp = [
-                {
-                    "host": str(k.host),
-                    "port": k.port,
-                    "uuid": k.uuid,
-                    "model_name": k.model_name,
-                    "friendly_name": k.friendly_name,
-                }
-                for k in known_devices
-            ]
-        else:
-            # HA > 0.112
-            resp = [
-                {
-                    "host": str(known_devices[k].host),
-                    "port": known_devices[k].port,
-                    "uuid": known_devices[k].uuid,
-                    "model_name": known_devices[k].model_name,
-                    "friendly_name": known_devices[k].friendly_name,
-                }
-                for k in known_devices
-            ]
+        resp = [
+            {
+                "host": str(known_devices[k].host),
+                "port": known_devices[k].port,
+                "uuid": known_devices[k].uuid,
+                "model_name": known_devices[k].model_name,
+                "friendly_name": known_devices[k].friendly_name,
+            }
+            for k in known_devices
+        ]
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
@@ -449,16 +435,9 @@ class SpotifyCastDevice:
                 )
             )
         _LOGGER.error(
-            "Could not find device %s from hass.data, falling back to pychromecast scan",
+            "Could not find device %s from hass.data",
             device_name,
         )
-
-        # Discover devices manually
-        chromecasts = pychromecast.get_chromecasts()
-        for _cast in chromecasts:
-            if _cast.name == device_name:
-                _LOGGER.debug("Fallback, found cast device: %s", _cast)
-                return _cast
 
         raise HomeAssistantError("Could not find device with name {}".format(device_name))
 

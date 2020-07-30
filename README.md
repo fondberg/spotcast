@@ -135,6 +135,7 @@ where
 
 ## Use the sensor
 The sensor has the discovered chromecasts as both json and since v.2.1 as an array of objects.
+Since v3.4.0 it does not do its own discovery but relies on data from core cast.
 Add the following to the sensor section of the configuration:
 ```
 sensor:
@@ -181,8 +182,6 @@ const res = await this.props.hass.callWS({
 });
 ```
 
- ## Known issues
- It has been reported that updating the sensor takes more than 10s sometimes.
 
  ## Donate
  If you like what I do and want to support me then I love coffee
