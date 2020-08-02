@@ -43,11 +43,11 @@ class ChromecastDevicesSensor(Entity):
         return self._attributes
 
     def update(self):
-        _LOGGER.info('Getting chromecast devices')
+        _LOGGER.debug('Getting chromecast devices')
 
         known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
 
-        _LOGGER.info('devices %s', known_devices)
+        _LOGGER.debug('devices %s', known_devices)
 
         chromecasts = [
             {
