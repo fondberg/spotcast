@@ -10,6 +10,7 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
+from homeassistant.components.cast.helpers import ChromeCastZeroconf
 
 __VERSION__ = "3.4.0"
 DOMAIN = "spotcast"
@@ -422,9 +423,23 @@ class SpotifyCastDevice:
                 None,
             )
 
-        _LOGGER.debug("cast info: %s", cast_info)
+        _LOGGER.info("cast info: %s", cast_info)
 
         if cast_info:
+            if cast_info.model_name == "Google Cast Group":
+                chromecasts, browser  = pychromecast.get_listed_chromecasts(friendly_names=[cast_info.friendly_name], zeroconf_instance=ChromeCastZeroconf.get_zeroconf())
+                cast = None
+                for _cast in chromecasts:
+                   _LOGGER.info("_cast {}".format(_cast))
+                   if _cast.device.friendly_name == cast_info.friendly_name:
+                      cast = _cast
+                      break
+                pychromecast.stop_discovery(browser)
+                if not cast:
+                   _LOGGER.info('No chromecast with uuuid "{}" discovered'.format(cast_info.uuid))
+                else:
+                   _LOGGER.info("cast {}".format(cast))
+                   return cast
             return pychromecast._get_chromecast_from_host(
                 (
                     cast_info.host,
