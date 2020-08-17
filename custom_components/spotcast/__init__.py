@@ -423,32 +423,19 @@ class SpotifyCastDevice:
                 None,
             )
 
-        _LOGGER.info("cast info: %s", cast_info)
+        _LOGGER.debug("cast info: %s", cast_info)
 
         if cast_info:
-            if cast_info.model_name == "Google Cast Group":
-                chromecasts, browser  = pychromecast.get_listed_chromecasts(friendly_names=[cast_info.friendly_name], zeroconf_instance=ChromeCastZeroconf.get_zeroconf())
-                cast = None
-                for _cast in chromecasts:
-                   _LOGGER.info("_cast {}".format(_cast))
-                   if _cast.device.friendly_name == cast_info.friendly_name:
-                      cast = _cast
-                      break
-                pychromecast.stop_discovery(browser)
-                if not cast:
-                   _LOGGER.info('No chromecast with uuuid "{}" discovered'.format(cast_info.uuid))
-                else:
-                   _LOGGER.info("cast {}".format(cast))
-                   return cast
-            return pychromecast._get_chromecast_from_host(
-                (
-                    cast_info.host,
-                    cast_info.port,
-                    cast_info.uuid,
-                    cast_info.model_name,
-                    cast_info.friendly_name,
-                )
-            )
+            return pychromecast.get_chromecast_from_service(
+                  (
+                     cast_info.services,
+                     cast_info.uuid,
+                     cast_info.model_name,
+                     cast_info.friendly_name,
+                     None,
+                     None,
+                 ),
+                 ChromeCastZeroconf.get_zeroconf()) 
         _LOGGER.error(
             "Could not find device %s from hass.data",
             device_name,
