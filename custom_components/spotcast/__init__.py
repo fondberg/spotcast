@@ -12,7 +12,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
 
-__VERSION__ = "3.4.0"
+__VERSION__ = "3.4.1"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
