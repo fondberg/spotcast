@@ -10,6 +10,7 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
+from homeassistant.components.cast.helpers import ChromeCastZeroconf
 
 __VERSION__ = "3.4.0"
 DOMAIN = "spotcast"
@@ -425,15 +426,16 @@ class SpotifyCastDevice:
         _LOGGER.debug("cast info: %s", cast_info)
 
         if cast_info:
-            return pychromecast._get_chromecast_from_host(
-                (
-                    cast_info.host,
-                    cast_info.port,
-                    cast_info.uuid,
-                    cast_info.model_name,
-                    cast_info.friendly_name,
-                )
-            )
+            return pychromecast.get_chromecast_from_service(
+                  (
+                     cast_info.services,
+                     cast_info.uuid,
+                     cast_info.model_name,
+                     cast_info.friendly_name,
+                     None,
+                     None,
+                 ),
+                 ChromeCastZeroconf.get_zeroconf()) 
         _LOGGER.error(
             "Could not find device %s from hass.data",
             device_name,
