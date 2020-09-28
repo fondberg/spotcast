@@ -3,6 +3,7 @@ import logging
 import voluptuous as vol
 import random
 import time
+from datetime import datetime
 import spotipy
 from functools import wraps, partial
 from homeassistant.components import http, websocket_api
@@ -161,7 +162,7 @@ def setup(hass, config):
                 resp = resp.get("content")
             elif playlistType == "featured":
                 resp = client.featured_playlists(
-                    locale=locale, country=countryCode, timestamp=None, limit=limit, offset=0
+                    locale=locale, country=countryCode, timestamp=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), limit=limit, offset=0
                 )
                 resp = resp.get("playlists")
             else:
