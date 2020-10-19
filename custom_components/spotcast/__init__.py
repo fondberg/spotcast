@@ -255,16 +255,6 @@ def setup(hass, config):
                 random_song,
             )
             client.start_playback(**kwargs)
-        if shuffle or repeat:
-            time.sleep(3)
-            if shuffle:
-                _LOGGER.debug("Turning shuffle on")
-                time.sleep(2)
-                client.shuffle(state=shuffle, device_id=spotify_device_id)
-            if repeat:
-                _LOGGER.debug("Turning repeat on")
-                time.sleep(2)
-                client.repeat(state=repeat, device_id=spotify_device_id)
 
     def getSpotifyConnectDeviceId(client, device_name):
         devices_available = client.devices()
@@ -312,6 +302,16 @@ def setup(hass, config):
             client.transfer_playback(device_id=spotify_device_id, force_play=force_playback)
         else:
             play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
+        if shuffle or repeat:
+            time.sleep(3)
+            if shuffle:
+                _LOGGER.debug("Turning shuffle on")
+                time.sleep(2)
+                client.shuffle(state=shuffle, device_id=spotify_device_id)
+            if repeat:
+                _LOGGER.debug("Turning repeat on")
+                time.sleep(2)
+                client.repeat(state=repeat, device_id=spotify_device_id)
 
     # Register websocket and service
     hass.components.websocket_api.async_register_command(
