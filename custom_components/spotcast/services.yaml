@@ -31,6 +31,6 @@ start:
     offset:
       description: "Set offset mode for playback. 0 is the first song."
       example: 1
-    start_volume_pct:
+    start_volume:
       description: "Set the volume for playback in percentage."
       example: 50

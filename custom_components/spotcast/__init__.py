@@ -13,7 +13,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
 
-__VERSION__ = "3.4.4"
+__VERSION__ = "3.4.5"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ CONF_SHUFFLE = "shuffle"
 CONF_OFFSET = "offset"
 CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
-CONF_START_VOL_PCT = "start_volume_pct"
+CONF_START_VOL = "start_volume"
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
@@ -78,7 +78,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_REPEAT, default="off"): cv.string,
         vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
         vol.Optional(CONF_OFFSET, default=0): cv.string,
-        vol.Optional(CONF_START_VOL_PCT, default=101): cv.positive_int,
+        vol.Optional(CONF_START_VOL, default=101): cv.positive_int,
     }
 )
 
@@ -271,7 +271,7 @@ def setup(hass, config):
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT)
         shuffle = call.data.get(CONF_SHUFFLE)
-        start_volume_pct = call.data.get(CONF_START_VOL_PCT)
+        start_volume = call.data.get(CONF_START_VOL)
         spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
         force_playback = call.data.get(CONF_FORCE_PLAYBACK)
@@ -305,18 +305,18 @@ def setup(hass, config):
             client.transfer_playback(device_id=spotify_device_id, force_play=force_playback)
         else:
             play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
-        if shuffle or repeat or start_volume_pct <= 100:
-            if start_volume_pct <= 100:
-                _LOGGER.debug("Setting volume to %d", start_volume_pct)
+        if shuffle or repeat or start_volume <= 100:
+            if start_volume <= 100:
+                _LOGGER.debug("Setting volume to %d", start_volume)
                 time.sleep(2)
-                client.volume(volume_percent=start_volume_pct, device_id=spotify_device_id)
+                client.volume(volume_percent=start_volume, device_id=spotify_device_id)
             if shuffle:
                 _LOGGER.debug("Turning shuffle on")
-                time.sleep(5)
+                time.sleep(3)
                 client.shuffle(state=shuffle, device_id=spotify_device_id)
             if repeat:
                 _LOGGER.debug("Turning repeat on")
-                time.sleep(5)
+                time.sleep(3)
                 client.repeat(state=repeat, device_id=spotify_device_id)
 
     # Register websocket and service
