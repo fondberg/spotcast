@@ -8,6 +8,9 @@
   "homeassistant": "0.113.0",
   "dependencies": [
   ],
+  "after_dependencies": [
+     "cast"
+  ],
   "codeowners": [
     "@fondberg"
   ]
