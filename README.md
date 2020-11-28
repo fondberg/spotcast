@@ -68,6 +68,7 @@ spotcast:
 ```
 
 ## Call the service
+The spotcast custom component creates a service called 'spotcast.start' in Home Assistant.
 
 ### start playback on spotify connect device
 ```
@@ -99,6 +100,28 @@ optionally you can specify the `entity_id` of an existing home assistant chromec
 	"entity_id" : "media_player.vardagsrum",
 	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
+```
+
+### Automation example
+```
+- id: 'jul_spotify_spela_julmusik'
+  alias: Jul spela julmusik
+  initial_state: 'on'
+  trigger:
+  - event_data:
+      id: remote_fonsterlampor
+      event: 5002
+    platform: event
+    event_type: deconz_event
+  condition: []
+  action:
+  - data:
+      uri: 'spotify:playlist:56Bor5fbMJlJV7oryb2p3k'
+      random_song: true
+      shuffle: true
+      start_volume: 50
+      entity_id: media_player.gh_kok
+    service: spotcast.start
 ```
 
 ### transfer current playback for the account
