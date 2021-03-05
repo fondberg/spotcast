@@ -6,6 +6,7 @@
     "spotify_token==1.0.0"
   ],
   "homeassistant": "0.113.0",
+  "version": "3.4.6",
   "dependencies": [
   ],
   "after_dependencies": [
