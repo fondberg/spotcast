@@ -11,8 +11,7 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
-
-__VERSION__ = "3.4.7"
+__VERSION__ = "3.5.0"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -113,12 +112,10 @@ def async_wrap(func):
 def setup(hass, config):
     """Setup the Spotcast service."""
     conf = config[DOMAIN]
-
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
     spotifyTokenInstances = {}
-
     def get_token_instance(account=None):
         """ Get token instance for account """
         if account is None or account == "default":
@@ -421,38 +418,17 @@ class SpotifyCastDevice:
 
     def getChromecastDevice(self, device_name):
         import pychromecast
-
-        # Get cast from discovered devices of cast platform
-        #known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
-        known_devices, browser = pychromecast.get_chromecasts()
+        known_devices, browser = pychromecast.get_listed_chromecasts([device_name],zeroconf_instance=ChromeCastZeroconf.get_zeroconf())
+        browser.stop_discovery()
         _LOGGER.debug("Chromecast devices: %s", known_devices)
-        pychromecast.discovery.stop_discovery(browser)
         try:
-            # HA below 0.113
-            cast_info = next((x for x in known_devices if x.friendly_name == device_name), None)
-        except:
-            cast_info = next(
-                (
-                    x
-                    for x in known_devices
-                    if x.name == device_name
-                ),
-                None,
-            )
-
-        _LOGGER.debug("cast info: %s", cast_info)
+            cast_info = known_devices[0]
+        except IndexError:
+            cast_info = None
+        _LOGGER.info("cast info: %s", cast_info)
 
         if cast_info:
-            return pychromecast.get_chromecast_from_service(
-                  (
-                     cast_info._services,
-                     cast_info.uuid,
-                     cast_info.model_name,
-                     cast_info.name,
-                     None,
-                     None,
-                 ),
-                 ChromeCastZeroconf.get_zeroconf())
+            return cast_info
         _LOGGER.error(
             "Could not find device %s from hass.data",
             device_name,
