@@ -10,7 +10,6 @@ from homeassistant.components import http, websocket_api
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
 
 __VERSION__ = "3.4.7"
@@ -230,7 +229,17 @@ def setup(hass, config):
         _LOGGER.debug(
             "Version: %s, playing URI: %s on device-id: %s", __VERSION__, uri, spotify_device_id
         )
-        if uri.find("track") > 0:
+        if uri.find("show") > 0:
+            show_episodes_info = client.show_episodes(uri)
+            if show_episodes_info and len(show_episodes_info["items"]) > 0:
+                episode_uri = show_episodes_info["items"][0]["external_urls"]["spotify"]
+                _LOGGER.debug("Playing episode using uris (latest podcast playlist)= for uri: %s", episode_uri)
+                client.start_playback(device_id=spotify_device_id, uris=[episode_uri])         
+        elif uri.find("episode") > 0:
+            _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
+            client.start_playback(device_id=spotify_device_id, uris=[uri])
+
+        elif uri.find("track") > 0:
             _LOGGER.debug("Playing track using uris= for uri: %s", uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
@@ -414,18 +423,19 @@ class SpotifyCastDevice:
         import pychromecast
 
         # Get cast from discovered devices of cast platform
-        known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
-
+        #known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+        known_devices, browser = pychromecast.get_chromecasts()
         _LOGGER.debug("Chromecast devices: %s", known_devices)
+        pychromecast.discovery.stop_discovery(browser)
         try:
             # HA below 0.113
             cast_info = next((x for x in known_devices if x.friendly_name == device_name), None)
         except:
             cast_info = next(
                 (
-                    known_devices[x]
+                    x
                     for x in known_devices
-                    if known_devices[x].friendly_name == device_name
+                    if x.name == device_name
                 ),
                 None,
             )
@@ -435,10 +445,10 @@ class SpotifyCastDevice:
         if cast_info:
             return pychromecast.get_chromecast_from_service(
                   (
-                     cast_info.services,
+                     cast_info._services,
                      cast_info.uuid,
                      cast_info.model_name,
-                     cast_info.friendly_name,
+                     cast_info.name,
                      None,
                      None,
                  ),
@@ -470,7 +480,8 @@ class SpotifyCastDevice:
         for device in devices_available["devices"]:
             if device["id"] == self.spotifyController.device:
                 return device["id"]
-
+        if not devices_available["devices"] and self.spotifyController.device:
+            return self.spotifyController.device
         _LOGGER.error(
             'No device with id "{}" known by Spotify'.format(self.spotifyController.device)
         )
