@@ -14,7 +14,7 @@ from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from homeassistant.components.spotify.media_player import KNOWN_SPOTIFY_DEVICES
 
-__VERSION__ = "3.5.0"
+__VERSION__ = "3.5.1"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
