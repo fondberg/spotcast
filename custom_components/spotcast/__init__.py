@@ -284,8 +284,7 @@ def setup(hass, config):
 
     def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
         _LOGGER.debug(
-            "Version: %s, playing URI: %s on device-id: %s",
-            __VERSION__,
+            "Playing URI: %s on device-id: %s",
             uri,
             spotify_device_id,
         )
