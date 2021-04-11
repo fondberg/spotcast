@@ -25,7 +25,7 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
 
 To obtain the cookies:
-*  Using Chrome
+*  Using Chrome or Edge
 >* Open url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
 >* If no cookies appear go to [`https://open.spotify.com`](https://open.spotify.com) and sign-in
 >* Copy content from `sp_dc` and `sp_key` cookies
