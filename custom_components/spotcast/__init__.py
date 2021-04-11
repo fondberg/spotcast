@@ -10,10 +10,12 @@ from homeassistant.components import http, websocket_api
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.cast.media_player import KNOWN_CHROMECAST_INFO_KEY
+from homeassistant.components.cast.media_player import CastDevice
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
+from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
+from homeassistant.helpers import entity_platform
 
-__VERSION__ = "3.4.7"
+__VERSION__ = "3.5.2"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,22 +50,32 @@ SCHEMA_PLAYLISTS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
 
 WS_TYPE_SPOTCAST_DEVICES = "spotcast/devices"
 SCHEMA_WS_DEVICES = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SPOTCAST_DEVICES, vol.Optional("account"): str,}
+    {
+        vol.Required("type"): WS_TYPE_SPOTCAST_DEVICES,
+        vol.Optional("account"): str,
+    }
 )
 
 WS_TYPE_SPOTCAST_PLAYER = "spotcast/player"
 SCHEMA_WS_PLAYER = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SPOTCAST_PLAYER, vol.Optional("account"): str,}
+    {
+        vol.Required("type"): WS_TYPE_SPOTCAST_PLAYER,
+        vol.Optional("account"): str,
+    }
 )
 
 WS_TYPE_SPOTCAST_ACCOUNTS = "spotcast/accounts"
 SCHEMA_WS_ACCOUNTS = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SPOTCAST_ACCOUNTS,}
+    {
+        vol.Required("type"): WS_TYPE_SPOTCAST_ACCOUNTS,
+    }
 )
 
 WS_TYPE_SPOTCAST_CASTDEVICES = "spotcast/castdevices"
 SCHEMA_WS_CASTDEVICES = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {vol.Required("type"): WS_TYPE_SPOTCAST_CASTDEVICES,}
+    {
+        vol.Required("type"): WS_TYPE_SPOTCAST_CASTDEVICES,
+    }
 )
 
 SERVICE_START_COMMAND_SCHEMA = vol.Schema(
@@ -83,7 +95,10 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
 )
 
 ACCOUNTS_SCHEMA = vol.Schema(
-    {vol.Required(CONF_SP_DC): cv.string, vol.Required(CONF_SP_KEY): cv.string,}
+    {
+        vol.Required(CONF_SP_DC): cv.string,
+        vol.Required(CONF_SP_KEY): cv.string,
+    }
 )
 
 CONFIG_SCHEMA = vol.Schema(
@@ -98,6 +113,45 @@ CONFIG_SCHEMA = vol.Schema(
     },
     extra=vol.ALLOW_EXTRA,
 )
+
+
+def get_spotify_devices(hass):
+    platforms = entity_platform.async_get_platforms(hass, "spotify")
+    spotify_media_player = None
+    for platform in platforms:
+        if platform.domain != "media_player":
+            continue
+
+        for entity in platform.entities.values():
+            if isinstance(entity, SpotifyMediaPlayer):
+                _LOGGER.debug(
+                    f"get_spotify_devices: {entity.entity_id}: {entity.name} HH: %s",
+                    entity._devices,
+                )
+                spotify_media_player = entity
+                break
+    if spotify_media_player:
+        # try later to see if it possible to retrieve the devices instead of relying on the caches one which
+        # might be 30 seconds old from spotify_media_player
+        # return spotify_media_player._spotify.devices()
+        return spotify_media_player._devices
+
+
+def get_cast_devices(hass):
+    platforms = entity_platform.async_get_platforms(hass, "cast")
+    cast_infos = []
+    for platform in platforms:
+        if platform.domain != "media_player":
+            continue
+        for entity in platform.entities.values():
+            if isinstance(entity, CastDevice):
+                _LOGGER.debug(
+                    f"get_cast_devices: {entity.entity_id}: {entity.name} cast info: %s",
+                    entity._cast_info,
+                )
+                cast_infos.append(entity._cast_info)
+    return cast_infos
+
 
 # Async wrap sync function
 def async_wrap(func):
@@ -164,7 +218,11 @@ def setup(hass, config):
                 resp = resp.get("content")
             elif playlistType == "featured":
                 resp = client.featured_playlists(
-                    locale=locale, country=countryCode, timestamp=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), limit=limit, offset=0
+                    locale=locale,
+                    country=countryCode,
+                    timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                    limit=limit,
+                    offset=0,
                 )
                 resp = resp.get("playlists")
             else:
@@ -178,11 +236,9 @@ def setup(hass, config):
     def websocket_handle_devices(hass, connection, msg):
         @async_wrap
         def get_devices():
-            """Handle to get devices"""
-            account = msg.get("account", None)
-            _LOGGER.debug("websocket_handle_devices msg: %s", msg)
-            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
-            resp = client.devices()
+            """Handle to get devices. Only for default account"""
+            devices = get_spotify_devices(hass)
+            resp = {"devices": devices}
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_devices())
@@ -212,30 +268,47 @@ def setup(hass, config):
     def websocket_handle_castdevices(hass, connection, msg):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
-        known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+
+        known_devices = get_cast_devices(hass)
+        _LOGGER.debug("%s", known_devices)
         resp = [
             {
-                "host": str(known_devices[k].host),
-                "port": known_devices[k].port,
-                "uuid": known_devices[k].uuid,
-                "model_name": known_devices[k].model_name,
-                "friendly_name": known_devices[k].friendly_name,
+                "uuid": cast_info.uuid,
+                "model_name": cast_info.model_name,
+                "friendly_name": cast_info.friendly_name,
             }
-            for k in known_devices
+            for cast_info in known_devices
         ]
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
     def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
         _LOGGER.debug(
-            "Version: %s, playing URI: %s on device-id: %s", __VERSION__, uri, spotify_device_id
+            "Playing URI: %s on device-id: %s",
+            uri,
+            spotify_device_id,
         )
-        if uri.find("track") > 0:
+        if uri.find("show") > 0:
+            show_episodes_info = client.show_episodes(uri)
+            if show_episodes_info and len(show_episodes_info["items"]) > 0:
+                episode_uri = show_episodes_info["items"][0]["external_urls"]["spotify"]
+                _LOGGER.debug(
+                    "Playing episode using uris (latest podcast playlist)= for uri: %s",
+                    episode_uri,
+                )
+                client.start_playback(device_id=spotify_device_id, uris=[episode_uri])
+        elif uri.find("episode") > 0:
+            _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
+            client.start_playback(device_id=spotify_device_id, uris=[uri])
+
+        elif uri.find("track") > 0:
             _LOGGER.debug("Playing track using uris= for uri: %s", uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
             if uri == "random":
-                _LOGGER.debug("Cool, you found the easter egg with playing a random playlist")
+                _LOGGER.debug(
+                    "Cool, you found the easter egg with playing a random playlist"
+                )
                 playlists = client.user_playlists("me", 50)
                 no_playlists = len(playlists["items"])
                 uri = playlists["items"][random.randint(0, no_playlists - 1)]["uri"]
@@ -286,13 +359,21 @@ def setup(hass, config):
         # first, rely on spotify id given in config
         if not spotify_device_id:
             # if not present, check if there's a spotify connect device with that name
-            spotify_device_id = getSpotifyConnectDeviceId(client, call.data.get(CONF_DEVICE_NAME))
+            spotify_device_id = getSpotifyConnectDeviceId(
+                client, call.data.get(CONF_DEVICE_NAME)
+            )
         if not spotify_device_id:
             # if still no id available, check cast devices and launch the app on chromecast
+            devices = get_spotify_devices(hass)
+            devices_available = {"devices": devices}
             spotify_cast_device = SpotifyCastDevice(
-                hass, call.data.get(CONF_DEVICE_NAME), call.data.get(CONF_ENTITY_ID)
+                hass,
+                call.data.get(CONF_DEVICE_NAME),
+                call.data.get(CONF_ENTITY_ID),
+                devices_available,
             )
             spotify_cast_device.startSpotifyController(access_token, expires)
+            time.sleep(1)
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
 
         if uri is None or uri.strip() == "":
@@ -302,7 +383,9 @@ def setup(hass, config):
                 _LOGGER.debug("Current_playback from spotify: %s", current_playback)
                 force_playback = True
             _LOGGER.debug("Force playback: %s", force_playback)
-            client.transfer_playback(device_id=spotify_device_id, force_play=force_playback)
+            client.transfer_playback(
+                device_id=spotify_device_id, force_play=force_playback
+            )
         else:
             play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
         if shuffle or repeat or start_volume <= 100:
@@ -335,10 +418,14 @@ def setup(hass, config):
     )
 
     hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_CASTDEVICES, websocket_handle_castdevices, SCHEMA_WS_CASTDEVICES
+        WS_TYPE_SPOTCAST_CASTDEVICES,
+        websocket_handle_castdevices,
+        SCHEMA_WS_CASTDEVICES,
     )
 
-    hass.services.register(DOMAIN, "start", start_casting, schema=SERVICE_START_COMMAND_SCHEMA)
+    hass.services.register(
+        DOMAIN, "start", start_casting, schema=SERVICE_START_COMMAND_SCHEMA
+    )
 
     return True
 
@@ -370,7 +457,9 @@ class SpotifyToken:
         import spotify_token as st
 
         try:
-            self._access_token, self._token_expires = st.start_session(self.sp_dc, self.sp_key)
+            self._access_token, self._token_expires = st.start_session(
+                self.sp_dc, self.sp_key
+            )
             expires = self._token_expires - int(time.time())
             return self._access_token, expires
         except:
@@ -383,17 +472,21 @@ class SpotifyCastDevice:
     hass = None
     castDevice = None
     spotifyController = None
+    devices_available = []
 
-    def __init__(self, hass, call_device_name, call_entity_id):
+    def __init__(self, hass, call_device_name, call_entity_id, devices_available):
         """Initialize a spotify cast device."""
         self.hass = hass
+        self.devices_available = devices_available
 
         # Get device name from either device_name or entity_id
         device_name = None
         if call_device_name is None:
             entity_id = call_entity_id
             if entity_id is None:
-                raise HomeAssistantError("Either entity_id or device_name must be specified")
+                raise HomeAssistantError(
+                    "Either entity_id or device_name must be specified"
+                )
             entity_states = hass.states.get(entity_id)
             if entity_states is None:
                 _LOGGER.error("Could not find entity_id: %s", entity_id)
@@ -414,41 +507,33 @@ class SpotifyCastDevice:
         import pychromecast
 
         # Get cast from discovered devices of cast platform
-        known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+        known_devices = get_cast_devices(self.hass)
 
         _LOGGER.debug("Chromecast devices: %s", known_devices)
-        try:
-            # HA below 0.113
-            cast_info = next((x for x in known_devices if x.friendly_name == device_name), None)
-        except:
-            cast_info = next(
-                (
-                    known_devices[x]
-                    for x in known_devices
-                    if known_devices[x].friendly_name == device_name
-                ),
-                None,
-            )
+
+        cast_info = next(
+            (
+                castinfo
+                for castinfo in known_devices
+                if castinfo.friendly_name == device_name
+            ),
+            None,
+        )
 
         _LOGGER.debug("cast info: %s", cast_info)
 
         if cast_info:
-            return pychromecast.get_chromecast_from_service(
-                  (
-                     cast_info.services,
-                     cast_info.uuid,
-                     cast_info.model_name,
-                     cast_info.friendly_name,
-                     None,
-                     None,
-                 ),
-                 ChromeCastZeroconf.get_zeroconf())
+            return pychromecast.get_chromecast_from_cast_info(
+                cast_info, ChromeCastZeroconf.get_zeroconf()
+            )
         _LOGGER.error(
             "Could not find device %s from hass.data",
             device_name,
         )
 
-        raise HomeAssistantError("Could not find device with name {}".format(device_name))
+        raise HomeAssistantError(
+            "Could not find device with name {}".format(device_name)
+        )
 
     def startSpotifyController(self, access_token, expires):
         from pychromecast.controllers.spotify import SpotifyController
@@ -458,21 +543,37 @@ class SpotifyCastDevice:
         sp.launch_app()
 
         if not sp.is_launched and not sp.credential_error:
-            raise HomeAssistantError("Failed to launch spotify controller due to timeout")
+            raise HomeAssistantError(
+                "Failed to launch spotify controller due to timeout"
+            )
         if not sp.is_launched and sp.credential_error:
-            raise HomeAssistantError("Failed to launch spotify controller due to credentials error")
+            raise HomeAssistantError(
+                "Failed to launch spotify controller due to credentials error"
+            )
 
         self.spotifyController = sp
 
     def getSpotifyDeviceId(self, client):
         # Look for device
-        devices_available = client.devices()
+        devices_available = self.devices_available
+
+        _LOGGER.info(
+            "devices_available: %s %s", devices_available, self.spotifyController.device
+        )
+
         for device in devices_available["devices"]:
             if device["id"] == self.spotifyController.device:
                 return device["id"]
 
         _LOGGER.error(
-            'No device with id "{}" known by Spotify'.format(self.spotifyController.device)
+            'No device with id "{}" known by Spotify'.format(
+                self.spotifyController.device
+            )
         )
         _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
-        raise HomeAssistantError("Failed to get device id from Spotify")
+
+        # Default to try to use the one we got
+        return self.spotifyController.device
+
+        # can't throw as as we are not in control over the retrieval of devices for cast
+        # raise HomeAssistantError("Failed to get device id from Spotify")
