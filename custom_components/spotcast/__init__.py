@@ -213,16 +213,18 @@ def setup(hass, config):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
         known_devices = hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
-        resp = [
-            {
-                "host": str(known_devices[k].host),
-                "port": known_devices[k].port,
-                "uuid": known_devices[k].uuid,
-                "model_name": known_devices[k].model_name,
-                "friendly_name": known_devices[k].friendly_name,
-            }
-            for k in known_devices
-        ]
+        _LOGGER.debug("%s", known_devices)
+        resp = []
+        # resp = [
+        #     {
+        #         "host": str(known_devices[k].host),
+        #         "port": known_devices[k].port,
+        #         "uuid": known_devices[k].uuid,
+        #         "model_name": known_devices[k].model_name,
+        #         "friendly_name": known_devices[k].friendly_name,
+        #     }
+        #     for k in known_devices
+        # ]
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
@@ -293,6 +295,7 @@ def setup(hass, config):
                 hass, call.data.get(CONF_DEVICE_NAME), call.data.get(CONF_ENTITY_ID)
             )
             spotify_cast_device.startSpotifyController(access_token, expires)
+            time.sleep(1)
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
 
         if uri is None or uri.strip() == "":
@@ -433,15 +436,8 @@ class SpotifyCastDevice:
         _LOGGER.debug("cast info: %s", cast_info)
 
         if cast_info:
-            return pychromecast.get_chromecast_from_service(
-                  (
-                     cast_info.services,
-                     cast_info.uuid,
-                     cast_info.model_name,
-                     cast_info.friendly_name,
-                     None,
-                     None,
-                 ),
+            return pychromecast.get_chromecast_from_cast_info(
+                 cast_info,
                  ChromeCastZeroconf.get_zeroconf())
         _LOGGER.error(
             "Could not find device %s from hass.data",
@@ -467,9 +463,17 @@ class SpotifyCastDevice:
     def getSpotifyDeviceId(self, client):
         # Look for device
         devices_available = client.devices()
+        devices_available2 = client._get("me/player/devices")
+        _LOGGER.info("devices_available2: %s", devices_available2)
+        _LOGGER.info("devices_available: %s %s", devices_available, self.spotifyController.device)
+
         for device in devices_available["devices"]:
+            _LOGGER.debug("getSpotifyDeviceId loop:'%s' self:'%s'", device, self.spotifyController.device)
             if device["id"] == self.spotifyController.device:
                 return device["id"]
+
+        if not devices_available["devices"] and self.spotifyController.device:
+            return self.spotifyController.device
 
         _LOGGER.error(
             'No device with id "{}" known by Spotify'.format(self.spotifyController.device)
