@@ -15,7 +15,7 @@ from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.helpers import entity_platform
 
-__VERSION__ = "3.5.2"
+__VERSION__ = "3.5.3"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ CONF_OFFSET = "offset"
 CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
 CONF_START_VOL = "start_volume"
+CONF_IGNORE_FULLY_PLAYED = "ignore_fully_played"
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
@@ -91,6 +92,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
         vol.Optional(CONF_OFFSET, default=0): cv.string,
         vol.Optional(CONF_START_VOL, default=101): cv.positive_int,
+        vol.Optional(CONF_IGNORE_FULLY_PLAYED, default=False): cv.boolean,
     }
 )
 
@@ -282,7 +284,7 @@ def setup(hass, config):
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
-    def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position):
+    def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position, ignore_fully_played):
         _LOGGER.debug(
             "Playing URI: %s on device-id: %s",
             uri,
@@ -291,7 +293,13 @@ def setup(hass, config):
         if uri.find("show") > 0:
             show_episodes_info = client.show_episodes(uri)
             if show_episodes_info and len(show_episodes_info["items"]) > 0:
-                episode_uri = show_episodes_info["items"][0]["external_urls"]["spotify"]
+                if ignore_fully_played:
+                    for episode in show_episodes_info["items"]:
+                        if not episode["resume_point"]["fully_played"]:
+                            episode_uri = episode["external_urls"]["spotify"]
+                            break
+                else:
+                    episode_uri = show_episodes_info["items"][0]["external_urls"]["spotify"]
                 _LOGGER.debug(
                     "Playing episode using uris (latest podcast playlist)= for uri: %s",
                     episode_uri,
@@ -349,6 +357,7 @@ def setup(hass, config):
         position = call.data.get(CONF_OFFSET)
         force_playback = call.data.get(CONF_FORCE_PLAYBACK)
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
+        ignore_fully_played = call.data.get(CONF_IGNORE_FULLY_PLAYED)
 
         # login as real browser to get powerful token
         access_token, expires = get_token_instance(account).get_spotify_token()
@@ -387,7 +396,7 @@ def setup(hass, config):
                 device_id=spotify_device_id, force_play=force_playback
             )
         else:
-            play(client, spotify_device_id, uri, random_song, repeat, shuffle, position)
+            play(client, spotify_device_id, uri, random_song, repeat, shuffle, position, ignore_fully_played)
         if shuffle or repeat or start_volume <= 100:
             if start_volume <= 100:
                 _LOGGER.debug("Setting volume to %d", start_volume)
