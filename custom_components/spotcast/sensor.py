@@ -40,7 +40,6 @@ class ChromecastDevicesSensor(Entity):
         """Return the state attributes."""
         return self._attributes
 
-    # ChromecastInfo(services={ServiceInfo(type='mdns', data='Google-Home-fa4dda8024b636eb450ca54f021a264a._googlecast._tcp.local.')}, uuid='fa4dda80-24b6-36eb-450c-a54f021a264a', _manufacturer=None, model_name='Google Home', friendly_name='Kök', is_audio_group=False, is_dynamic_group=None),
     def update(self):
         _LOGGER.debug("Getting chromecast devices")
 
