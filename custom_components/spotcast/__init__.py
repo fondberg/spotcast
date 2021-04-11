@@ -253,7 +253,17 @@ def setup(hass, config):
             uri,
             spotify_device_id,
         )
-        if uri.find("track") > 0:
+        if uri.find("show") > 0:
+            show_episodes_info = client.show_episodes(uri)
+            if show_episodes_info and len(show_episodes_info["items"]) > 0:
+                episode_uri = show_episodes_info["items"][0]["external_urls"]["spotify"]
+                _LOGGER.debug("Playing episode using uris (latest podcast playlist)= for uri: %s", episode_uri)
+                client.start_playback(device_id=spotify_device_id, uris=[episode_uri])
+        elif uri.find("episode") > 0:
+            _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
+            client.start_playback(device_id=spotify_device_id, uris=[uri])
+
+        elif uri.find("track") > 0:
             _LOGGER.debug("Playing track using uris= for uri: %s", uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
         else:
