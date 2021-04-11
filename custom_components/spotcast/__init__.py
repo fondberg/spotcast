@@ -117,16 +117,24 @@ CONFIG_SCHEMA = vol.Schema(
 
 def get_spotify_devices(hass):
     platforms = entity_platform.async_get_platforms(hass, "spotify")
+    spotify_media_player = None
     for platform in platforms:
         if platform.domain != "media_player":
             continue
+
         for entity in platform.entities.values():
             if isinstance(entity, SpotifyMediaPlayer):
                 _LOGGER.debug(
                     f"get_spotify_devices: {entity.entity_id}: {entity.name} HH: %s",
                     entity._devices,
                 )
-                return entity._devices
+                spotify_media_player = entity
+                break
+    if spotify_media_player:
+        # try later to see if it possible to retrieve the devices instead of relying on the caches one which
+        # might be 30 seconds old from spotify_media_player
+        # return spotify_media_player._spotify.devices()
+        return spotify_media_player._devices
 
 
 def get_cast_devices(hass):
