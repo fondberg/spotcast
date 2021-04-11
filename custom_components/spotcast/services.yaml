@@ -34,3 +34,6 @@ start:
     start_volume:
       description: "Set the volume for playback in percentage."
       example: 50
+    ignore_fully_played:
+      description: "Set to ignore or not already played episodes in a podcast playlist"
+      example: false
