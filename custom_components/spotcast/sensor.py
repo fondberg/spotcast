@@ -43,27 +43,27 @@ class ChromecastDevicesSensor(Entity):
         return self._attributes
 
     def update(self):
-        # _LOGGER.debug('Getting chromecast devices')
+        _LOGGER.debug('Getting chromecast devices')
 
-        # known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
+        known_devices = self.hass.data.get(KNOWN_CHROMECAST_INFO_KEY, [])
 
-        # _LOGGER.debug('devices %s', known_devices)
+        _LOGGER.debug('devices %s', known_devices)
 
-        # chromecasts = [
-        #     {
-        #         "host": str(known_devices[k].host),
-        #         "port": known_devices[k].port,
-        #         "uuid": known_devices[k].uuid,
-        #         "model_name": known_devices[k].model_name,
-        #         "name": known_devices[k].friendly_name,
-        #         'manufacturer': known_devices[k].manufacturer
-        #     }
-        #     for k in known_devices
-        # ]
+        chromecasts = [
+            {
+                "host": "deprecated",
+                "port": "deprecated",
+                "uuid": known_devices[k].uuid,
+                "model_name": known_devices[k].model_name,
+                "name": known_devices[k].friendly_name,
+                'manufacturer': known_devices[k].manufacturer
+            }
+            for k in known_devices
+        ]
 
-        # self._attributes['devices_json'] = json.dumps(chromecasts, ensure_ascii=False)
-        # self._attributes['devices'] = chromecasts
-        # self._attributes['last_update'] = dt.now().isoformat('T')
+        self._attributes['devices_json'] = json.dumps(chromecasts, ensure_ascii=False)
+        self._attributes['devices'] = chromecasts
+        self._attributes['last_update'] = dt.now().isoformat('T')
         self._state = STATE_OK
 
 
