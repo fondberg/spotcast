@@ -561,16 +561,17 @@ class SpotifyCastDevice:
             "devices_available: %s %s", devices_available, self.spotifyController.device
         )
 
-        for device in devices_available["devices"]:
-            if device["id"] == self.spotifyController.device:
-                return device["id"]
+        if devices := devices_available["devices"]:
+            for device in devices:
+                if device["id"] == self.spotifyController.device:
+                    return device["id"]
 
         _LOGGER.error(
             'No device with id "{}" known by Spotify'.format(
                 self.spotifyController.device
             )
         )
-        _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
+        _LOGGER.error("Known devices: {}".format(devices))
 
         # Default to try to use the one we got
         return self.spotifyController.device
