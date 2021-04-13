@@ -67,7 +67,7 @@ spotcast:
       sp_key: !secret ming_sp_key
 ```
 
-####Official Spotify Integration
+#### Official Spotify Integration
 
 Note that since v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
 
