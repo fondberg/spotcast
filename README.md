@@ -14,14 +14,17 @@ Community post: https://community.home-assistant.io/t/spotcast-custom-component-
 
 ## Installation
 
-### This component is easiest installed using [HACS](https://github.com/custom-components/hacs)
+### HACS
+This component is easiest installed using [HACS](https://github.com/custom-components/hacs).
 
-### Manual
+### Manual installation
 Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
 
-### Configuration
+## Configuration
+### Official Spotify Integration
+Note that since v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
 
-#### Obtaining `sp_dc` and `sp_key` cookies
+### Obtaining `sp_dc` and `sp_key` cookies
 Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
 
 To obtain the cookies:
@@ -29,6 +32,7 @@ To obtain the cookies:
 >* Open url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
 >* If no cookies appear go to [`https://open.spotify.com`](https://open.spotify.com) and sign-in
 >* Copy content from `sp_dc` and `sp_key` cookies
+
 * Using another browser
 >* Use a browser extension like "Export cookies" and look for `sp_dc` and `sp_key` cookies
 
@@ -41,20 +45,20 @@ or
 >* Close the window without logging out (Otherwise the cookies are made invalid).
 >
 >![Screenshots](images/cookies_1.jpg)
+
 * Alternatively you can use a browser plugin like "Export cookies".
 
-#### Single account
+### Single account
 Add the following to your config
-```
+```yaml
 spotcast:
   sp_dc: !secret sp_dc
   sp_key: !secret sp_key
 ```
-#### Multiple accounts
+### Multiple accounts
 Add `accounts` dict to the configuration and populate with a list of accounts to
 be able to initiate playback using diffferent accounts than the default.
-```
-
+```yaml
 spotcast:
   sp_dc: !secret primary_sp_dc
   sp_key: !secret primary_sp_key
@@ -67,23 +71,19 @@ spotcast:
       sp_key: !secret ming_sp_key
 ```
 
-####Official Spotify Integration
-
-Note that since v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
-
 ## Call the service
 The spotcast custom component creates a service called 'spotcast.start' in Home Assistant.
 
-### start playback on spotify connect device
-```
+### Start playback on Spotify connect device
+```json
 {
 	"spotify_device_id" : "Kök",
 	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
 	"random_song": true
 }
 ```
-#### start playback on a device with default account
-```
+### Start playback on a device with default account
+```json
 {
 	"device_name" : "Kök",
 	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
@@ -99,7 +99,7 @@ where
  - `offset` optional paramter to set offset mode for playback. 0 is the first song.
 
 optionally you can specify the `entity_id` of an existing home assistant chromecast mediaplayer like:
-```
+```json
 {
 	"entity_id" : "media_player.vardagsrum",
 	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
@@ -107,7 +107,7 @@ optionally you can specify the `entity_id` of an existing home assistant chromec
 ```
 
 ### Automation example
-```
+```yaml
 - id: 'jul_spotify_spela_julmusik'
   alias: Jul spela julmusik
   initial_state: 'on'
@@ -128,15 +128,15 @@ optionally you can specify the `entity_id` of an existing home assistant chromec
     service: spotcast.start
 ```
 
-### transfer current playback for the account
+### Transfer current playback for the account
 Omitting `uri` will transfer the playback to the specified device.
-```
+```json
 {
 	"device_name" : "Högtalare uppe"
 }
 ```
 Use the parameter `force_playback` to continue the user's playback even if nothing is currently playing.
-```
+```json
 {
 	"device_name" : "MultiRoom",
 	"force_playback" : true
@@ -147,8 +147,8 @@ where
  - `force_playback` (optional) true or false, true to continue the user's playback even if nothing is currently playing
 
 
-#### start playback on a device with non default account
-```
+### Start playback on a device with non default account
+```json
 {
   "account":"niklas",
   "device_name" : "Kök",
@@ -164,17 +164,17 @@ where
 The sensor has the discovered chromecasts as both json and since v.2.1 as an array of objects.
 Since v3.4.0 it does not do its own discovery but relies on data from core cast.
 Add the following to the sensor section of the configuration:
-```
+```yaml
 sensor:
-    - platform: spotcast
+  - platform: spotcast
 ```
 
 Sensor name
-```
+```yaml
 sensor.chromecast_devices
 ```
 Attributes
-```
+```json
 devices_json: [{"name": "Kök", "cast_type": "audio", "model_name": "Google Home", "uuid": "xxxxx", "manufacturer": "Google Inc."}, {"name": "Högtalare uppe", "cast_type": "group", "model_name": "Google Cast Group", "uuid": "xxxx", "manufacturer": "Google Inc."}, {"name": "Vardagsrum", "cast_type": "cast", "model_name": "HK Citation 300", "uuid": "xxxx", "manufacturer": "Harman Kardon"}]
 
 last_update: 2019-05-01T15:27:49.828553+02:00
@@ -186,7 +186,7 @@ friendly_name: Chromecast Devices
 The components websocket api.
 Example usage:
 
-```
+```python
 // Retrieve playlists
 const res = await this.props.hass.callWS({
   type: 'spotcast/playlists',
