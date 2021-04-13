@@ -39,17 +39,17 @@ To obtain the cookies:
 or
 >* Open a new __Incognito window__ at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
 >* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
->* Login to Spotify.
+>* Login to Spotify
 >* Search/Filter for `get_access_token` in Developer tools under Network.
->* Under cookies for the request save the values for `sp_dc` and `sp_key`.
->* Close the window without logging out (Otherwise the cookies are made invalid).
+>* Under cookies for the request save the values for `sp_dc` and `sp_key`
+>* Close the window without logging out (Otherwise the cookies are made invalid)
 >
 >![Screenshots](images/cookies_1.jpg)
 
 * Alternatively you can use a browser plugin like "Export cookies".
 
 ### Single account
-Add the following to your config
+Add the following to your configuration.yaml:
 ```yaml
 spotcast:
   sp_dc: !secret sp_dc
@@ -77,32 +77,32 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 ### Start playback on Spotify connect device
 ```json
 {
-	"spotify_device_id" : "Kök",
-	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
-	"random_song": true
+  "spotify_device_id" : "Kök",
+  "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
+  "random_song": true
 }
 ```
 ### Start playback on a device with default account
 ```json
 {
-	"device_name" : "Kök",
-	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
-	"random_song": true
+  "device_name" : "Kök",
+  "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
+  "random_song": true
 }
 ```
-where
- - `device_name` is the friendly name of the Chromecast
- - `uri` is the spotify uri, supports all uris including track (limit to one track)
+where:
+ - `device_name` is the friendly name of the chromecast device
+ - `uri` is the Spotify uri, supports all uris including track (limit to one track)
  - `random_song` optional parameter that starts the playback at a random position in the playlist
  - `repeat` optional parameter that repeats the playlist/track
- - `shuffle` optional parameter to set shuffle mode for playback.
- - `offset` optional paramter to set offset mode for playback. 0 is the first song.
+ - `shuffle` optional parameter to set shuffle mode for playback
+ - `offset` optional paramter to set offset mode for playback. 0 is the first song
 
-optionally you can specify the `entity_id` of an existing home assistant chromecast mediaplayer like:
+Optionally you can specify the `entity_id` of an existing Home Assistant chromecast mediaplayer like:
 ```json
 {
-	"entity_id" : "media_player.vardagsrum",
-	"uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+  "entity_id" : "media_player.vardagsrum",
+  "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
 ```
 
@@ -132,18 +132,18 @@ optionally you can specify the `entity_id` of an existing home assistant chromec
 Omitting `uri` will transfer the playback to the specified device.
 ```json
 {
-	"device_name" : "Högtalare uppe"
+  "device_name" : "Högtalare uppe"
 }
 ```
 Use the parameter `force_playback` to continue the user's playback even if nothing is currently playing.
 ```json
 {
-	"device_name" : "MultiRoom",
-	"force_playback" : true
+  "device_name" : "MultiRoom",
+  "force_playback" : true
 }
 ```
-where
- - `device_name` is the friendly name of the Chromecast
+where:
+ - `device_name` is the friendly name of the chromecast
  - `force_playback` (optional) true or false, true to continue the user's playback even if nothing is currently playing
 
 
@@ -155,13 +155,13 @@ where
   "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
 ```
-where
+where:
  - `account` is the name of account key in the accounts dictionary in the configuration
- - `device_name` is the friendly name of the Chromecast
- - `uri` is the spotify uri, supports all uris including track (limit to one track)
+ - `device_name` is the friendly name of the chromecast
+ - `uri` is the Spotify uri, supports all uris including track (limit to one track)
 
 ## Use the sensor
-The sensor has the discovered chromecasts as both json and since v.2.1 as an array of objects.
+The sensor has the discovered chromecasts as both json and an array of objects.
 Since v3.4.0 it does not do its own discovery but relies on data from core cast.
 Add the following to the sensor section of the configuration:
 ```yaml
@@ -209,14 +209,13 @@ const res = await this.props.hass.callWS({
 });
 ```
 
-
  ## Donate
- If you like what I do and want to support me then I love coffee
+ If you like what I do and want to support me - I love coffee!
 
 <a href="https://www.buymeacoffee.com/fondberg" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
  ## Contribute
- Please do
+ Please do! Open a Pull Request with your improvements.
 
  ## License
  Apache 2.0
