@@ -15,7 +15,6 @@ from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.helpers import entity_platform
 
-__VERSION__ = "3.5.2"
 DOMAIN = "spotcast"
 
 _LOGGER = logging.getLogger(__name__)
@@ -131,10 +130,8 @@ def get_spotify_devices(hass):
                 spotify_media_player = entity
                 break
     if spotify_media_player:
-        # try later to see if it possible to retrieve the devices instead of relying on the caches one which
-        # might be 30 seconds old from spotify_media_player
-        # return spotify_media_player._spotify.devices()
-        return spotify_media_player._devices
+        # Need to come from media_player spotify's sp client due to token issues
+        return spotify_media_player._spotify.devices()
 
 
 def get_cast_devices(hass):
@@ -237,8 +234,7 @@ def setup(hass, config):
         @async_wrap
         def get_devices():
             """Handle to get devices. Only for default account"""
-            devices = get_spotify_devices(hass)
-            resp = {"devices": devices}
+            resp = get_spotify_devices(hass)
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_devices())
@@ -364,17 +360,13 @@ def setup(hass, config):
             )
         if not spotify_device_id:
             # if still no id available, check cast devices and launch the app on chromecast
-            devices = get_spotify_devices(hass)
-            devices_available = {"devices": devices}
             spotify_cast_device = SpotifyCastDevice(
                 hass,
                 call.data.get(CONF_DEVICE_NAME),
                 call.data.get(CONF_ENTITY_ID),
-                devices_available,
             )
             spotify_cast_device.startSpotifyController(access_token, expires)
-            time.sleep(1)
-            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(client)
+            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(get_spotify_devices(hass))
 
         if uri is None or uri.strip() == "":
             _LOGGER.debug("Transfering playback")
@@ -472,12 +464,10 @@ class SpotifyCastDevice:
     hass = None
     castDevice = None
     spotifyController = None
-    devices_available = []
 
-    def __init__(self, hass, call_device_name, call_entity_id, devices_available):
+    def __init__(self, hass, call_device_name, call_entity_id):
         """Initialize a spotify cast device."""
         self.hass = hass
-        self.devices_available = devices_available
 
         # Get device name from either device_name or entity_id
         device_name = None
@@ -553,11 +543,9 @@ class SpotifyCastDevice:
 
         self.spotifyController = sp
 
-    def getSpotifyDeviceId(self, client):
-        # Look for device
-        devices_available = self.devices_available
-
-        _LOGGER.info(
+    def getSpotifyDeviceId(self, devices_available):
+        # Look for device to make sure we can start playback
+        _LOGGER.debug(
             "devices_available: %s %s", devices_available, self.spotifyController.device
         )
 
@@ -572,8 +560,4 @@ class SpotifyCastDevice:
         )
         _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
 
-        # Default to try to use the one we got
-        return self.spotifyController.device
-
-        # can't throw as as we are not in control over the retrieval of devices for cast
-        # raise HomeAssistantError("Failed to get device id from Spotify")
+        raise HomeAssistantError("Failed to get device id from Spotify")
