@@ -70,7 +70,7 @@ start:
       name: "Shuffle"
       description: "Set shuffle mode for playback."
       example: true
-      required: true
+      required: false
       default: false
       selector:
         boolean:
@@ -97,3 +97,11 @@ start:
           step: 1
           min: 0
           max: 100
+
+    ignore_fully_played:
+      description: "Set to ignore or not already played episodes in a podcast playlist"
+      example: true
+      required: false
+      default: false
+      selector:
+        boolean:
