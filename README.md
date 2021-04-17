@@ -160,6 +160,22 @@ where
  - `device_name` is the friendly name of the Chromecast
  - `uri` is the spotify uri, supports all uris including track (limit to one track)
 
+#### start podcast playack
+Play the latest episode of a given podcast show.
+```
+{
+  "account":"niklas",
+  "device_name" : "Kök",
+  "uri" : "spotify:show:6PeAI9SHRZhghU7NRPXvT3"
+  "ignore_fully_played": true
+}
+```
+where
+ - `account` is the name of account key in the accounts dictionary in the configuration
+ - `device_name` is the friendly name of the Chromecast
+ - `uri` is the spotify uri, (podcasts use the 'show' uri)
+ - `ignore_fully_played` (optional) true or false, true to ignore already fully played episodes (defaults to false and play the latest released episode)
+ 
 ## Use the sensor
 The sensor has the discovered chromecasts as both json and since v.2.1 as an array of objects.
 Since v3.4.0 it does not do its own discovery but relies on data from core cast.
