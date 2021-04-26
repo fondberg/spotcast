@@ -563,6 +563,11 @@ class SpotifyCastDevice:
             for device in devices:
                 if device["id"] == self.spotifyController.device:
                     return device["id"]
+        
+        # If `client.devices()` returns an empty list, we assume that the ID is correct.
+        # Based on the hotfix of @provinzio.
+        if not devices_available["devices"] and self.spotifyController.device:
+            return self.spotifyController.device
 
         _LOGGER.error(
             'No device with id "{}" known by Spotify'.format(
