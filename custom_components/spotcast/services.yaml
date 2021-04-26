@@ -42,7 +42,7 @@ start:
       name: "Force Playback"
       description: "In case of transfering playback: If true starts playing the user's last playback even if nothing is currently playing."
       example: true
-      required: true
+      required: false
       default: false
       selector:
         boolean:
@@ -50,7 +50,7 @@ start:
       name: "Random Song"
       description: "Starts the playback at a random position in the playlist or album."
       example: true
-      required: true
+      required: false
       default: false
       selector:
         boolean:
@@ -58,7 +58,7 @@ start:
       name: "Repeat"
       description: "Set repeat mode for playback."
       example: "track"
-      required: true
+      required: false
       default: "off"
       selector:
         select:
@@ -78,7 +78,7 @@ start:
       name: "Offset"
       description: "Set offset mode for playback. 0 is the first song."
       example: 1
-      required: true
+      required: false
       default: 0
       selector:
         number:
