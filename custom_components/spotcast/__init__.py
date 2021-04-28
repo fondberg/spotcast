@@ -565,7 +565,7 @@ class SpotifyCastDevice:
                     return device["id"]
         
         # If `client.devices()` returns an empty list, we assume that the ID is correct.
-        # Based on the hotfix of @provinzio.
+        # Basically, this is the same we used in 3.5.2 and before.
         if not devices_available["devices"] and self.spotifyController.device:
             return self.spotifyController.device
 
