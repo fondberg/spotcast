@@ -392,7 +392,7 @@ def setup(hass, config):
             me_resp = client._get("me")
             spotify_cast_device.startSpotifyController(access_token, expires)
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
-                get_spotify_devices(hass)
+                get_spotify_devices(hass, me_resp['id'])
             )
 
         if uri is None or uri.strip() == "":
