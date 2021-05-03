@@ -1,20 +1,24 @@
 import asyncio
 import logging
-import voluptuous as vol
 import random
 import time
 from datetime import datetime
+from functools import partial, wraps
+
+import homeassistant.helpers.config_validation as cv
+import pychromecast
+import spotify_token as st
 import spotipy
-from functools import wraps, partial
-from homeassistant.components import http, websocket_api
+import voluptuous as vol
+from homeassistant.components import websocket_api
+from homeassistant.components.cast.helpers import ChromeCastZeroconf
+from homeassistant.components.cast.media_player import CastDevice
+from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
+from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
-import homeassistant.helpers.config_validation as cv
-from homeassistant.components.cast.media_player import CastDevice
-from homeassistant.components.cast.helpers import ChromeCastZeroconf
-from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.helpers import entity_platform
-
+from pychromecast.controllers.spotify import SpotifyController
 
 DOMAIN = "spotcast"
 
@@ -22,15 +26,12 @@ _LOGGER = logging.getLogger(__name__)
 
 CONF_SPOTIFY_DEVICE_ID = "spotify_device_id"
 CONF_DEVICE_NAME = "device_name"
-CONF_ENTITY_ID = "entity_id"
 CONF_SPOTIFY_URI = "uri"
 CONF_ACCOUNTS = "accounts"
 CONF_SPOTIFY_ACCOUNT = "account"
 CONF_FORCE_PLAYBACK = "force_playback"
 CONF_RANDOM = "random_song"
-CONF_REPEAT = "repeat"
 CONF_SHUFFLE = "shuffle"
-CONF_OFFSET = "offset"
 CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
 CONF_START_VOL = "start_volume"
@@ -175,7 +176,7 @@ def setup(hass, config):
     spotifyTokenInstances = {}
 
     def get_token_instance(account=None):
-        """ Get token instance for account """
+        """Get token instance for account"""
         if account is None or account == "default":
             account = "default"
             dc = sp_dc
@@ -284,7 +285,16 @@ def setup(hass, config):
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
-    def play(client, spotify_device_id, uri, random_song, repeat, shuffle, position, ignore_fully_played):
+    def play(
+        client,
+        spotify_device_id,
+        uri,
+        random_song,
+        repeat,
+        shuffle,
+        position,
+        ignore_fully_played,
+    ):
         _LOGGER.debug(
             "Playing URI: %s on device-id: %s",
             uri,
@@ -299,7 +309,9 @@ def setup(hass, config):
                             episode_uri = episode["external_urls"]["spotify"]
                             break
                 else:
-                    episode_uri = show_episodes_info["items"][0]["external_urls"]["spotify"]
+                    episode_uri = show_episodes_info["items"][0]["external_urls"][
+                        "spotify"
+                    ]
                 _LOGGER.debug(
                     "Playing episode using uris (latest podcast playlist)= for uri: %s",
                     episode_uri,
@@ -379,7 +391,9 @@ def setup(hass, config):
             )
             me_resp = client._get("me")
             spotify_cast_device.startSpotifyController(access_token, expires)
-            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(get_spotify_devices(hass, me_resp['id']))
+            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
+                get_spotify_devices(hass)
+            )
 
         if uri is None or uri.strip() == "":
             _LOGGER.debug("Transfering playback")
@@ -392,7 +406,16 @@ def setup(hass, config):
                 device_id=spotify_device_id, force_play=force_playback
             )
         else:
-            play(client, spotify_device_id, uri, random_song, repeat, shuffle, position, ignore_fully_played)
+            play(
+                client,
+                spotify_device_id,
+                uri,
+                random_song,
+                repeat,
+                shuffle,
+                position,
+                ignore_fully_played,
+            )
         if shuffle or repeat or start_volume <= 100:
             if start_volume <= 100:
                 _LOGGER.debug("Setting volume to %d", start_volume)
@@ -459,8 +482,6 @@ class SpotifyToken:
         return self._access_token
 
     def get_spotify_token(self):
-        import spotify_token as st
-
         try:
             self._access_token, self._token_expires = st.start_session(
                 self.sp_dc, self.sp_key
@@ -507,8 +528,6 @@ class SpotifyCastDevice:
         self.castDevice.wait()
 
     def getChromecastDevice(self, device_name):
-        import pychromecast
-
         # Get cast from discovered devices of cast platform
         known_devices = get_cast_devices(self.hass)
 
@@ -539,8 +558,6 @@ class SpotifyCastDevice:
         )
 
     def startSpotifyController(self, access_token, expires):
-        from pychromecast.controllers.spotify import SpotifyController
-
         sp = SpotifyController(access_token, expires)
         self.castDevice.register_handler(sp)
         sp.launch_app()
