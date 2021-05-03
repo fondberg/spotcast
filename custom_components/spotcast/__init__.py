@@ -118,7 +118,7 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 
-def get_spotify_devices(hass):
+def get_spotify_devices(hass, spotify_user_id):
     platforms = entity_platform.async_get_platforms(hass, "spotify")
     spotify_media_player = None
     for platform in platforms:
@@ -126,7 +126,7 @@ def get_spotify_devices(hass):
             continue
 
         for entity in platform.entities.values():
-            if isinstance(entity, SpotifyMediaPlayer):
+            if isinstance(entity, SpotifyMediaPlayer) and entity.unique_id == spotify_user_id:
                 _LOGGER.debug(
                     f"get_spotify_devices: {entity.entity_id}: {entity.name} HH: %s",
                     entity._devices,
@@ -238,7 +238,10 @@ def setup(hass, config):
         @async_wrap
         def get_devices():
             """Handle to get devices. Only for default account"""
-            resp = get_spotify_devices(hass)
+            account = msg.get("account", None)
+            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
+            me_resp = client._get("me")
+            resp = get_spotify_devices(hass, me_resp['id'])
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_devices())
@@ -373,7 +376,6 @@ def setup(hass, config):
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
-
         # first, rely on spotify id given in config
         if not spotify_device_id:
             # if not present, check if there's a spotify connect device with that name
@@ -387,6 +389,7 @@ def setup(hass, config):
                 call.data.get(CONF_DEVICE_NAME),
                 call.data.get(CONF_ENTITY_ID),
             )
+            me_resp = client._get("me")
             spotify_cast_device.startSpotifyController(access_token, expires)
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
                 get_spotify_devices(hass)
