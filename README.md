@@ -290,6 +290,16 @@ const res = await this.props.hass.callWS({
 });
 ```
 
+## Enabling debug log
+In configuration.yaml for you HA add and attach those the relevant logs. 
+Be sure to disable it later as it is quite noisy.
+```
+logger:
+  default: info
+  logs:
+    custom_components.spotcast: debug
+```
+
 ## Donate
 
 If you like what I do and want to support me - I love coffee!
