@@ -16,7 +16,7 @@ A clear and concise description of what the bug is.
 * [ ] Using latest stable version of Home Assistant
 * [ ] I have Spotify Premium
 * [ ] I'm attaching relevant logs with level debug for component spotcast (see README)
-* [ ] I'm using entity_id in the service call and have tried device_name instead
+* [ ] I'm using entity_id in the service call and have tried device_name but the issue remains
 
 **Describe the bug**
 
