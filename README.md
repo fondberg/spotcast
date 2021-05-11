@@ -29,7 +29,7 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 
 ### Official Spotify Integration
 
-Note that since v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
+Note that as of v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
 
 ### Obtaining `sp_dc` and `sp_key` cookies
 
@@ -74,6 +74,8 @@ spotcast:
 
 Add `accounts` dict to the configuration and populate with a list of accounts to
 be able to initiate playback using diffferent accounts than the default.
+
+If you are using v3.5.2 or greater and thus also have the core Spotify Integration installed, then [the additional accounts will also need to be added there as well](https://www.home-assistant.io/integrations/spotify#using-multiple-spotify-accounts) for multiple accounts to work.
 
 ```yaml
 spotcast:
