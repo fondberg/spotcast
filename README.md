@@ -98,7 +98,7 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 
 ```json
 {
-  "spotify_device_id" : "Kök",
+  "spotify_device_id" : "ab123c5d7347324c2b1234567890f8d6dc40350",
   "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8",
   "random_song": true
 }
@@ -116,21 +116,25 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 
 where:
 
+* `spotify_device_id` is the device ID of the Spotify Connect device 
 * `device_name` is the friendly name of the chromecast device
 * `uri` is the Spotify uri, supports all uris including track (limit to one track)
 * `random_song` optional parameter that starts the playback at a random position in the playlist
 * `repeat` optional parameter that repeats the playlist/track
 * `shuffle` optional parameter to set shuffle mode for playback
-* `offset` optional paramter to set offset mode for playback. 0 is the first song
+* `offset` optional parameter to set offset mode for playback. 0 is the first song
 
 Optionally you can specify the `entity_id` of an existing Home Assistant chromecast media-player like:
 
 ```json
-{
+{ 
   "entity_id" : "media_player.vardagsrum",
   "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
 ```
+### Find Spotify Device ID
+
+To use the Spotcast service with a Spotify Connect device, you need the `spotify_device_id`. To find the `spotify_device_id`, enable the debug logs (instructions are in section `Enabling Debug Log` in this README), reboot Home Assistant, and go to `Configuration >> Logs >> Load Full Home Assistant Log`. Find the log entry `get_spotify_devices` and look for the device ID.
 
 ### Automation example
 
