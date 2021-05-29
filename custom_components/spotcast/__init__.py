@@ -3,7 +3,6 @@ import random
 import time
 from datetime import datetime
 
-import spotipy
 from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
@@ -36,7 +35,7 @@ from .const import (
     WS_TYPE_SPOTCAST_PLAYLISTS,
 )
 from .helpers import async_wrap, get_cast_devices, get_spotify_devices
-from .spotcast_controller import SpotifyCastDevice, SpotifyToken, SpotcastController
+from .spotcast_controller import SpotcastController
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
 
@@ -66,7 +65,7 @@ def setup(hass, config):
 
             _LOGGER.debug("websocket_handle_playlists msg: %s", msg)
 
-            client = spotipy.Spotify(auth=spotcast_controller.get_token_instance(account).access_token)
+            client = spotcast_controller.get_spotify_client(account)
             resp = {}
 
             if playlistType == "discover-weekly":
@@ -102,7 +101,7 @@ def setup(hass, config):
         def get_devices():
             """Handle to get devices. Only for default account"""
             account = msg.get("account", None)
-            client = spotipy.Spotify(auth=spotcast_controller.get_token_instance(account).access_token)
+            client = spotcast_controller.get_spotify_client(account)
             me_resp = client._get("me")
             resp = get_spotify_devices(hass, me_resp["id"])
             connection.send_message(websocket_api.result_message(msg["id"], resp))
@@ -116,7 +115,7 @@ def setup(hass, config):
             """Handle to get player"""
             account = msg.get("account", None)
             _LOGGER.debug("websocket_handle_player msg: %s", msg)
-            client = spotipy.Spotify(auth=spotcast_controller.get_token_instance(account).access_token)
+            client = spotcast_controller.get_spotify_client(account)
             resp = client._get("me/player")
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
@@ -153,8 +152,6 @@ def setup(hass, config):
         spotify_device_id,
         uri,
         random_song,
-        repeat,
-        shuffle,
         position,
         ignore_fully_played,
     ):
@@ -225,8 +222,8 @@ def setup(hass, config):
         """service called."""
         uri = call.data.get(CONF_SPOTIFY_URI)
         random_song = call.data.get(CONF_RANDOM, False)
-        repeat = call.data.get(CONF_REPEAT)
-        shuffle = call.data.get(CONF_SHUFFLE)
+        repeat = call.data.get(CONF_REPEAT, False)
+        shuffle = call.data.get(CONF_SHUFFLE, False)
         start_volume = call.data.get(CONF_START_VOL)
         spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
@@ -236,28 +233,12 @@ def setup(hass, config):
         device_name = call.data.get(CONF_DEVICE_NAME)
         entity_id = call.data.get(CONF_ENTITY_ID)
 
-        # login as real browser to get powerful token
-        access_token, expires = spotcast_controller.get_token_instance(account).get_spotify_token()
+        client = spotcast_controller.get_spotify_client(account)
 
-        # get the spotify web api client
-        client = spotipy.Spotify(auth=access_token)
-        # first, rely on spotify id given in config
+        # first, rely on spotify id given in config otherwise get one
         if not spotify_device_id:
-            # if not present, check if there's a spotify connect device with that name
-            spotify_device_id = getSpotifyConnectDeviceId(
-                client, call.data.get(CONF_DEVICE_NAME)
-            )
-        if not spotify_device_id:
-            # if still no id available, check cast devices and launch the app on chromecast
-            spotify_cast_device = SpotifyCastDevice(
-                hass,
-                call.data.get(CONF_DEVICE_NAME),
-                call.data.get(CONF_ENTITY_ID),
-            )
-            me_resp = client._get("me")
-            spotify_cast_device.startSpotifyController(access_token, expires)
-            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
-                get_spotify_devices(hass, me_resp["id"])
+            spotify_device_id = spotcast_controller.get_spotify_device_id(
+                account, spotify_device_id, device_name, entity_id
             )
 
         if uri is None or uri.strip() == "":
@@ -276,24 +257,22 @@ def setup(hass, config):
                 spotify_device_id,
                 uri,
                 random_song,
-                repeat,
-                shuffle,
                 position,
                 ignore_fully_played,
             )
-        if shuffle or repeat or start_volume <= 100:
-            if start_volume <= 100:
-                _LOGGER.debug("Setting volume to %d", start_volume)
-                time.sleep(2)
-                client.volume(volume_percent=start_volume, device_id=spotify_device_id)
-            if shuffle:
-                _LOGGER.debug("Turning shuffle on")
-                time.sleep(3)
-                client.shuffle(state=shuffle, device_id=spotify_device_id)
-            if repeat:
-                _LOGGER.debug("Turning repeat on")
-                time.sleep(3)
-                client.repeat(state=repeat, device_id=spotify_device_id)
+
+        if start_volume <= 100:
+            _LOGGER.debug("Setting volume to %d", start_volume)
+            time.sleep(2)
+            client.volume(volume_percent=start_volume, device_id=spotify_device_id)
+        if shuffle:
+            _LOGGER.debug("Turning shuffle on")
+            time.sleep(3)
+            client.shuffle(state=shuffle, device_id=spotify_device_id)
+        if repeat:
+            _LOGGER.debug("Turning repeat on")
+            time.sleep(3)
+            client.repeat(state=repeat, device_id=spotify_device_id)
 
     # Register websocket and service
     hass.components.websocket_api.async_register_command(

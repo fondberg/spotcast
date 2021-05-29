@@ -211,4 +211,4 @@ class SpotcastController:
             spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
                 get_spotify_devices(self.hass, me_resp["id"])
             )
-        _LOGGER.debug("NIKLAS NIKLAS NIKLAS NIKLAS NIKLAS")
+        return spotify_device_id
