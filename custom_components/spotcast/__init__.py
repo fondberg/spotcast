@@ -36,7 +36,7 @@ from .const import (
     WS_TYPE_SPOTCAST_PLAYLISTS,
 )
 from .helpers import async_wrap, get_cast_devices, get_spotify_devices
-from .spotcast_controller import SpotcastController, SpotifyCastDevice
+from .spotcast_controller import SpotifyCastDevice, SpotifyToken
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
 
@@ -50,7 +50,22 @@ def setup(hass, config):
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
-    spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
+    spotifyTokenInstances = {}
+
+    def get_token_instance(account=None):
+        """Get token instance for account"""
+        if account is None or account == "default":
+            account = "default"
+            dc = sp_dc
+            key = sp_key
+        else:
+            dc = accounts.get(account).get(CONF_SP_DC)
+            key = accounts.get(account).get(CONF_SP_KEY)
+
+        _LOGGER.debug("setting up with  account %s", account)
+        if account not in spotifyTokenInstances:
+            spotifyTokenInstances[account] = SpotifyToken(dc, key)
+        return spotifyTokenInstances[account]
 
     @callback
     def websocket_handle_playlists(hass, connection, msg):
@@ -65,7 +80,7 @@ def setup(hass, config):
 
             _LOGGER.debug("websocket_handle_playlists msg: %s", msg)
 
-            client = spotcast_controller.get_spotify_client(account)
+            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
             resp = {}
 
             if playlistType == "discover-weekly":
@@ -101,7 +116,7 @@ def setup(hass, config):
         def get_devices():
             """Handle to get devices. Only for default account"""
             account = msg.get("account", None)
-            client = spotcast_controller.get_spotify_client(account)
+            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
             me_resp = client._get("me")
             resp = get_spotify_devices(hass, me_resp["id"])
             connection.send_message(websocket_api.result_message(msg["id"], resp))
@@ -115,7 +130,7 @@ def setup(hass, config):
             """Handle to get player"""
             account = msg.get("account", None)
             _LOGGER.debug("websocket_handle_player msg: %s", msg)
-            client = spotcast_controller.get_spotify_client(account)
+            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
             resp = client._get("me/player")
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
@@ -152,6 +167,8 @@ def setup(hass, config):
         spotify_device_id,
         uri,
         random_song,
+        repeat,
+        shuffle,
         position,
         ignore_fully_played,
     ):
@@ -211,6 +228,13 @@ def setup(hass, config):
             )
             client.start_playback(**kwargs)
 
+    def getSpotifyConnectDeviceId(client, device_name):
+        devices_available = get_spotify_devices(hass, client._get("me")["id"])
+        for device in devices_available["devices"]:
+            if device["name"] == device_name:
+                return device["id"]
+        return None
+
     def start_casting(call):
         """service called."""
         uri = call.data.get(CONF_SPOTIFY_URI)
@@ -227,16 +251,14 @@ def setup(hass, config):
         entity_id = call.data.get(CONF_ENTITY_ID)
 
         # login as real browser to get powerful token
-        access_token, expires = spotcast_controller.get_token_instance(
-            account
-        ).get_spotify_token()
+        access_token, expires = get_token_instance(account).get_spotify_token()
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
         # first, rely on spotify id given in config
         if not spotify_device_id:
             # if not present, check if there's a spotify connect device with that name
-            spotify_device_id = spotcast_controller._getSpotifyConnectDeviceId(
+            spotify_device_id = getSpotifyConnectDeviceId(
                 client, call.data.get(CONF_DEVICE_NAME)
             )
         if not spotify_device_id:
@@ -268,6 +290,8 @@ def setup(hass, config):
                 spotify_device_id,
                 uri,
                 random_song,
+                repeat,
+                shuffle,
                 position,
                 ignore_fully_played,
             )
