@@ -36,7 +36,7 @@ from .const import (
     WS_TYPE_SPOTCAST_PLAYLISTS,
 )
 from .helpers import async_wrap, get_cast_devices, get_spotify_devices
-from .spotcast_controller import SpotifyCastDevice, SpotifyToken
+from .spotcast_controller import SpotifyCastDevice, SpotifyToken, SpotcastController
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
 
@@ -50,22 +50,8 @@ def setup(hass, config):
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
-    spotifyTokenInstances = {}
 
-    def get_token_instance(account=None):
-        """Get token instance for account"""
-        if account is None or account == "default":
-            account = "default"
-            dc = sp_dc
-            key = sp_key
-        else:
-            dc = accounts.get(account).get(CONF_SP_DC)
-            key = accounts.get(account).get(CONF_SP_KEY)
-
-        _LOGGER.debug("setting up with  account %s", account)
-        if account not in spotifyTokenInstances:
-            spotifyTokenInstances[account] = SpotifyToken(dc, key)
-        return spotifyTokenInstances[account]
+    spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
 
     @callback
     def websocket_handle_playlists(hass, connection, msg):
@@ -80,7 +66,7 @@ def setup(hass, config):
 
             _LOGGER.debug("websocket_handle_playlists msg: %s", msg)
 
-            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
+            client = spotipy.Spotify(auth=spotcast_controller.get_token_instance(account).access_token)
             resp = {}
 
             if playlistType == "discover-weekly":
@@ -116,7 +102,7 @@ def setup(hass, config):
         def get_devices():
             """Handle to get devices. Only for default account"""
             account = msg.get("account", None)
-            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
+            client = spotipy.Spotify(auth=spotcast_controller.get_token_instance(account).access_token)
             me_resp = client._get("me")
             resp = get_spotify_devices(hass, me_resp["id"])
             connection.send_message(websocket_api.result_message(msg["id"], resp))
@@ -130,7 +116,7 @@ def setup(hass, config):
             """Handle to get player"""
             account = msg.get("account", None)
             _LOGGER.debug("websocket_handle_player msg: %s", msg)
-            client = spotipy.Spotify(auth=get_token_instance(account).access_token)
+            client = spotipy.Spotify(auth=spotcast_controller.get_token_instance(account).access_token)
             resp = client._get("me/player")
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
@@ -251,7 +237,7 @@ def setup(hass, config):
         entity_id = call.data.get(CONF_ENTITY_ID)
 
         # login as real browser to get powerful token
-        access_token, expires = get_token_instance(account).get_spotify_token()
+        access_token, expires = spotcast_controller.get_token_instance(account).get_spotify_token()
 
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)

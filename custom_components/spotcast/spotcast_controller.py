@@ -160,15 +160,18 @@ class SpotcastController:
         accounts["default"] = {sp_dc: sp_dc, sp_key: sp_key}
         self.accounts = accounts
         self.hass = hass
+        self.sp_dc = sp_dc
+        self.sp_key = sp_key
 
     def get_token_instance(self, account=None):
         """Get token instance for account"""
-        if account is None:
+        if account is None or account == "default":
             account = "default"
-        _LOGGER.debug("%s", self.accounts)
-        _LOGGER.debug("Got account: %s", account)
-        dc = self.accounts.get(account).get(CONF_SP_DC)
-        key = self.accounts.get(account).get(CONF_SP_KEY)
+            dc = self.sp_dc
+            key = self.sp_key
+        else:
+            dc = self.accounts.get(account).get(CONF_SP_DC)
+            key = self.accounts.get(account).get(CONF_SP_KEY)
 
         _LOGGER.debug("setting up with  account %s", account)
         if account not in self.spotifyTokenInstances:
