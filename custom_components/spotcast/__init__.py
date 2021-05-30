@@ -1,7 +1,5 @@
 import logging
-import random
 import time
-from datetime import datetime
 
 from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
@@ -57,40 +55,16 @@ def setup(hass, config):
         @async_wrap
         def get_playlist():
             """Handle to get playlist"""
-            playlistType = msg.get("playlist_type")
-            countryCode = msg.get("country_code")
+            playlist_type = msg.get("playlist_type")
+            country_code = msg.get("country_code")
             locale = msg.get("locale", "en")
             limit = msg.get("limit", 10)
             account = msg.get("account", None)
 
             _LOGGER.debug("websocket_handle_playlists msg: %s", msg)
-
-            client = spotcast_controller.get_spotify_client(account)
-            resp = {}
-
-            if playlistType == "discover-weekly":
-                resp = client._get(
-                    "views/made-for-x",
-                    content_limit=limit,
-                    locale=locale,
-                    platform="web",
-                    types="album,playlist,artist,show,station",
-                    limit=limit,
-                    offset=0,
-                )
-                resp = resp.get("content")
-            elif playlistType == "featured":
-                resp = client.featured_playlists(
-                    locale=locale,
-                    country=countryCode,
-                    timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-                    limit=limit,
-                    offset=0,
-                )
-                resp = resp.get("playlists")
-            else:
-                resp = client.current_user_playlists(limit=limit)
-
+            resp = spotcast_controller.get_playlists(
+                account, playlist_type, country_code, locale, limit
+            )
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_playlist())
@@ -147,77 +121,6 @@ def setup(hass, config):
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
-    def play(
-        client,
-        spotify_device_id,
-        uri,
-        random_song,
-        position,
-        ignore_fully_played,
-    ):
-        _LOGGER.debug(
-            "Playing URI: %s on device-id: %s",
-            uri,
-            spotify_device_id,
-        )
-        if uri.find("show") > 0:
-            show_episodes_info = client.show_episodes(uri)
-            if show_episodes_info and len(show_episodes_info["items"]) > 0:
-                if ignore_fully_played:
-                    for episode in show_episodes_info["items"]:
-                        if not episode["resume_point"]["fully_played"]:
-                            episode_uri = episode["external_urls"]["spotify"]
-                            break
-                else:
-                    episode_uri = show_episodes_info["items"][0]["external_urls"][
-                        "spotify"
-                    ]
-                _LOGGER.debug(
-                    "Playing episode using uris (latest podcast playlist)= for uri: %s",
-                    episode_uri,
-                )
-                client.start_playback(device_id=spotify_device_id, uris=[episode_uri])
-        elif uri.find("episode") > 0:
-            _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
-            client.start_playback(device_id=spotify_device_id, uris=[uri])
-
-        elif uri.find("track") > 0:
-            _LOGGER.debug("Playing track using uris= for uri: %s", uri)
-            client.start_playback(device_id=spotify_device_id, uris=[uri])
-        else:
-            if uri == "random":
-                _LOGGER.debug(
-                    "Cool, you found the easter egg with playing a random playlist"
-                )
-                playlists = client.user_playlists("me", 50)
-                no_playlists = len(playlists["items"])
-                uri = playlists["items"][random.randint(0, no_playlists - 1)]["uri"]
-            kwargs = {"device_id": spotify_device_id, "context_uri": uri}
-
-            if random_song:
-                if uri.find("album") > 0:
-                    results = client.album_tracks(uri)
-                    position = random.randint(0, results["total"] - 1)
-                elif uri.find("playlist") > 0:
-                    results = client.playlist_tracks(uri)
-                    position = random.randint(0, results["total"] - 1)
-                _LOGGER.debug("Start playback at random position: %s", position)
-            if uri.find("artist") < 1:
-                kwargs["offset"] = {"position": position}
-            _LOGGER.debug(
-                'Playing context uri using context_uri for uri: "%s" (random_song: %s)',
-                uri,
-                random_song,
-            )
-            client.start_playback(**kwargs)
-
-    def getSpotifyConnectDeviceId(client, device_name):
-        devices_available = get_spotify_devices(hass, client._get("me")["id"])
-        for device in devices_available["devices"]:
-            if device["name"] == device_name:
-                return device["id"]
-        return None
-
     def start_casting(call):
         """service called."""
         uri = call.data.get(CONF_SPOTIFY_URI)
@@ -252,7 +155,7 @@ def setup(hass, config):
                 device_id=spotify_device_id, force_play=force_playback
             )
         else:
-            play(
+            spotcast_controller.play(
                 client,
                 spotify_device_id,
                 uri,

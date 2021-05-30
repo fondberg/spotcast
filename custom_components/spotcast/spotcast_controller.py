@@ -1,5 +1,8 @@
 import logging
+import random
 import time
+from collections import OrderedDict
+from datetime import datetime
 
 import pychromecast
 import spotify_token as st
@@ -54,7 +57,6 @@ class SpotifyCastDevice:
         known_devices = get_cast_devices(self.hass)
 
         _LOGGER.debug("Chromecast devices: %s", known_devices)
-
         cast_info = next(
             (
                 castinfo
@@ -63,9 +65,7 @@ class SpotifyCastDevice:
             ),
             None,
         )
-
         _LOGGER.debug("cast info: %s", cast_info)
-
         if cast_info:
             return pychromecast.get_chromecast_from_cast_info(
                 cast_info, ChromeCastZeroconf.get_zeroconf()
@@ -74,7 +74,6 @@ class SpotifyCastDevice:
             "Could not find device %s from hass.data",
             device_name,
         )
-
         raise HomeAssistantError(
             "Could not find device with name {}".format(device_name)
         )
@@ -100,7 +99,6 @@ class SpotifyCastDevice:
         _LOGGER.debug(
             "devices_available: %s %s", devices_available, self.spotifyController.device
         )
-
         if devices := devices_available["devices"]:
             for device in devices:
                 if device["id"] == self.spotifyController.device:
@@ -157,21 +155,16 @@ class SpotcastController:
     hass = None
 
     def __init__(self, hass, sp_dc, sp_key, accounts):
-        accounts["default"] = {sp_dc: sp_dc, sp_key: sp_key}
+        accounts["default"] = OrderedDict([("sp_dc", sp_dc), ("sp_key", sp_key)])
         self.accounts = accounts
         self.hass = hass
-        self.sp_dc = sp_dc
-        self.sp_key = sp_key
 
     def get_token_instance(self, account=None):
         """Get token instance for account"""
-        if account is None or account == "default":
+        if account is None:
             account = "default"
-            dc = self.sp_dc
-            key = self.sp_key
-        else:
-            dc = self.accounts.get(account).get(CONF_SP_DC)
-            key = self.accounts.get(account).get(CONF_SP_KEY)
+        dc = self.accounts.get(account).get(CONF_SP_DC)
+        key = self.accounts.get(account).get(CONF_SP_KEY)
 
         _LOGGER.debug("setting up with  account %s", account)
         if account not in self.spotifyTokenInstances:
@@ -191,7 +184,6 @@ class SpotcastController:
     def get_spotify_device_id(self, account, spotify_device_id, device_name, entity_id):
         # login as real browser to get powerful token
         access_token, expires = self.get_token_instance(account).get_spotify_token()
-        _LOGGER.debug("get_spotify_device_id: %s %s", account, access_token)
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
         # first, rely on spotify id given in config
@@ -212,3 +204,95 @@ class SpotcastController:
                 get_spotify_devices(self.hass, me_resp["id"])
             )
         return spotify_device_id
+
+    def play(
+        self,
+        client,
+        spotify_device_id,
+        uri,
+        random_song,
+        position,
+        ignore_fully_played,
+    ):
+        _LOGGER.debug(
+            "Playing URI: %s on device-id: %s",
+            uri,
+            spotify_device_id,
+        )
+        if uri.find("show") > 0:
+            show_episodes_info = client.show_episodes(uri)
+            if show_episodes_info and len(show_episodes_info["items"]) > 0:
+                if ignore_fully_played:
+                    for episode in show_episodes_info["items"]:
+                        if not episode["resume_point"]["fully_played"]:
+                            episode_uri = episode["external_urls"]["spotify"]
+                            break
+                else:
+                    episode_uri = show_episodes_info["items"][0]["external_urls"][
+                        "spotify"
+                    ]
+                _LOGGER.debug(
+                    "Playing episode using uris (latest podcast playlist)= for uri: %s",
+                    episode_uri,
+                )
+                client.start_playback(device_id=spotify_device_id, uris=[episode_uri])
+        elif uri.find("episode") > 0:
+            _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
+            client.start_playback(device_id=spotify_device_id, uris=[uri])
+
+        elif uri.find("track") > 0:
+            _LOGGER.debug("Playing track using uris= for uri: %s", uri)
+            client.start_playback(device_id=spotify_device_id, uris=[uri])
+        else:
+            if uri == "random":
+                _LOGGER.debug(
+                    "Cool, you found the easter egg with playing a random playlist"
+                )
+                playlists = client.user_playlists("me", 50)
+                no_playlists = len(playlists["items"])
+                uri = playlists["items"][random.randint(0, no_playlists - 1)]["uri"]
+            kwargs = {"device_id": spotify_device_id, "context_uri": uri}
+
+            if random_song:
+                if uri.find("album") > 0:
+                    results = client.album_tracks(uri)
+                    position = random.randint(0, results["total"] - 1)
+                elif uri.find("playlist") > 0:
+                    results = client.playlist_tracks(uri)
+                    position = random.randint(0, results["total"] - 1)
+                _LOGGER.debug("Start playback at random position: %s", position)
+            if uri.find("artist") < 1:
+                kwargs["offset"] = {"position": position}
+            _LOGGER.debug(
+                'Playing context uri using context_uri for uri: "%s" (random_song: %s)',
+                uri,
+                random_song,
+            )
+            client.start_playback(**kwargs)
+
+    def get_playlists(self, account, playlist_type, country_code, locale, limit):
+        client = self.get_spotify_client(account)
+        resp = {}
+
+        if playlist_type == "discover-weekly":
+            resp = client._get(
+                "views/made-for-x",
+                content_limit=limit,
+                locale=locale,
+                platform="web",
+                types="album,playlist,artist,show,station",
+                limit=limit,
+                offset=0,
+            )
+            resp = resp.get("content")
+        elif playlist_type == "featured":
+            resp = client.featured_playlists(
+                locale=locale,
+                country=country_code,
+                timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+                limit=limit,
+                offset=0,
+            )
+            resp = resp.get("playlists")
+        else:
+            resp = client.current_user_playlists(limit=limit)
