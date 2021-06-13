@@ -155,8 +155,9 @@ class SpotcastController:
     hass = None
 
     def __init__(self, hass, sp_dc, sp_key, accounts):
+	if accounts:
+            self.accounts = accounts
         accounts["default"] = OrderedDict([("sp_dc", sp_dc), ("sp_key", sp_key)])
-        self.accounts = accounts
         self.hass = hass
 
     def get_token_instance(self, account=None):
