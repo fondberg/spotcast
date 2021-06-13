@@ -296,3 +296,5 @@ class SpotcastController:
             resp = resp.get("playlists")
         else:
             resp = client.current_user_playlists(limit=limit)
+
+        return resp
