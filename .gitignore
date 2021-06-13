@@ -4,6 +4,9 @@
 /manifest.json
 /reuse.py
 /sensor.py
+/spotcast_controller.py
+/helpers.py
+/const.py
 /services.yaml
 
 # Byte-compiled / optimized / DLL files
