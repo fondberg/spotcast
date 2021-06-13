@@ -155,7 +155,7 @@ class SpotcastController:
     hass = None
 
     def __init__(self, hass, sp_dc, sp_key, accs):
-        if accounts:
+        if accs:
             self.accounts = accs
         self.accounts["default"] = OrderedDict([("sp_dc", sp_dc), ("sp_key", sp_key)])
         self.hass = hass
