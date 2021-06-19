@@ -27,6 +27,10 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 
 ## Configuration
 
+### Minimum Home Assistant version
+
+Spotcast is compatible with any version since 2021.4.1.
+
 ### Official Spotify Integration
 
 Note that as of v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.

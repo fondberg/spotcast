@@ -1,6 +1,6 @@
 {
   "domain": "spotcast",
-  "name": "Start Spotify on chromecast",
+  "name": "Spotcast",
   "documentation": "https://github.com/fondberg/spotcast",
   "issue_tracker": "https://github.com/fondberg/spotcast/issues",
   "iot_class": "cloud_polling",
