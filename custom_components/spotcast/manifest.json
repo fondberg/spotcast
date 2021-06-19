@@ -7,7 +7,7 @@
   "requirements": [
     "spotify_token==1.0.0"
   ],
-  "version": "3.6.0",
+  "version": "3.6.2",
   "dependencies": [
     "spotify"
   ],
