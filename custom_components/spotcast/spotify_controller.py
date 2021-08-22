@@ -24,7 +24,6 @@ class SpotifyController(BaseController):
     """Controller to interact with Spotify namespace."""
 
     def __init__(self, access_token=None, expires=None):
-        #super().__init__(APP_NAMESPACE, APP_SPOTIFY)
         super(SpotifyController, self).__init__(APP_NAMESPACE, APP_SPOTIFY)
 
         self.logger = logging.getLogger(__name__)
