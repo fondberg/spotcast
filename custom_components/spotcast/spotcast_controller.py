@@ -9,8 +9,9 @@ import spotify_token as st
 import spotipy
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from homeassistant.exceptions import HomeAssistantError
-from pychromecast.controllers.spotify import SpotifyController
+#from pychromecast.controllers.spotify import SpotifyController
 
+from .spotify_controller import SpotifyController
 from .const import CONF_SP_DC, CONF_SP_KEY
 from .helpers import get_cast_devices, get_spotify_devices
 

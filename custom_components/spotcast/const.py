@@ -3,6 +3,8 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 
+APP_SPOTIFY = "CC32E753"
+
 DOMAIN = "spotcast"
 
 CONF_SPOTIFY_DEVICE_ID = "spotify_device_id"
