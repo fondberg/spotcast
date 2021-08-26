@@ -98,7 +98,7 @@ class ChromecastPlaylistSensor(SensorEntity):
         resp = self.hass.data[DOMAIN]["controller"].get_playlists(
             account, playlist_type, country_code, locale, limit
         )
-        self._attributes["playlists"] = [{ "uri": x.uri, "name": x.name} for x in resp.items ]
+        self._attributes["playlists"] = [{ "uri": x['uri'], "name": x['name']} for x in resp['items'] ]
 
         self._attributes["last_update"] = dt.now().isoformat("T")
         self._state = STATE_OK
