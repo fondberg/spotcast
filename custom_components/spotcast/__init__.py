@@ -50,6 +50,10 @@ def setup(hass, config):
 
     spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
 
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+    hass.data[DOMAIN]["controller"] = spotcast_controller
+
     @callback
     def websocket_handle_playlists(hass, connection, msg):
         @async_wrap

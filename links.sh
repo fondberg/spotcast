@@ -5,3 +5,4 @@ ln -s custom_components/spotcast/services.yaml .
 ln -s custom_components/spotcast/const.py .
 ln -s custom_components/spotcast/helpers.py .
 ln -s custom_components/spotcast/spotcast_controller.py .
+ln -s custom_components/spotcast/spotify_controller.py .

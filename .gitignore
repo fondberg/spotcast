@@ -5,6 +5,7 @@
 /reuse.py
 /sensor.py
 /spotcast_controller.py
+/spotify_controller.py
 /helpers.py
 /const.py
 /services.yaml
