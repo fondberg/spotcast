@@ -97,8 +97,8 @@ start:
           step: 1
           min: 0
           max: 100
-
     ignore_fully_played:
+      name: "Ignore Fully Played"
       description: "Set to ignore or not already played episodes in a podcast playlist"
       example: true
       required: false
