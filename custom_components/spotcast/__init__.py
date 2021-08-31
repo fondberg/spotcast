@@ -164,7 +164,8 @@ def setup(hass, config):
 
             if uri is None or uri.strip() == "":
                 # get uri from search request
-                uri = helpers.get_uri_from_search(search, account)
+                token, expires = spotcast_controller.get_token_instance(account).get_spotify_token()
+                uri = helpers.get_uri_from_search(search, token)
 
             spotcast_controller.play(
                 client,

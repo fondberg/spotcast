@@ -10,7 +10,7 @@ DOMAIN = "spotcast"
 CONF_SPOTIFY_DEVICE_ID = "spotify_device_id"
 CONF_DEVICE_NAME = "device_name"
 CONF_SPOTIFY_URI = "uri"
-CONF_SPOTIFY_SEARCH
+CONF_SPOTIFY_SEARCH = "search"
 CONF_ACCOUNTS = "accounts"
 CONF_SPOTIFY_ACCOUNT = "account"
 CONF_FORCE_PLAYBACK = "force_playback"
