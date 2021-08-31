@@ -18,7 +18,7 @@ start:
     entity_id:
       name: "Entity ID"
       description: "The entity_id of the chromecast mediaplayer. Friendly name MUST match the spotify connect device name (not used together with device_name and spotify_device_id)."
-      example:  "media_player.vardagsrum"
+      example: "media_player.vardagsrum"
       required: false
       selector:
         entity:
@@ -28,6 +28,13 @@ start:
       name: "URI"
       description: "Supported Spotify URI as string. None or empty uri will transfer the current/last playback (see parameter force_playback)."
       example: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+      required: false
+      selector:
+        text:
+
+    search:
+      name: "Search"
+      description: "A Search request to the spotify API. Will play the most relevant search result."
       required: false
       selector:
         text:

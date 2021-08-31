@@ -17,6 +17,7 @@ from .const import (
     CONF_SPOTIFY_ACCOUNT,
     CONF_SPOTIFY_DEVICE_ID,
     CONF_SPOTIFY_URI,
+    CONF_SPOTIFY_SEARCH,
     CONF_START_VOL,
     DOMAIN,
     SCHEMA_PLAYLISTS,
@@ -128,6 +129,7 @@ def setup(hass, config):
     def start_casting(call):
         """service called."""
         uri = call.data.get(CONF_SPOTIFY_URI)
+        search = call.data.get(CONF_SPOTIFY_SEARCH)
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT, False)
         shuffle = call.data.get(CONF_SHUFFLE, False)
@@ -148,7 +150,7 @@ def setup(hass, config):
                 account, spotify_device_id, device_name, entity_id
             )
 
-        if uri is None or uri.strip() == "":
+        if (uri is None or uri.strip() == "") and (search is None or search.strip() == ""):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
             if current_playback is not None:
@@ -159,6 +161,11 @@ def setup(hass, config):
                 device_id=spotify_device_id, force_play=force_playback
             )
         else:
+
+            if uri is None or uri.strip() == "":
+                # get uri from search request
+                uri = helpers.get_uri_from_search(search, account)
+
             spotcast_controller.play(
                 client,
                 spotify_device_id,

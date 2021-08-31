@@ -1,10 +1,14 @@
 import asyncio
 import logging
+import requests
+import urllib
+import difflib
 from functools import partial, wraps
 
 from homeassistant.components.cast.media_player import CastDevice
 from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.helpers import entity_platform
+from .spotcast_controller import SpotcastController
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,3 +64,39 @@ def async_wrap(func):
         return await loop.run_in_executor(executor, pfunc)
 
     return run
+
+def get_uri_from_search(search, account):
+    
+    # Get Token
+    token, expires = SpotcastController.get_token_instance(account).get_spotify_token()
+
+    results = __get_search_results(search, token)
+
+def __get_search_results(search, token)
+    BASE_URL = "https://api.spotify.com/v1/search?q="
+    SEARCH_TYPES = ["artist", "album", "track", "playlist"]
+
+    search = search.upper()
+
+    headers = {
+        'Authorization': 'Bearer {token}'.format(token=token)
+    }
+
+    results = []
+
+    for searchType in SEARCH_TYPES
+        result = requests.get(
+            BASE_URL +
+            searchType + "%3A" + urllib.parse.quote(search, safe='') +
+            "&type=" + searchType +
+            "&limit=1",
+            headers=headers).json()[searchType + 's']['items'][0]
+
+        results.append(
+            {
+                'name':result['name'].lower(),
+                'uri': result['uri']
+            }
+        )
+
+    return sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)
