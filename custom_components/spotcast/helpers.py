@@ -64,42 +64,32 @@ def async_wrap(func):
 
     return run
 
-def get_uri_from_search(search, token):
-
-    results = __get_search_results(search, token)
-
-    return results[0]['name']
-
-def __get_search_results(search, token):
-    BASE_URL = "https://api.spotify.com/v1/search?q="
+def get_search_results(search, spotify_client):
+    
     SEARCH_TYPES = ["artist", "album", "track", "playlist"]
 
     search = search.upper()
 
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=token)
-    }
-
     results = []
 
     for searchType in SEARCH_TYPES:
-        
-        try:
-            result = requests.get(
-                BASE_URL +
-                searchType + "%3A" + urllib.parse.quote(search, safe='') +
-                "&type=" + searchType +
-                "&limit=1",
-                headers=headers).json()[searchType + 's']['items'][0]
 
-        
+        try:
+    
+            result = spotify_client.search(
+                searchType + ":" + urllib.parse.quote(search, safe=''),
+                limit=1,
+                offset=0,
+                type=searchType)[searchType + 's']['items'][0]
+
             results.append(
                 {
-                    'name':result['name'].upper(),
+                    'name': result['name'].upper(),
                     'uri': result['uri']
                 }
             )
+
         except IndexError:
             pass
 
-    return sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)
+    return sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]['uri']
