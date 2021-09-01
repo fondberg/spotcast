@@ -77,7 +77,7 @@ def get_search_results(search, spotify_client):
         try:
     
             result = spotify_client.search(
-                searchType + ":" + urllib.parse.quote(search, safe=''),
+                searchType + ":" + search,
                 limit=1,
                 offset=0,
                 type=searchType)[searchType + 's']['items'][0]

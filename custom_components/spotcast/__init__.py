@@ -164,7 +164,7 @@ def setup(hass, config):
 
             if uri is None or uri.strip() == "":
                 # get uri from search request
-                uri = helpers.get_uri_from_search(search, client)
+                uri = helpers.get_search_results(search, client)
 
             spotcast_controller.play(
                 client,
