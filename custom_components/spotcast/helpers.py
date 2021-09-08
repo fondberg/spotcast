@@ -65,6 +65,8 @@ def async_wrap(func):
     return run
 
 def get_search_results(search, spotify_client):
+
+    _LOGGER.debug("using search query to find uri")
     
     SEARCH_TYPES = ["artist", "album", "track", "playlist"]
 
@@ -89,7 +91,13 @@ def get_search_results(search, spotify_client):
                 }
             )
 
+            _LOGGER.debug("search result for %s: %s", searchType, result['name'])
+
         except IndexError:
             pass
 
-    return sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]['uri']
+    bestMatch = sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]
+
+    _LOGGER.debug("Best match for %s is %s", search. bestMatch['name'])
+
+    return bestMatch['uri']
