@@ -98,6 +98,6 @@ def get_search_results(search, spotify_client):
 
     bestMatch = sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]
 
-    _LOGGER.debug("Best match for %s is %s", search. bestMatch['name'])
+    _LOGGER.debug("Best match for %s is %s", search, bestMatch['name'])
 
     return bestMatch['uri']
