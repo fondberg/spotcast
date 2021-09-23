@@ -1,5 +1,8 @@
 import asyncio
 import logging
+import requests
+import urllib
+import difflib
 from functools import partial, wraps
 
 from homeassistant.components.cast.media_player import CastDevice
@@ -60,3 +63,41 @@ def async_wrap(func):
         return await loop.run_in_executor(executor, pfunc)
 
     return run
+
+def get_search_results(search, spotify_client):
+
+    _LOGGER.debug("using search query to find uri")
+    
+    SEARCH_TYPES = ["artist", "album", "track", "playlist"]
+
+    search = search.upper()
+
+    results = []
+
+    for searchType in SEARCH_TYPES:
+
+        try:
+    
+            result = spotify_client.search(
+                searchType + ":" + search,
+                limit=1,
+                offset=0,
+                type=searchType)[searchType + 's']['items'][0]
+
+            results.append(
+                {
+                    'name': result['name'].upper(),
+                    'uri': result['uri']
+                }
+            )
+
+            _LOGGER.debug("search result for %s: %s", searchType, result['name'])
+
+        except IndexError:
+            pass
+
+    bestMatch = sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]
+
+    _LOGGER.debug("Best match for %s is %s", search, bestMatch['name'])
+
+    return bestMatch['uri']

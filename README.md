@@ -123,6 +123,7 @@ where:
 * `spotify_device_id` is the device ID of the Spotify Connect device 
 * `device_name` is the friendly name of the chromecast device
 * `uri` is the Spotify uri, supports all uris including track (limit to one track)
+* `search` is a search query to resolve into a uri. This parameter will be overlooked if a uri is provided
 * `random_song` optional parameter that starts the playback at a random position in the playlist
 * `repeat` optional parameter that repeats the playlist/track
 * `shuffle` optional parameter to set shuffle mode for playback
@@ -161,6 +162,17 @@ To use the Spotcast service with a Spotify Connect device, you need the `spotify
       start_volume: 50
       entity_id: media_player.gh_kok
     service: spotcast.start
+```
+
+```yaml
+- service: spotcast.start
+  data:
+    search: "Brown Bird"
+    # resolve to spotify:artist:5zzbSFZMVpvxSlWAkqqtHP at the time of writing
+    random_song: true
+    shuffle: true
+    start_volume: 50
+    entity_id: media_player.cuisine
 ```
 
 ### Transfer current playback for the account
