@@ -45,6 +45,7 @@ def setup(hass, config):
     
     # get spotify core integration status
     if not helpers.get_spotify_install_status(hass):
+        _LOGGER.error("Spotify integration was not found, aborting setup...")
         return False
     
     """Setup the Spotcast service."""
