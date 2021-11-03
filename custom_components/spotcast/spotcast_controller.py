@@ -276,16 +276,10 @@ class SpotcastController:
         resp = {}
 
         if playlist_type == "discover-weekly":
-            resp = client._get(
-                "views/made-for-x",
-                content_limit=limit,
-                locale=locale,
-                platform="web",
-                types="album,playlist,artist,show,station",
-                limit=limit,
-                offset=0,
-            )
-            resp = resp.get("content")
+            playlist_type = "made-for-x"
+        
+        if playlist_type == "user" or playlist_type == "default" or playlist_type == "":
+            resp = client.current_user_playlists(limit=limit)
         elif playlist_type == "featured":
             resp = client.featured_playlists(
                 locale=locale,
@@ -296,6 +290,15 @@ class SpotcastController:
             )
             resp = resp.get("playlists")
         else:
-            resp = client.current_user_playlists(limit=limit)
+            resp = client._get(
+                "views/" + playlist_type,
+                content_limit=limit,
+                locale=locale,
+                platform="web",
+                types="album,playlist,artist,show,station",
+                limit=limit,
+                offset=0,
+            )
+            resp = resp.get("content")
 
         return resp
