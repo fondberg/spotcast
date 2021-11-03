@@ -287,13 +287,22 @@ friendly_name: Chromecast Devices
 ## Websocket API
 
 The components websocket api.
+
+Method: `spotcast/playlist` supporting different `playlist_type`s.
+
+* `user`, or `default` for user chosen saved playlists
+* `featured` for spotify "featured" playlists (not personalized)
+* `discover-weekly` for personalized "Made for _____" (includes daily mixes)
+* `recently-played` for "Recently Played"
+* ... any other `view id` as found in the API at https://api.spotify.com/v1/views/personalized-recommendations
+
 Example usage:
 
 ```python
 // Retrieve playlists
 const res = await this.props.hass.callWS({
   type: 'spotcast/playlists',
-  playlist_type: 'featured', // one of 'user', 'discover-weekly' and 'featured'
+  playlist_type: 'featured', // 'user' for saved playlists, 'featured' for spotify featured, or personalized view id
   country_code: 'SV', // Optional country code used by featured playlists
   limit: 20, // Optional limit, default is 10
   account: 'ming' // optional account name
