@@ -12,7 +12,8 @@
     "spotify"
   ],
   "after_dependencies": [
-    "cast"
+    "cast",
+    "spotify"
   ],
   "codeowners": [
     "@fondberg"
