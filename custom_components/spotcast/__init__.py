@@ -44,9 +44,10 @@ _LOGGER = logging.getLogger(__name__)
 def setup(hass, config):
 
     # get spotify core integration status
+    # if return false, could indicate a bad spotify integration. Race
+    # condition doesn't permit us to abort setup, see #258
     if not helpers.get_spotify_install_status(hass):
-        _LOGGER.error("Spotify integration was not found, please verify integration is functionnal. Could result in python error...")
-        return False
+        _LOGGER.debug("Spotify integration was not found, please verify integration is functionnal. Could result in python error...")
 
     """Setup the Spotcast service."""
     conf = config[DOMAIN]

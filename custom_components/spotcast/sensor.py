@@ -89,7 +89,7 @@ class ChromecastPlaylistSensor(SensorEntity):
     def update(self):
         _LOGGER.debug("Getting playlists")
 
-        playlist_type = "playlists"
+        playlist_type = "user"
         country_code = "SE"
         locale = "en"
         limit = 10
