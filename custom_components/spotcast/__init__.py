@@ -124,9 +124,9 @@ def setup(hass, config):
         _LOGGER.debug("%s", known_devices)
         resp = [
             {
-                "uuid": cast_info.uuid,
-                "model_name": cast_info.model_name,
-                "friendly_name": cast_info.friendly_name,
+                "uuid": str(cast_info.cast_info.uuid),
+                "model_name": cast_info.cast_info.model_name,
+                "friendly_name": cast_info.cast_info.friendly_name,
             }
             for cast_info in known_devices
         ]
