@@ -68,7 +68,7 @@ class SpotifyCastDevice:
         _LOGGER.debug("cast info: %s", cast_info)
         if cast_info:
             return pychromecast.get_chromecast_from_cast_info(
-                cast_info, ChromeCastZeroconf.get_zeroconf()
+                cast_info.cast_info, ChromeCastZeroconf.get_zeroconf()
             )
         _LOGGER.error(
             "Could not find device %s from hass.data",
