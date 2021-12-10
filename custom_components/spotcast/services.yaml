@@ -32,6 +32,29 @@ start:
       selector:
         text:
 
+    category:
+      name: "Category"
+      description: "A category to fetch playlist from. See https://developer.spotify.com/console/get-browse-categories/ for a list of categories"
+      required: false
+      selector:
+        text:
+    country:
+      name: "Country"
+      description: "Country code to use with category. See https://spotipy.readthedocs.io/en/2.19.0/#spotipy.client.Spotify.country_codes for list of available codes"
+      required: false
+      selector:
+        text:
+    limit:
+      name: "Limit"
+      description: "Limit of playlist to fetch in a given category. Default 20"
+      required: false
+      default: 20
+      selector:
+        number:
+          mode: box
+          step: 1
+          min: 0
+          max: 50
     search:
       name: "Search"
       description: "A Search request to the spotify API. Will play the most relevant search result."
