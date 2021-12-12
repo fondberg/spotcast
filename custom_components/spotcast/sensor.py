@@ -38,7 +38,7 @@ class ChromecastDevicesSensor(SensorEntity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the state attributes."""
         return self._attributes
 
@@ -50,12 +50,11 @@ class ChromecastDevicesSensor(SensorEntity):
 
         chromecasts = [
             {
-                "host": "deprecated",
-                "port": "deprecated",
-                "uuid": cast_info.uuid,
-                "model_name": cast_info.model_name,
-                "name": cast_info.friendly_name,
-                "manufacturer": cast_info.manufacturer,
+                "uuid": str(cast_info.cast_info.uuid),
+                "model_name": cast_info.cast_info.model_name,
+                "name": cast_info.cast_info.friendly_name,
+                "manufacturer": cast_info.cast_info.manufacturer,
+                "cast_type": cast_info.cast_info.cast_type,
             }
             for cast_info in known_devices
         ]
@@ -82,7 +81,7 @@ class ChromecastPlaylistSensor(SensorEntity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the state attributes."""
         return self._attributes
 
