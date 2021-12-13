@@ -120,7 +120,7 @@ def get_random_playlist_from_category(spotify_client, category, country=None, li
     _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
     playlists = spotify_client.category_playlists(category_id=category, country=country, limit=limit)["playlists"]["items"]
     chosen = random.choice(playlists)
-    _LOGGER.debug(f"Choosed playlist {chosen['name']} ({chosen['uri']}) from category {category}.")
+    _LOGGER.debug(f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}.")
 
     return chosen['uri']
 
