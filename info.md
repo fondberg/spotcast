@@ -14,7 +14,7 @@ Used by https://github.com/custom-cards/spotify-card.
 
 ## Minimum Home Assistant version
 
-Spotcast is compatible with any version since 2021.4.1.
+Spotcast is compatible with any version since 2021.12.0.
 
 ## Official Spotify integration
 
