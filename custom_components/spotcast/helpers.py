@@ -114,3 +114,38 @@ def get_search_results(search, spotify_client):
     _LOGGER.debug("Best match for %s is %s", search, bestMatch['name'])
 
     return bestMatch['uri']
+
+def is_valid_uri(uri: str) -> bool:
+    
+    # list of possible types
+    types = [
+        "artist",
+        "album",
+        "track",
+        "playlist",
+        "show",
+        "episode"
+    ]
+
+    # split the string
+    elems = uri.split(":")
+
+    # validate number of sub elements
+    if len(elems) != 3:
+        _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [Spotify.<type>.<unique_id>]")
+        return False
+
+    # check correct format of the sub elements
+    if elems[0].lower() != "spotify":
+        _LOGGER.error(f"This is not a valid Spotify URI. This shoould start with [spotify], but instead starts with [{elems[0]}]")
+        return False
+
+    if elems[1].lower() not in types:
+        _LOGGER.error(f"{elems[1]} is not a valid type for Spotify request. Please make sure to use the following list {str(types)}")
+        return False
+
+    if "?" in elems[2]:
+        _LOGGER.warning(f"{elems[2]} contains query character. This should work, but you should probably remove it.")
+    
+    # return True if all test passes
+    return True
