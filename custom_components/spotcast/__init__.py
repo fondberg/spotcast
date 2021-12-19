@@ -152,7 +152,7 @@ def setup(hass, config):
         client = spotcast_controller.get_spotify_client(account)
 
         # verify the uri provided and clean-up if required
-        if helpers.is_valid_uri(uri):
+        if not helpers.is_valid_uri(uri):
             _LOGGER.error("Invalid URI provided, aborting casting")
             return
 
