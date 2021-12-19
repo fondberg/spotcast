@@ -137,7 +137,7 @@ def is_valid_uri(uri: str) -> bool:
 
     # check correct format of the sub elements
     if elems[0].lower() != "spotify":
-        _LOGGER.error(f"This is not a valid Spotify URI. This shoould start with [spotify], but instead starts with [{elems[0]}]")
+        _LOGGER.error(f"This is not a valid Spotify URI. This should start with [spotify], but instead starts with [{elems[0]}]")
         return False
 
     if elems[1].lower() not in types:
@@ -145,7 +145,7 @@ def is_valid_uri(uri: str) -> bool:
         return False
 
     if "?" in elems[2]:
-        _LOGGER.warning(f"{elems[2]} contains query character. This should work, but you should probably remove it.")
+        _LOGGER.warning(f"{elems[2]} contains query character. This should work, but you should probably remove it and anything after.")
     
     # return True if all test passes
     return True
