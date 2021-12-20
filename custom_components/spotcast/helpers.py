@@ -10,6 +10,9 @@ from homeassistant.components.cast.media_player import CastDevice
 from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.helpers import entity_platform
 
+# import for type inference
+import spotipy
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -78,7 +81,7 @@ def async_wrap(func):
 
     return run
 
-def get_search_results(search, spotify_client):
+def get_search_results(search:str, spotify_client:spotipy.Spotify) -> str:
 
     _LOGGER.debug("using search query to find uri")
 
@@ -116,10 +119,31 @@ def get_search_results(search, spotify_client):
 
     return bestMatch['uri']
 
-def get_random_playlist_from_category(spotify_client, category, country=None, limit=20):
+def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:str, country:str=None, limit:int=20) -> str:
     _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+
+    # validate category and country are valid entries
+    if country.upper() not in spotify_client.country_codes:
+        _LOGGER.error(f"{country} is not a valid country code")
+        return None
+    
+    is_found = False
+
+    for item in spotify_client.categories(country=country, limit=50)["categories"]["items"]:
+        if item["id"].upper() == category.upper():
+           is_found = True
+           break 
+
+    if not is_found:
+        _LOGGER.error(f"{category} is not a valid category code")
+        return None
+    
+    # get list of playlist from category and localisation provided
     playlists = spotify_client.category_playlists(category_id=category, country=country, limit=limit)["playlists"]["items"]
+
+    # choose one at random
     chosen = random.choice(playlists)
+
     _LOGGER.debug(f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}.")
 
     return chosen['uri']
