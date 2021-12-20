@@ -22,6 +22,7 @@ A clear and concise description of what the bug is.
 
 
 **Environment (please complete the following information):**
+ - Installation type: [HA_OS|Container|Supervised|Core]
  - HA version: [ ]
  - spotcast version: [ ]
 
