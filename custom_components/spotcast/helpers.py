@@ -175,3 +175,6 @@ def is_valid_uri(uri: str) -> bool:
     
     # return True if all test passes
     return True
+
+def is_empty_str(string:str) -> bool:
+    return string is None or string.strip() == ""

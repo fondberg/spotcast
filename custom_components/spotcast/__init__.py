@@ -58,6 +58,9 @@ def setup(hass, config):
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
+    country = conf[CONF_SPOTIFY_COUNTRY]
+
+    _LOGGER.debug(type(country))
 
     spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
 
@@ -158,7 +161,7 @@ def setup(hass, config):
         client = spotcast_controller.get_spotify_client(account)
 
         # verify the uri provided and clean-up if required
-        if not (uri is None or uri.strip() == ""):
+        if not helpers.is_empty_str(uri):
             if not helpers.is_valid_uri(uri):
                 _LOGGER.error("Invalid URI provided, aborting casting")
                 return
@@ -171,7 +174,7 @@ def setup(hass, config):
                 account, spotify_device_id, device_name, entity_id
             )
 
-        if (uri is None or uri.strip() == "") and (search is None or search.strip() == "") and (category is None or category.strip() == ""):
+        if helpers.is_empty_str(uri) and helpers.is_empty_str(search) and helpers.is_empty_str(category):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
             if current_playback is not None:
@@ -198,7 +201,7 @@ def setup(hass, config):
             )
         else:
 
-            if uri is None or uri.strip() == "":
+            if helpers.is_empty_str(uri):
                 # get uri from search request
                 uri = helpers.get_search_results(search, client)
 
