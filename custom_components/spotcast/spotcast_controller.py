@@ -229,9 +229,6 @@ class SpotcastController:
             spotify_device_id,
         )
 
-        # clean uri
-        uri = self._clean_uri(uri)
-
         if uri.find("show") > 0:
             show_episodes_info = client.show_episodes(uri)
             if show_episodes_info and len(show_episodes_info["items"]) > 0:
