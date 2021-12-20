@@ -120,10 +120,13 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 
 where:
 
-* `spotify_device_id` is the device ID of the Spotify Connect device 
+* `spotify_device_id` is the device ID of the Spotify Connect device
 * `device_name` is the friendly name of the chromecast device
 * `uri` is the Spotify uri, supports all uris including track (limit to one track)
 * `search` is a search query to resolve into a uri. This parameter will be overlooked if a uri is provided
+* `category` let spotify pick a random playlist inside a given [category](https://developer.spotify.com/console/get-browse-categories/)
+* `country` restrict country to use when looking for playlists inside a category
+* `limit` restrict number of playlists to return when looking in a category. Note that only a single playlist will be chosen randomly from them.
 * `random_song` optional parameter that starts the playback at a random position in the playlist
 * `repeat` optional parameter that repeats the playlist/track
 * `shuffle` optional parameter to set shuffle mode for playback
@@ -132,7 +135,7 @@ where:
 Optionally you can specify the `entity_id` of an existing Home Assistant chromecast media-player like:
 
 ```json
-{ 
+{
   "entity_id" : "media_player.vardagsrum",
   "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
@@ -322,7 +325,7 @@ const res = await this.props.hass.callWS({
 ```
 
 ## Enabling debug log
-In configuration.yaml for you HA add and attach those the relevant logs. 
+In configuration.yaml for you HA add and attach those the relevant logs.
 Be sure to disable it later as it is quite noisy.
 ```
 logger:

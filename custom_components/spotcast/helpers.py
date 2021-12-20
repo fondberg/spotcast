@@ -3,6 +3,7 @@ import logging
 import requests
 import urllib
 import difflib
+import random
 from functools import partial, wraps
 
 from homeassistant.components.cast.media_player import CastDevice
@@ -80,7 +81,7 @@ def async_wrap(func):
 def get_search_results(search, spotify_client):
 
     _LOGGER.debug("using search query to find uri")
-    
+
     SEARCH_TYPES = ["artist", "album", "track", "playlist"]
 
     search = search.upper()
@@ -90,7 +91,7 @@ def get_search_results(search, spotify_client):
     for searchType in SEARCH_TYPES:
 
         try:
-    
+
             result = spotify_client.search(
                 searchType + ":" + search,
                 limit=1,
@@ -114,6 +115,14 @@ def get_search_results(search, spotify_client):
     _LOGGER.debug("Best match for %s is %s", search, bestMatch['name'])
 
     return bestMatch['uri']
+
+def get_random_playlist_from_category(spotify_client, category, country=None, limit=20):
+    _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+    playlists = spotify_client.category_playlists(category_id=category, country=country, limit=limit)["playlists"]["items"]
+    chosen = random.choice(playlists)
+    _LOGGER.debug(f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}.")
+
+    return chosen['uri']
 
 def is_valid_uri(uri: str) -> bool:
     

@@ -18,6 +18,9 @@ from .const import (
     CONF_SPOTIFY_DEVICE_ID,
     CONF_SPOTIFY_URI,
     CONF_SPOTIFY_SEARCH,
+    CONF_SPOTIFY_CATEGORY,
+    CONF_SPOTIFY_COUNTRY,
+    CONF_SPOTIFY_LIMIT,
     CONF_START_VOL,
     DOMAIN,
     SCHEMA_PLAYLISTS,
@@ -136,6 +139,9 @@ def setup(hass, config):
     def start_casting(call):
         """service called."""
         uri = call.data.get(CONF_SPOTIFY_URI)
+        category = call.data.get(CONF_SPOTIFY_CATEGORY)
+        country = call.data.get(CONF_SPOTIFY_COUNTRY)
+        limit = call.data.get(CONF_SPOTIFY_LIMIT)
         search = call.data.get(CONF_SPOTIFY_SEARCH)
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT, False)
@@ -165,7 +171,7 @@ def setup(hass, config):
                 account, spotify_device_id, device_name, entity_id
             )
 
-        if (uri is None or uri.strip() == "") and (search is None or search.strip() == ""):
+        if (uri is None or uri.strip() == "") and (search is None or search.strip() == "") and (category is None or category.strip() == ""):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
             if current_playback is not None:
@@ -174,6 +180,17 @@ def setup(hass, config):
             _LOGGER.debug("Force playback: %s", force_playback)
             client.transfer_playback(
                 device_id=spotify_device_id, force_play=force_playback
+            )
+        elif category:
+            uri = helpers.get_random_playlist_from_category(client, category, country, limit)
+
+            spotcast_controller.play(
+                client,
+                spotify_device_id,
+                uri,
+                random_song,
+                position,
+                ignore_fully_played,
             )
         else:
 
