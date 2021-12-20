@@ -58,7 +58,11 @@ def setup(hass, config):
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
-    country = conf[CONF_SPOTIFY_COUNTRY]
+    
+    try:
+        country = conf[CONF_SPOTIFY_COUNTRY]
+    except KeyError:
+        country = None
 
     _LOGGER.debug(type(country))
 
