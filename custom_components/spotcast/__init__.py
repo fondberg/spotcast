@@ -184,6 +184,10 @@ def setup(hass, config):
         elif category:
             uri = helpers.get_random_playlist_from_category(client, category, country, limit)
 
+            if uri is None:
+                _LOGGER.error("No playlist returned. Stop service call")
+                return None
+
             spotcast_controller.play(
                 client,
                 spotify_device_id,
