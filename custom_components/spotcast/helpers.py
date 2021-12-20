@@ -127,19 +127,12 @@ def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:s
         _LOGGER.error(f"{country} is not a valid country code")
         return None
     
-    is_found = False
-
-    for item in spotify_client.categories(country=country, limit=50)["categories"]["items"]:
-        if item["id"].upper() == category.upper():
-           is_found = True
-           break 
-
-    if not is_found:
-        _LOGGER.error(f"{category} is not a valid category code")
-        return None
-    
     # get list of playlist from category and localisation provided
-    playlists = spotify_client.category_playlists(category_id=category, country=country, limit=limit)["playlists"]["items"]
+    try:
+        playlists = spotify_client.category_playlists(category_id=category, country=country, limit=limit)["playlists"]["items"]
+    except spotipy.exceptions.SpotifyException as e:
+        _LOGGER.error(e.msg)
+        return None
 
     # choose one at random
     chosen = random.choice(playlists)
