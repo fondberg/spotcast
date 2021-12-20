@@ -206,14 +206,6 @@ class SpotcastController:
             )
         return spotify_device_id
 
-
-    def _clean_uri(self, uri):
-
-        # remove anything after ?
-        uri = uri.split("?")[0]
-
-        return uri
-
     def play(
         self,
         client,
