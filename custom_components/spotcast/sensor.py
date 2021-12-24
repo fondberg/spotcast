@@ -8,7 +8,10 @@ from homeassistant.const import STATE_OK, STATE_UNKNOWN
 from homeassistant.util import dt
 
 from .helpers import get_cast_devices
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    CONF_SPOTIFY_COUNTRY
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +20,14 @@ SCAN_INTERVAL = timedelta(seconds=SENSOR_SCAN_INTERVAL_SECS)
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
+
+    conf = config[DOMAIN]
+    
+    try:
+        country = conf[CONF_SPOTIFY_COUNTRY]
+    except KeyError:
+        country = None
+
     add_devices([ChromecastDevicesSensor(hass)])
     add_devices([ChromecastPlaylistSensor(hass)])
 
@@ -66,7 +77,7 @@ class ChromecastDevicesSensor(SensorEntity):
 
 
 class ChromecastPlaylistSensor(SensorEntity):
-    def __init__(self, hass):
+    def __init__(self, hass, country=None):
         self.hass = hass
         self._state = STATE_UNKNOWN
         self._attributes = {"playlists": [], "last_update": None}

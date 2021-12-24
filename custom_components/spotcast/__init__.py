@@ -64,8 +64,6 @@ def setup(hass, config):
     except KeyError:
         country = None
 
-    _LOGGER.debug(type(country))
-
     spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
 
     if DOMAIN not in hass.data:
@@ -162,6 +160,13 @@ def setup(hass, config):
         device_name = call.data.get(CONF_DEVICE_NAME)
         entity_id = call.data.get(CONF_ENTITY_ID)
 
+        # if no market information try to get global setting
+        if helpers.is_empty_str(country):
+            try:
+                country = config[DOMAIN][CONF_SPOTIFY_COUNTRY]
+            except KeyError:
+                country = None
+
         client = spotcast_controller.get_spotify_client(account)
 
         # verify the uri provided and clean-up if required
@@ -207,7 +212,7 @@ def setup(hass, config):
 
             if helpers.is_empty_str(uri):
                 # get uri from search request
-                uri = helpers.get_search_results(search, client)
+                uri = helpers.get_search_results(search, client, country)
 
             spotcast_controller.play(
                 client,

@@ -81,7 +81,7 @@ def async_wrap(func):
 
     return run
 
-def get_search_results(search:str, spotify_client:spotipy.Spotify) -> str:
+def get_search_results(search:str, spotify_client:spotipy.Spotify, country:str=None) -> str:
 
     _LOGGER.debug("using search query to find uri")
 
@@ -99,7 +99,8 @@ def get_search_results(search:str, spotify_client:spotipy.Spotify) -> str:
                 searchType + ":" + search,
                 limit=1,
                 offset=0,
-                type=searchType)[searchType + 's']['items'][0]
+                type=searchType,
+                market=country)[searchType + 's']['items'][0]
 
             results.append(
                 {
