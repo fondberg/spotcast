@@ -23,15 +23,8 @@ SCAN_INTERVAL = timedelta(seconds=SENSOR_SCAN_INTERVAL_SECS)
 
 def setup_platform(hass:ha_core.HomeAssistant, config:collections.OrderedDict, add_devices, discovery_info=None):
 
-    conf = config[DOMAIN]
-    
-    try:
-        country = conf[CONF_SPOTIFY_COUNTRY]
-    except KeyError:
-        country = None
-
     add_devices([ChromecastDevicesSensor(hass)])
-    add_devices([ChromecastPlaylistSensor(hass, country)])
+    add_devices([ChromecastPlaylistSensor(hass)])
 
 
 class ChromecastDevicesSensor(SensorEntity):
