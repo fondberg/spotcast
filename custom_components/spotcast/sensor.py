@@ -4,7 +4,6 @@ import json
 import logging
 from datetime import timedelta
 import homeassistant.core as ha_core
-import spotcast_controller
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_OK, STATE_UNKNOWN
