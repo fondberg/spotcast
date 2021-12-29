@@ -1,7 +1,10 @@
 """Sensor platform for Chromecast devices."""
+import collections
 import json
 import logging
 from datetime import timedelta
+import homeassistant.core as ha_core
+import spotcast_controller
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_OK, STATE_UNKNOWN
@@ -19,7 +22,7 @@ SENSOR_SCAN_INTERVAL_SECS = 60
 SCAN_INTERVAL = timedelta(seconds=SENSOR_SCAN_INTERVAL_SECS)
 
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+def setup_platform(hass:ha_core.HomeAssistant, config:collections.OrderedDict, add_devices, discovery_info=None):
 
     conf = config[DOMAIN]
     
@@ -29,7 +32,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         country = None
 
     add_devices([ChromecastDevicesSensor(hass)])
-    add_devices([ChromecastPlaylistSensor(hass)])
+    add_devices([ChromecastPlaylistSensor(hass, country)])
 
 
 class ChromecastDevicesSensor(SensorEntity):

@@ -1,9 +1,12 @@
+import collections
 import logging
 import time
+import homeassistant
 
 from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
+import homeassistant.core as ha_core
 
 from .const import (
     CONF_ACCOUNTS,
@@ -44,7 +47,7 @@ CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
 _LOGGER = logging.getLogger(__name__)
 
 
-def setup(hass, config):
+def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
 
     # get spotify core integration status
     # if return false, could indicate a bad spotify integration. Race
@@ -71,7 +74,7 @@ def setup(hass, config):
     hass.data[DOMAIN]["controller"] = spotcast_controller
 
     @callback
-    def websocket_handle_playlists(hass, connection, msg):
+    def websocket_handle_playlists(hass: ha_core.HomeAssistant, connection, msg):
         @async_wrap
         def get_playlist():
             """Handle to get playlist"""
@@ -90,7 +93,7 @@ def setup(hass, config):
         hass.async_add_job(get_playlist())
 
     @callback
-    def websocket_handle_devices(hass, connection, msg):
+    def websocket_handle_devices(hass: ha_core.HomeAssistant, connection, msg):
         @async_wrap
         def get_devices():
             """Handle to get devices. Only for default account"""
@@ -103,7 +106,7 @@ def setup(hass, config):
         hass.async_add_job(get_devices())
 
     @callback
-    def websocket_handle_player(hass, connection, msg):
+    def websocket_handle_player(hass: ha_core.HomeAssistant, connection, msg):
         @async_wrap
         def get_player():
             """Handle to get player"""
@@ -116,7 +119,7 @@ def setup(hass, config):
         hass.async_add_job(get_player())
 
     @callback
-    def websocket_handle_accounts(hass, connection, msg):
+    def websocket_handle_accounts(hass: ha_core.HomeAssistant, connection, msg):
         """Handle to get accounts"""
         _LOGGER.debug("websocket_handle_accounts msg: %s", msg)
         resp = list(accounts.keys()) if accounts is not None else []
@@ -124,7 +127,7 @@ def setup(hass, config):
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
     @callback
-    def websocket_handle_castdevices(hass, connection, msg):
+    def websocket_handle_castdevices(hass: ha_core.HomeAssistant, connection, msg):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
 
@@ -141,7 +144,7 @@ def setup(hass, config):
 
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
-    def start_casting(call):
+    def start_casting(call: ha_core.ServiceCall):
         """service called."""
         uri = call.data.get(CONF_SPOTIFY_URI)
         category = call.data.get(CONF_SPOTIFY_CATEGORY)
