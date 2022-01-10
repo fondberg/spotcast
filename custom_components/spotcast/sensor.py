@@ -23,8 +23,13 @@ SCAN_INTERVAL = timedelta(seconds=SENSOR_SCAN_INTERVAL_SECS)
 
 def setup_platform(hass:ha_core.HomeAssistant, config:collections.OrderedDict, add_devices, discovery_info=None):
 
+    try:
+        country = config[CONF_SPOTIFY_COUNTRY]
+    except KeyError:
+        country = None
+
     add_devices([ChromecastDevicesSensor(hass)])
-    add_devices([ChromecastPlaylistSensor(hass)])
+    add_devices([ChromecastPlaylistSensor(hass, country)])
 
 
 class ChromecastDevicesSensor(SensorEntity):
@@ -72,9 +77,10 @@ class ChromecastDevicesSensor(SensorEntity):
 
 
 class ChromecastPlaylistSensor(SensorEntity):
-    def __init__(self, hass, country=None):
+    def __init__(self, hass: ha_core, country=None):
         self.hass = hass
         self._state = STATE_UNKNOWN
+        self.country = country
         self._attributes = {"playlists": [], "last_update": None}
         _LOGGER.debug("initiating playlist sensor")
 
@@ -94,8 +100,13 @@ class ChromecastPlaylistSensor(SensorEntity):
     def update(self):
         _LOGGER.debug("Getting playlists")
 
+        if self.country is not None:
+            country_code = self.country
+        else:
+            # kept the country code to SE if not provided by the user for retrocompatibility
+            country_code = "SE"
+
         playlist_type = "user"
-        country_code = "SE"
         locale = "en"
         limit = 10
         account = None

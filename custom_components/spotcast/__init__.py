@@ -61,11 +61,6 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
-    
-    try:
-        country = conf[CONF_SPOTIFY_COUNTRY]
-    except KeyError:
-        country = None
 
     spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
 
