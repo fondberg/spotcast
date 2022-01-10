@@ -72,6 +72,7 @@ Add the following to your configuration.yaml:
 spotcast:
   sp_dc: !secret sp_dc
   sp_key: !secret sp_key
+  country: SE #optinal, added in 3.6.24
 ```
 
 ### Multiple accounts
@@ -85,6 +86,7 @@ If you are using v3.5.2 or greater and thus also have the core Spotify Integrati
 spotcast:
   sp_dc: !secret primary_sp_dc
   sp_key: !secret primary_sp_key
+  country: SE #optional, added in 3.6.24
   accounts:
     niklas:
       sp_dc: !secret niklas_sp_dc
@@ -226,7 +228,7 @@ Play the latest episode of a given podcast show.
 {
   "account":"niklas",
   "device_name" : "Kök",
-  "uri" : "spotify:show:6PeAI9SHRZhghU7NRPXvT3"
+  "uri" : "spotify:show:6PeAI9SHRZhghU7NRPXvT3",
   "ignore_fully_played": true
 }
 ```
@@ -247,7 +249,10 @@ Add the following to the sensor section of the configuration:
 ```yaml
 sensor:
   - platform: spotcast
+    country: SE
 ```
+
+The country tag was added in v3.6.24. This tag is optional. If ommited or if you haven't updated the configuration since the update, it will default to "SE" (which it always did before)
 
 Sensor name:
 

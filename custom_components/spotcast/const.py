@@ -102,6 +102,7 @@ SPOTCAST_CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_SP_DC): cv.string,
                 vol.Required(CONF_SP_KEY): cv.string,
                 vol.Optional(CONF_ACCOUNTS): cv.schema_with_slug_keys(ACCOUNTS_SCHEMA),
+                vol.Optional(CONF_SPOTIFY_COUNTRY): cv.string,
             }
         ),
     },
