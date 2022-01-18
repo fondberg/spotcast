@@ -11,7 +11,7 @@ Home Assistant custom component to start Spotify playback on an idle chromecast 
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromecast device and the Spotify playback after the initial start is done in their respective components.
 Because starting playback using the API requires more powerful token the username and password used for browser login is used.
 
-Used by https://github.com/custom-cards/spotify-card.
+Used by [Spotify-Card](https://github.com/custom-cards/spotify-card).
 
 __[Community post](https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232)__
 
@@ -53,7 +53,7 @@ To obtain the cookies:
 
 or
 
->* Open a new __Incognito window__ at https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F
+>* Open a new __Incognito window__ at [https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F](https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F)
 >* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
 >* Login to Spotify
 >* Search/Filter for `get_access_token` in Developer tools under Network.
@@ -142,9 +142,52 @@ Optionally you can specify the `entity_id` of an existing Home Assistant chromec
   "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
 ```
+
 ### Find Spotify Device ID
 
-To use the Spotcast service with a Spotify Connect device, you need the `spotify_device_id`. To find the `spotify_device_id`, enable the debug logs (instructions are in section `Enabling Debug Log` in this README), reboot Home Assistant, and go to `Configuration >> Logs >> Load Full Home Assistant Log`. Find the log entry `get_spotify_devices` and look for the device ID.
+To use the Spotcast service with a Spotify Connect device, you need the `spotify_device_id`. To find the `spotify_device_id`, multiple option are available.
+
+#### With Spotify developper portal
+
+1. Go to [Spotify developper console](https://developer.spotify.com/console/get-users-available-devices/)
+2. Click `GET TOKEN` <br/>
+![get_token](./images/get_token.png)
+3. Select `user-read-playback-state` as a scope<br/>
+![select_scope](./images/select_scope.png)
+4. If prompt give permission to your Spotify profile
+5. For chromecast devices, make sure to play media on the device prior to checking the logs as they will not show unless active
+6. Press the option `Try it`
+7. Read the result in the console in the right.<br/>
+![device_id](./images/device_id.png)
+
+#### Through Spotcast log
+
+1. Enable the debug logs (instructions are in section `Enabling Debug Log` in this README)
+2. Reboot Home Assistant
+3. Go to `Configuration >> Logs >> Load Full Home Assistant Log`.
+4. For chromecast devices, make sure to play media on the device prior to checking the logs as they will not show unless active
+5. Find the log entry `get_spotify_devices` and look for the device ID.
+
+#### Sonos Device ID
+
+1. Open the Spotify Web Player and sign in if needed
+2. Make sure you see your Sonos devices in the Connect popup
+3. Open your browser's DevTools (F12 for Chrome)
+4. Navigate to the Network tab
+5. Connect to the desired Sonos device in the Web Player
+6. Find the associated request in your DevTools
+7. The request URL looks something like this: `https://gew1-spclient.spotify.com/connect-state/v1/connect/transfer/from/my_web_player_device_id/to/my_sonos_device_id`
+8. The `my_sonos_device_id` is the `spotify_device_id` you are looking for.
+
+##### Log exemple
+
+```LOG
+2022-01-13 19:10:35 DEBUG (SyncWorker_0) [custom_components.spotcast.helpers] get_spotify_devices: media_player.spotify_felix: Spotify Félix Cusson: [{'id': '################################', 'is_active': True, 'is_private_session': False, 'is_restricted': False, 'name': 'Salon', 'type': 'CastAudio', 'volume_percent': 16}]
+2022-01-13 19:10:35 DEBUG (SyncWorker_0) [custom_components.spotcast.helpers] get_spotify_devices: {'devices': [{'id': '###############################', 'is_active': False, 'is_private_session': False, 'is_restricted': False, 'name': 'Salon', 'type': 'CastAudio', 'volume_percent': 16}]}
+
+# Look for
+<...> Spotify Félix Cusson: [{'id': '################################', <- This is the device ID
+```
 
 ### Automation example
 
@@ -302,7 +345,7 @@ Method: `spotcast/playlist` supporting different `playlist_type`s.
 * `featured` for spotify "featured" playlists (not personalized)
 * `discover-weekly` for personalized "Made for _____" (includes daily mixes)
 * `recently-played` for "Recently Played"
-* ... any other `view id` as found in the API at https://api.spotify.com/v1/views/personalized-recommendations
+* ... any other `view id` as found in the API at [https://api.spotify.com/v1/views/personalized-recommendations](https://api.spotify.com/v1/views/personalized-recommendations)
 
 Example usage:
 
@@ -330,9 +373,11 @@ const res = await this.props.hass.callWS({
 ```
 
 ## Enabling debug log
+
 In configuration.yaml for you HA add and attach those the relevant logs.
 Be sure to disable it later as it is quite noisy.
-```
+
+```yaml
 logger:
   default: info
   logs:
