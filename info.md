@@ -9,19 +9,19 @@ Home Assistant custom component to start Spotify playback on an idle chromecast 
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromecast device and the Spotify playback after the initial start is done in their respective components.
 Because starting playback using the API requires more powerful token the username and password used for browser login is used.
 
-Used by https://github.com/custom-cards/spotify-card.
+Used by [Spotify Card](https://github.com/custom-cards/spotify-card).
 
-# Minimal Configuration
+## Minimal Configuration
 
-## Minimum Home Assistant version
+### Minimum Home Assistant version
 
 Spotcast is compatible with any version since 2021.12.0.
 
-## Official Spotify integration
+### Official Spotify integration
 
 Note that since v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
 
-## Single account
+### Single account
 
 Add the following to your config
 
