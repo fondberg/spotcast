@@ -72,6 +72,7 @@ Add the following to your configuration.yaml:
 spotcast:
   sp_dc: !secret sp_dc
   sp_key: !secret sp_key
+  country: SE #optinal, added in 3.6.24
 ```
 
 ### Multiple accounts
@@ -85,6 +86,7 @@ If you are using v3.5.2 or greater and thus also have the core Spotify Integrati
 spotcast:
   sp_dc: !secret primary_sp_dc
   sp_key: !secret primary_sp_key
+  country: SE #optional, added in 3.6.24
   accounts:
     niklas:
       sp_dc: !secret niklas_sp_dc
@@ -120,10 +122,13 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 
 where:
 
-* `spotify_device_id` is the device ID of the Spotify Connect device 
+* `spotify_device_id` is the device ID of the Spotify Connect device
 * `device_name` is the friendly name of the chromecast device
 * `uri` is the Spotify uri, supports all uris including track (limit to one track)
 * `search` is a search query to resolve into a uri. This parameter will be overlooked if a uri is provided
+* `category` let spotify pick a random playlist inside a given [category](https://developer.spotify.com/console/get-browse-categories/)
+* `country` restrict country to use when looking for playlists inside a category
+* `limit` restrict number of playlists to return when looking in a category. Note that only a single playlist will be chosen randomly from them.
 * `random_song` optional parameter that starts the playback at a random position in the playlist
 * `repeat` optional parameter that repeats the playlist/track
 * `shuffle` optional parameter to set shuffle mode for playback
@@ -132,7 +137,7 @@ where:
 Optionally you can specify the `entity_id` of an existing Home Assistant chromecast media-player like:
 
 ```json
-{ 
+{
   "entity_id" : "media_player.vardagsrum",
   "uri" : "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
 }
@@ -267,7 +272,7 @@ Play the latest episode of a given podcast show.
 {
   "account":"niklas",
   "device_name" : "Kök",
-  "uri" : "spotify:show:6PeAI9SHRZhghU7NRPXvT3"
+  "uri" : "spotify:show:6PeAI9SHRZhghU7NRPXvT3",
   "ignore_fully_played": true
 }
 ```
@@ -288,7 +293,10 @@ Add the following to the sensor section of the configuration:
 ```yaml
 sensor:
   - platform: spotcast
+    country: SE
 ```
+
+The country tag was added in v3.6.24. This tag is optional. If ommited or if you haven't updated the configuration since the update, it will default to "SE" (which it always did before)
 
 Sensor name:
 
@@ -366,7 +374,7 @@ const res = await this.props.hass.callWS({
 ```
 
 ## Enabling debug log
-In configuration.yaml for you HA add and attach those the relevant logs. 
+In configuration.yaml for you HA add and attach those the relevant logs.
 Be sure to disable it later as it is quite noisy.
 ```
 logger:
