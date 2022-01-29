@@ -10,6 +10,7 @@ from pychromecast import Chromecast
 async def async_get_media_browser_root_object(
     content_filter: Callable[[BrowseMedia], bool]
 ):
+    """Create a root object for media browsing."""
     return [
         BrowseMedia(
             title="Spotify",
@@ -29,6 +30,7 @@ async def async_browse_media(
     media_content_id: str,
     content_filter: Callable[[BrowseMedia], bool],
 ):
+    """Browse media."""
     if ha_spotify.is_spotify_media_type(media_content_type):
         return await ha_spotify.async_browse_media(
             hass, media_content_type, media_content_id, can_play_artist=False
@@ -47,6 +49,7 @@ async def async_play_media(
     media_type: str,
     media_id: str,
 ):
+    """Play media."""
     if media_id and media_id.startswith("spotify:"):
         data = {"entity_id": cast_entity_id, "uri": media_id}
         await hass.services.async_call("spotcast", "start", data, blocking=False)
