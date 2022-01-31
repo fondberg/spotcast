@@ -46,7 +46,7 @@ async def async_play_media(
     chromecast: Chromecast,
     media_type: str,
     media_id: str,
-):
+) -> bool:
     """Play media."""
     if media_id and media_id.startswith("spotify:"):
         data = {"entity_id": cast_entity_id, "uri": media_id}
