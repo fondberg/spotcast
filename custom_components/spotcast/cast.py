@@ -7,9 +7,7 @@ import homeassistant.core as ha_core
 from pychromecast import Chromecast
 
 
-async def async_get_media_browser_root_object(
-    content_filter: Callable[[BrowseMedia], bool]
-):
+async def async_get_media_browser_root_object(cast_type: str) -> list[BrowseMedia]:
     """Create a root object for media browsing."""
     return [
         BrowseMedia(
@@ -28,8 +26,8 @@ async def async_browse_media(
     hass: ha_core.HomeAssistant,
     media_content_type: str,
     media_content_id: str,
-    content_filter: Callable[[BrowseMedia], bool],
-):
+    cast_type: str,
+) -> BrowseMedia | None:
     """Browse media."""
     if ha_spotify.is_spotify_media_type(media_content_type):
         return await ha_spotify.async_browse_media(
