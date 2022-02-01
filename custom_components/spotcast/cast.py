@@ -1,4 +1,6 @@
-from collections.abc import Callable
+from __future__ import annotations
+
+import logging
 
 from homeassistant.components import spotify as ha_spotify
 from homeassistant.components.media_player import BrowseMedia
@@ -6,9 +8,15 @@ from homeassistant.components.media_player.const import MEDIA_CLASS_APP
 import homeassistant.core as ha_core
 from pychromecast import Chromecast
 
+_LOGGER = logging.getLogger(__name__)
 
-async def async_get_media_browser_root_object(cast_type: str) -> list[BrowseMedia]:
+
+async def async_get_media_browser_root_object(
+    hass: ha_core.HomeAssistant,
+    cast_type: str
+) -> list[BrowseMedia]:
     """Create a root object for media browsing."""
+    _LOGGER.debug("async_get_media_browser_root_object")
     return [
         BrowseMedia(
             title="Spotify",
@@ -29,15 +37,28 @@ async def async_browse_media(
     cast_type: str,
 ) -> BrowseMedia | None:
     """Browse media."""
+    _LOGGER.debug(
+        "async_browse_media %s, %s",
+        media_content_type,
+        media_content_id
+    )
+    result = None
+    # Check if this media is handled by Spotify, if it isn't just return None.
     if ha_spotify.is_spotify_media_type(media_content_type):
-        return await ha_spotify.async_browse_media(
+        # Browse deeper in the tree
+        result = await ha_spotify.async_browse_media(
             hass, media_content_type, media_content_id, can_play_artist=False
         )
     if media_content_type == "spotify":
-        return await ha_spotify.async_browse_media(
+        # Browse the root node created by async_get_media_browser_root_object
+        result = await ha_spotify.async_browse_media(
             hass, None, None, can_play_artist=False
         )
-    return None
+    _LOGGER.debug(
+        "async_browse_media return: %s",
+        result
+    )
+    return result
 
 
 async def async_play_media(
@@ -48,6 +69,13 @@ async def async_play_media(
     media_id: str,
 ) -> bool:
     """Play media."""
+    _LOGGER.debug(
+        "async_browse_media %s, %s",
+        media_type,
+        media_id
+    )
+    # If this is a spotify URI, forward to the the spotcast.start service, if not return
+    # False
     if media_id and media_id.startswith("spotify:"):
         data = {"entity_id": cast_entity_id, "uri": media_id}
         await hass.services.async_call("spotcast", "start", data, blocking=False)
