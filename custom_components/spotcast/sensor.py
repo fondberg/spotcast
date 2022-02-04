@@ -1,4 +1,6 @@
 """Sensor platform for Chromecast devices."""
+from __future__ import annotations
+
 import collections
 import json
 import logging
