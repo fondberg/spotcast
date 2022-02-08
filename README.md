@@ -94,7 +94,7 @@ Add the following to your configuration.yaml:
 spotcast:
   sp_dc: !secret sp_dc
   sp_key: !secret sp_key
-  country: SE #optinal, added in 3.6.24
+  country: SE #optional, added in 3.6.24
 ```
 
 ### Multiple accounts
