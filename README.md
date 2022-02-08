@@ -39,30 +39,52 @@ Note that as of v3.5.2 you must also have the official [Home Assistant Spotify I
 
 Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
 
-To obtain the cookies:
+To obtain the cookies, these different methods can be used:
 
-* Using Chrome or Edge
+#### Chrome based browser
 
->* Open url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
->* If no cookies appear go to [`https://open.spotify.com`](https://open.spotify.com) and sign-in
->* Copy content from `sp_dc` and `sp_key` cookies
+##### Setting page
 
-* Using another browser
+1. Make sure you are connected on [`https://open.spotify.com`](https://open.spotify.com)
+2. Open the url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
+3. Copy the content from `sp_dc` and `sp_key` cookies
 
->* Use a browser extension like "Export cookies" and look for `sp_dc` and `sp_key` cookies
+![cookie in chrome settings](images/cookies_chrome_1.png)
 
-or
+##### Chrome web console
 
->* Open a new __Incognito window__ at [https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F](https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F)
->* Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
->* Login to Spotify
->* Search/Filter for `get_access_token` in Developer tools under Network.
->* Under cookies for the request save the values for `sp_dc` and `sp_key`
->* Close the window without logging out (Otherwise the cookies are made invalid)
->
->![Screenshots](images/cookies_1.jpg)
+1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is openned and you are connected
+2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developper tools menu of your browser.
+3. Go into the `application` section
+4. In the menu on the left go int `Storage/Cookies/open.spotify.com`
+5. Find the `sp_dc` and `sp_key` and copy the values
 
-* Alternatively you can use a browser plugin like "Export cookies".
+![cookie in chrome developper tools](images/cookies_chrome_2.png)
+
+#### Firefox based browser
+
+##### Firefox web console
+
+1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is openned and you are connected
+2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developper tools menu of your browser.
+3. Go into the `Storage` section. (You might have to click on the right arrows to reveal the section)
+4. Select the `Cookies` sub-menu and then `https://open.spotify.com`
+5. Find the `sp_dc` and `sp_key` and copy the values
+
+![Firefox developper tool](images/cookies_firefox_1.png) 
+
+#### Other methods
+
+##### incognito mode
+
+1. Open a new __Incognito window__ at [https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F](https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F)
+2. Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
+3. Login to Spotify
+4. Search/Filter for `get_access_token` in Developer tools under Network.
+5. Under cookies for the request save the values for `sp_dc` and `sp_key`
+6. Close the window without logging out (Otherwise the cookies are made invalid)
+
+![Screenshots](images/cookies_1.jpg)
 
 ### Single account
 
