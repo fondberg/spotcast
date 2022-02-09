@@ -76,7 +76,7 @@ To obtain the cookies, these different methods can be used:
 
 #### Other methods
 
-##### incognito mode
+##### Incognito mode
 
 1. Open a new __Incognito window__ at [https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F](https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F)
 2. Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
