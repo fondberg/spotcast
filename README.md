@@ -43,7 +43,7 @@ To obtain the cookies, these different methods can be used:
 
 #### Chrome based browser
 
-##### Setting page
+##### Settings page
 
 1. Make sure you are connected on [`https://open.spotify.com`](https://open.spotify.com)
 2. Open the url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
