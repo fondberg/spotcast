@@ -72,7 +72,7 @@ To obtain the cookies, these different methods can be used:
 4. Select the `Cookies` sub-menu and then `https://open.spotify.com`
 5. Find the `sp_dc` and `sp_key` and copy the values
 
-![Firefox developper tool](images/cookies_firefox_1.png) 
+![Firefox developer tool](images/cookies_firefox_1.png) 
 
 #### Other methods
 
