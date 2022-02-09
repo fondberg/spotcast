@@ -60,7 +60,7 @@ To obtain the cookies, these different methods can be used:
 4. In the menu on the left go int `Storage/Cookies/open.spotify.com`
 5. Find the `sp_dc` and `sp_key` and copy the values
 
-![cookie in chrome developper tools](images/cookies_chrome_2.png)
+![cookie in chrome developer tools](images/cookies_chrome_2.png)
 
 #### Firefox based browser
 
