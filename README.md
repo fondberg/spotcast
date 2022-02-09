@@ -53,7 +53,8 @@ To obtain the cookies, these different methods can be used:
 
 ##### Chrome web console
 
-1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is openned and you are connected
+1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is opened and you are connected
+
 2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developper tools menu of your browser.
 3. Go into the `application` section
 4. In the menu on the left go int `Storage/Cookies/open.spotify.com`
