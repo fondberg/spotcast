@@ -67,7 +67,7 @@ To obtain the cookies, these different methods can be used:
 ##### Firefox web console
 
 1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is opened and you are connected
-2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developper tools menu of your browser.
+2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developer tools menu of your browser.
 3. Go into the `Storage` section. (You might have to click on the right arrows to reveal the section)
 4. Select the `Cookies` sub-menu and then `https://open.spotify.com`
 5. Find the `sp_dc` and `sp_key` and copy the values
