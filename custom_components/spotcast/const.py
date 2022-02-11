@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components import websocket_api
