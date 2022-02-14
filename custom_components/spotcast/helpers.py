@@ -28,15 +28,24 @@ def get_spotify_devices(hass, spotify_user_id):
                 isinstance(entity, SpotifyMediaPlayer)
                 and entity.unique_id == spotify_user_id
             ):
-                _LOGGER.debug(
-                    f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
-                    entity._devices,
-                )
+                if hasattr(entity, "_devices"):
+                    _LOGGER.debug(
+                        f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
+                        entity._devices,
+                    )
+                else:
+                    _LOGGER.debug(
+                        f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
+                        entity.data.devices.data,
+                    )
                 spotify_media_player = entity
                 break
     if spotify_media_player:
         # Need to come from media_player spotify's sp client due to token issues
-        resp = spotify_media_player._spotify.devices()
+        if hasattr(entity, "_spotify"):
+            resp = spotify_media_player._spotify.devices()
+        else:
+            resp = spotify_media_player.data.client.devices()
         _LOGGER.debug("get_spotify_devices: %s", resp)
         return resp
 
