@@ -123,12 +123,19 @@ def get_search_results(search:str, spotify_client:spotipy.Spotify, country:str=N
     return bestMatch['uri']
 
 def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:str, country:str=None, limit:int=20) -> str:
-    _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+    
+    if country is None:
+        
+        _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category}, no country specified.")
 
-    # validate category and country are valid entries
-    if country.upper() not in spotify_client.country_codes:
-        _LOGGER.error(f"{country} is not a valid country code")
-        return None
+    else:
+
+        _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+
+        # validate category and country are valid entries
+        if country.upper() not in spotify_client.country_codes:
+            _LOGGER.error(f"{country} is not a valid country code")
+            return None
     
     # get list of playlist from category and localisation provided
     try:
