@@ -30,25 +30,25 @@ def get_spotify_devices(hass, spotify_user_id):
                 isinstance(entity, SpotifyMediaPlayer)
                 and entity.unique_id == spotify_user_id
             ):
-                if hasattr(entity, "_devices"):
-                    _LOGGER.debug(
-                        f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
-                        entity._devices,
-                    )
-                else:
-                    _LOGGER.debug(
-                        f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
-                        entity.data.devices.data,
-                    )
+
+                try:
+                    entity_devices = entity._devices
+                except(AttributeError):
+                    entity_devices = entity.data.devices.data
+
+                _LOGGER.debug(f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s", entity._devices)
                 spotify_media_player = entity
                 break
+
     if spotify_media_player:
         # Need to come from media_player spotify's sp client due to token issues
-        if hasattr(entity, "_spotify"):
+        try:
             resp = spotify_media_player._spotify.devices()
-        else:
+        except(AttributeError):
             resp = spotify_media_player.data.client.devices()
+
         _LOGGER.debug("get_spotify_devices: %s", resp)
+        
         return resp
 
 def get_spotify_install_status(hass):
