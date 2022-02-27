@@ -36,7 +36,7 @@ def get_spotify_devices(hass, spotify_user_id):
                 except(AttributeError):
                     entity_devices = entity.data.devices.data
 
-                _LOGGER.debug(f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s", entity._devices)
+                _LOGGER.debug(f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s", entity_devices)
                 spotify_media_player = entity
                 break
 
