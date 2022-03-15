@@ -30,16 +30,25 @@ def get_spotify_devices(hass, spotify_user_id):
                 isinstance(entity, SpotifyMediaPlayer)
                 and entity.unique_id == spotify_user_id
             ):
-                _LOGGER.debug(
-                    f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
-                    entity._devices,
-                )
+
+                try:
+                    entity_devices = entity._devices
+                except(AttributeError):
+                    entity_devices = entity.data.devices.data
+
+                _LOGGER.debug(f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s", entity_devices)
                 spotify_media_player = entity
                 break
+
     if spotify_media_player:
         # Need to come from media_player spotify's sp client due to token issues
-        resp = spotify_media_player._spotify.devices()
+        try:
+            resp = spotify_media_player._spotify.devices()
+        except(AttributeError):
+            resp = spotify_media_player.data.client.devices()
+
         _LOGGER.debug("get_spotify_devices: %s", resp)
+        
         return resp
 
 def get_spotify_install_status(hass):
@@ -123,12 +132,19 @@ def get_search_results(search:str, spotify_client:spotipy.Spotify, country:str=N
     return bestMatch['uri']
 
 def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:str, country:str=None, limit:int=20) -> str:
-    _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+    
+    if country is None:
+        
+        _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category}, no country specified.")
 
-    # validate category and country are valid entries
-    if country.upper() not in spotify_client.country_codes:
-        _LOGGER.error(f"{country} is not a valid country code")
-        return None
+    else:
+
+        _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+
+        # validate category and country are valid entries
+        if country.upper() not in spotify_client.country_codes:
+            _LOGGER.error(f"{country} is not a valid country code")
+            return None
     
     # get list of playlist from category and localisation provided
     try:
@@ -161,7 +177,7 @@ def is_valid_uri(uri: str) -> bool:
 
     # validate number of sub elements
     if len(elems) != 3:
-        _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [Spotify.<type>.<unique_id>]")
+        _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [Spotify:<type>:<unique_id>]")
         return False
 
     # check correct format of the sub elements
