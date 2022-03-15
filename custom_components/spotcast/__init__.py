@@ -171,11 +171,19 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
 
         # verify the uri provided and clean-up if required
         if not helpers.is_empty_str(uri):
+
+            # remove ? from badly formatted URI
+            uri = uri.split("?")[0]
+
+            # force first two elements of uri to lowercase
+            uri = uri.split(":")
+            uri[0] = uri[0].lower()
+            uri[1] = uri[1].lower()
+            uri = ':'.join(uri)
+
             if not helpers.is_valid_uri(uri):
                 _LOGGER.error("Invalid URI provided, aborting casting")
                 return
-                
-            uri = uri.split("?")[0]
 
         # first, rely on spotify id given in config otherwise get one
         if not spotify_device_id:
