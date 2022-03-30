@@ -177,7 +177,7 @@ def is_valid_uri(uri: str) -> bool:
 
     # validate number of sub elements
     if len(elems) != 3:
-        _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [Spotify:<type>:<unique_id>]")
+        _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [spotify:<type>:<unique_id>]")
         return False
 
     # check correct format of the sub elements
