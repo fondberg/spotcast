@@ -121,6 +121,30 @@ spotcast:
       sp_key: !secret ming_sp_key
 ```
 
+### Edit secrets.yaml
+
+Please note: configuration.yaml is a plain text file and [it is not recommended to store your passwords in this file](https://www.home-assistant.io/docs/configuration/secrets/).
+
+By using the ```!secret``` tag you are directing Home Assistant to look inside the secrets.yaml file for your key instead.
+
+For a single account add the following to your secrets.yaml file:
+
+```yaml
+sp_dc: [your sp_dc here]
+sp_key: [your sp_key here]
+```
+
+For multiple accounts add the corresponding entries to your secrets.yaml file. For example, using the same accounts as above:
+
+```yaml
+primary_sp_dc: [your sp_dc here]
+primary_sp_key: [your sp_key here]
+niklas_sp_dc: [niklas sp_dc here]
+niklas_sp_key: [niklas sp_key here]
+ming_sp_dc: [ming sp_dc here]
+ming_sp_key: [ming sp_key here]
+```
+
 ## Call the service
 
 The spotcast custom component creates a service called 'spotcast.start' in Home Assistant.
