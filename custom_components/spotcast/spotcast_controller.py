@@ -4,6 +4,7 @@ import collections
 import logging
 import random
 import time
+from requests import TooManyRedirects
 from collections import OrderedDict
 from datetime import datetime
 import homeassistant.core as ha_core
@@ -147,8 +148,11 @@ class SpotifyToken:
             )
             expires = self._token_expires - int(time.time())
             return self._access_token, expires
+        except TooManyRedirects:
+            _LOGGER.error("Could not get spotify token. sp_dc and sp_key could be expired. Please update in config.")
+            raise HomeAssistantError("Expired sp_dc, sp_key")
         except:  # noqa: E722
-            raise HomeAssistantError("Could not get spotify token")
+            raise HomeAssistantError("Could not get spotify token.")
 
 
 class SpotcastController:
