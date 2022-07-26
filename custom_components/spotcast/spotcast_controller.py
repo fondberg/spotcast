@@ -208,9 +208,21 @@ class SpotcastController:
             me_resp = client._get("me")
             spotify_cast_device.startSpotifyController(access_token, expires)
             # Make sure it is started
-            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
-                get_spotify_devices(self.hass, me_resp["id"])
-            )
+            try:
+                spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
+                   get_spotify_devices(self.hass, me_resp["id"])
+                )
+            except HomeAssistantError as e:
+                # Some devices might need to get woken up first, so try again
+                if str(e) != "Failed to get device id from Spotify":
+                    raise e
+
+                time.sleep(2)
+
+                spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
+                   get_spotify_devices(self.hass, me_resp["id"])
+                )
+                
         return spotify_device_id
 
     def play(
