@@ -111,14 +111,19 @@ class SpotifyCastDevice:
         _LOGGER.debug(f"Searching for playback device { self.spotifyController.device } on spotify")
         # Sometimes the chromecast device might not yet be known to spotify e.g. if the chromecast is recently booted
         # We need to wait for the chromecast to be known to spotify before we can start playback
-        while time.time() - start_time < timeout_s:
+        max_retries = 5
+        counter = 0
+        while counter < max_retries:
+            counter += 1
             devices_available = get_spotify_devices(spotify_media_player)
-            _LOGGER.debug(f"Devices available on spotify: { devices_available }")
             for spotify_device in devices_available:
                 if spotify_device["id"] == self.spotifyController.device:
                     spotify_device = spotify_device["id"]
                     break
-            time.sleep(1)
+            # Exponential backoff with some jitter
+            sleep = random.uniform(1.5, 2.5) ** counter
+            time.sleep(sleep)
+        _LOGGER.debug(f"Devices available on spotify: {devices_available}")
 
         if not spotify_device:
             _LOGGER.error(f'No device with id "{self.spotifyController.device}" known by Spotify')
