@@ -120,8 +120,8 @@ class SpotifyCastDevice:
                 if spotify_device["id"] == self.spotifyController.device:
                     spotify_device = spotify_device["id"]
                     break
-            # Exponential backoff with some jitter
-            sleep = random.uniform(1.5, 2.5) ** counter
+            # Exponential backoff with some jitter, total loop time between ~19s to ~40s
+            sleep = random.uniform(1.5, 1.8) ** counter
             time.sleep(sleep)
         _LOGGER.debug(f"Devices available on spotify: {devices_available}")
 
