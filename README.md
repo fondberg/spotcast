@@ -74,7 +74,7 @@ To obtain the cookies, these different methods can be used:
 4. Select the `Cookies` sub-menu and then `https://open.spotify.com`
 5. Find the `sp_dc` and `sp_key` and copy the values
 
-![Firefox developer tool](images/cookies_firefox_1.png) 
+![Firefox developer tool](images/cookies_firefox_1.png)
 
 #### Other methods
 
@@ -179,7 +179,7 @@ where:
 * `country` restrict country to use when looking for playlists inside a category
 * `limit` restrict number of playlists to return when looking in a category. Note that only a single playlist will be chosen randomly from them.
 * `random_song` optional parameter that starts the playback at a random position in the playlist
-* `repeat` optional parameter that repeats the playlist/track
+* `repeat` optional parameter that repeats the playlist/track (track|context|off)
 * `shuffle` optional parameter to set shuffle mode for playback
 * `offset` optional parameter to set offset mode for playback. 0 is the first song
 
