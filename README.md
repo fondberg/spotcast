@@ -47,20 +47,22 @@ To obtain the cookies, these different methods can be used:
 
 ##### Settings page
 
-1. Make sure you are connected on [`https://open.spotify.com`](https://open.spotify.com)
-2. Open the url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com)
-3. Copy the content from `sp_dc` and `sp_key` cookies
+1. Open [`https://open.spotify.com`](https://open.spotify.com). If you are already logged in, log out of Spotify.
+2. Login to Spotify (this will ensure you get new cookies that are valid for 1 year). 
+3. Open the url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com).
+4. Copy the content from `sp_dc` and `sp_key` cookies.
+5. Close the window without logging out (Otherwise the cookies are made invalid).
 
 ![cookie in chrome settings](images/cookies_chrome_1.png)
 
 ##### Chrome web console
 
-1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is opened and you are connected
-
+1. Open a new __Incognito window__ at [`https://open.spotify.com`](https://open.spotify.com) and login to Spotify.
 2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developer tools menu of your browser.
-3. Go into the `application` section
-4. In the menu on the left go int `Storage/Cookies/open.spotify.com`
-5. Find the `sp_dc` and `sp_key` and copy the values
+3. Go into the `application` section.
+4. In the menu on the left go int `Storage/Cookies/open.spotify.com`.
+5. Find the `sp_dc` and `sp_key` and copy the values.
+6. Close the window without logging out (Otherwise the cookies are made invalid).
 
 ![cookie in chrome developer tools](images/cookies_chrome_2.png)
 
@@ -68,26 +70,14 @@ To obtain the cookies, these different methods can be used:
 
 ##### Firefox web console
 
-1. Make sure [`https://open.spotify.com`](https://open.spotify.com) is opened and you are connected
+1. Open a new __Incognito window__ at [`https://open.spotify.com`](https://open.spotify.com) and login to Spotify.
 2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developer tools menu of your browser.
-3. Go into the `Storage` section. (You might have to click on the right arrows to reveal the section)
-4. Select the `Cookies` sub-menu and then `https://open.spotify.com`
-5. Find the `sp_dc` and `sp_key` and copy the values
+3. Go into the `Storage` section. (You might have to click on the right arrows to reveal the section).
+4. Select the `Cookies` sub-menu and then `https://open.spotify.com`.
+5. Find the `sp_dc` and `sp_key` and copy the values.
+6. Close the window without logging out (Otherwise the cookies are made invalid).
 
 ![Firefox developer tool](images/cookies_firefox_1.png)
-
-#### Other methods
-
-##### Incognito mode
-
-1. Open a new __Incognito window__ at [https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F](https://accounts.spotify.com/en/login?continue=https:%2F%2Fopen.spotify.com%2F)
-2. Open Developer Tools in your browser (might require developer menu to be enabled in some browsers)
-3. Login to Spotify
-4. Search/Filter for `get_access_token` in Developer tools under Network.
-5. Under cookies for the request save the values for `sp_dc` and `sp_key`
-6. Close the window without logging out (Otherwise the cookies are made invalid)
-
-![Screenshots](images/cookies_1.jpg)
 
 ### Single account
 

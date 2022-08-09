@@ -14,10 +14,11 @@ assignees: 'fcusson'
 A clear and concise description of what the bug is.
 
 * [ ] Using latest version of spotcast
-* [ ] I have setup the Spotify integration in Home Assistant
-* [ ] I am using multiple accounts
 * [ ] Using latest stable version of Home Assistant
+* [ ] I have setup the Spotify integration in Home Assistant
 * [ ] I have Spotify Premium
+* [ ] I am using multiple accounts
+* [ ] I have renewed my `sp_dc` and `sp_key` values and restarted Home Assistant (see README)
 * [ ] I'm attaching relevant logs with level debug for component spotcast (see README)
 * [ ] I'm using entity_id in the service call and have tried device_name but the issue remains
 
