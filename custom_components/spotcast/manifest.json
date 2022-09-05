@@ -4,9 +4,6 @@
   "documentation": "https://github.com/fondberg/spotcast",
   "issue_tracker": "https://github.com/fondberg/spotcast/issues",
   "iot_class": "cloud_polling",
-  "requirements": [
-    "spotify_token==1.0.0"
-  ],
   "version": "v3.6.30",
   "dependencies": [
     "spotify"
