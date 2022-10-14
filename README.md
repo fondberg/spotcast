@@ -45,16 +45,6 @@ To obtain the cookies, these different methods can be used:
 
 #### Chrome based browser
 
-##### Settings page
-
-1. Open [`https://open.spotify.com`](https://open.spotify.com). If you are already logged in, log out of Spotify.
-2. Login to Spotify (this will ensure you get new cookies that are valid for 1 year). 
-3. Open the url [`chrome://settings/cookies/detail?site=spotify.com`](chrome://settings/cookies/detail?site=spotify.com).
-4. Copy the content from `sp_dc` and `sp_key` cookies.
-5. Close the window without logging out (Otherwise the cookies are made invalid).
-
-![cookie in chrome settings](images/cookies_chrome_1.png)
-
 ##### Chrome web console
 
 1. Open a new __Incognito window__ at [`https://open.spotify.com`](https://open.spotify.com) and login to Spotify.
