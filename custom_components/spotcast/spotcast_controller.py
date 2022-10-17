@@ -161,7 +161,8 @@ class SpotifyToken:
             _LOGGER.error("Could not get spotify token. sp_dc and sp_key could be expired. Please update in config.")
             raise HomeAssistantError("Expired sp_dc, sp_key")
         except (TokenError, Exception):  # noqa: E722
-            raise HomeAssistantError("Could not get spotify token.")
+            _LOGGER.error("Could not get spotify token. Update your sp_dc and sp_key, restart Home Assistant and try again.")
+            raise HomeAssistantError("Could not get spotify token. Update your sp_dc and sp_key, restart Home Assistant and try again.")
 
     async def start_session(self):
         """ Starts session to get access token. """
