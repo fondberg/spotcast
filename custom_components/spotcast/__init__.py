@@ -23,6 +23,7 @@ from .const import (
     CONF_SPOTIFY_DEVICE_ID,
     CONF_SPOTIFY_URI,
     CONF_SPOTIFY_SEARCH,
+    CONF_SPOTIFY_ARTISTNAME,
     CONF_SPOTIFY_CATEGORY,
     CONF_SPOTIFY_COUNTRY,
     CONF_SPOTIFY_LIMIT,
@@ -148,6 +149,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         country = call.data.get(CONF_SPOTIFY_COUNTRY)
         limit = call.data.get(CONF_SPOTIFY_LIMIT)
         search = call.data.get(CONF_SPOTIFY_SEARCH)
+        artistName = call.data.get(CONF_SPOTIFY_ARTISTNAME)
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT, False)
         shuffle = call.data.get(CONF_SHUFFLE, False)
@@ -191,7 +193,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 account, spotify_device_id, device_name, entity_id
             )
 
-        if helpers.is_empty_str(uri) and helpers.is_empty_str(search) and helpers.is_empty_str(category):
+        if helpers.is_empty_str(uri) and helpers.is_empty_str(search) and helpers.is_empty_str(artistName) and helpers.is_empty_str(category):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
             if current_playback is not None:
@@ -217,11 +219,14 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 ignore_fully_played,
             )
         else:
-
+            searchResults = []
             if helpers.is_empty_str(uri):
                 # get uri from search request
-                uri = helpers.get_search_results(search, client, country)
-
+                searchResults = helpers.search_tracks(search, client, False, shuffle, random_song, limit, artistName, country)
+                # play the first track
+                if len(searchResults) > 0:
+                    uri = searchResults[0]['uri']
+            
             spotcast_controller.play(
                 client,
                 spotify_device_id,
@@ -230,6 +235,9 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 position,
                 ignore_fully_played,
             )
+
+            if len(searchResults) > 1:
+                helpers.add_tracks_to_queue(client, searchResults[1:len(searchResults)])
 
         if start_volume <= 100:
             _LOGGER.debug("Setting volume to %d", start_volume)

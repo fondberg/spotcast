@@ -13,6 +13,7 @@ CONF_SPOTIFY_DEVICE_ID = "spotify_device_id"
 CONF_DEVICE_NAME = "device_name"
 CONF_SPOTIFY_URI = "uri"
 CONF_SPOTIFY_SEARCH = "search"
+CONF_SPOTIFY_ARTISTNAME = "artistName"
 CONF_SPOTIFY_CATEGORY = "category"
 CONF_SPOTIFY_COUNTRY = "country"
 CONF_SPOTIFY_LIMIT = "limit"
@@ -76,6 +77,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_ENTITY_ID): cv.string,
         vol.Optional(CONF_SPOTIFY_URI): cv.string,
         vol.Optional(CONF_SPOTIFY_SEARCH): cv.string,
+        vol.Optional(CONF_SPOTIFY_ARTISTNAME): cv.string,
         vol.Optional(CONF_SPOTIFY_CATEGORY): cv.string,
         vol.Optional(CONF_SPOTIFY_COUNTRY): cv.string,
         vol.Optional(CONF_SPOTIFY_LIMIT, default=20): cv.positive_int,
