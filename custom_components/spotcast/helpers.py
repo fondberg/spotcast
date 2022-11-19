@@ -6,6 +6,7 @@ import requests
 import urllib
 import difflib
 import random
+import time
 from functools import partial, wraps
 
 from homeassistant.components.cast.media_player import CastDevice
@@ -92,44 +93,90 @@ def async_wrap(func):
 
     return run
 
-def get_search_results(search:str, spotify_client:spotipy.Spotify, country:str=None) -> str:
+def get_top_tracks(artistName:str, spotify_client:spotipy.Spotify, limit:int=20, country:str = None):
+    
+    _LOGGER.debug("Searching for top tracks for the artist: %s", artistName)
+    searchType = "artist"
+    search = searchType + ":" + artistName
 
+    artistUri = ""
+    
+    # get artist uri
+    try:
+
+        artist = spotify_client.search(
+            artistName,
+            limit=1,
+            offset=0,
+            type="artist",
+            market=country)["artists"]['items'][0]
+
+        _LOGGER.debug("found artist %s: %s", artist['name'], artist['uri'])
+        artistUri = artist['uri']
+
+    except IndexError:
+        pass
+
+    results = spotify_client.artist_top_tracks(artistUri)
+    for track in results['tracks'][:10]:
+        _LOGGER.debug('track    : ' + track['name'])
+
+    return results['tracks']
+
+def get_search_string(search:str, artistName:str) -> str:
+    finalString = search.upper()
+    if not is_empty_str(artistName):
+        finalString += " artist:" + artistName
+    return finalString
+
+def get_search_results(search:str, spotify_client:spotipy.Spotify, artistName:str=None, limit:int=10, country:str=None):
     _LOGGER.debug("using search query to find uri")
+    searchResults = []
 
-    SEARCH_TYPES = ["artist", "album", "track", "playlist"]
-
-    search = search.upper()
-
-    results = []
-
-    for searchType in SEARCH_TYPES:
-
+    if is_empty_str(search) and artistName != None:
+        searchResults = get_top_tracks(artistName, spotify_client)
+        _LOGGER.debug("Playing top tracks for artist: %s", searchResults[0]['name'])
+    else:
+        # Get search type
+        search = get_search_string(search, artistName)
+        searchType = "track"
         try:
-
-            result = spotify_client.search(
-                searchType + ":" + search,
-                limit=1,
+            searchResults = spotify_client.search(
+                search,
+                limit,
                 offset=0,
                 type=searchType,
-                market=country)[searchType + 's']['items'][0]
-
-            results.append(
-                {
-                    'name': result['name'].upper(),
-                    'uri': result['uri']
-                }
-            )
-
-            _LOGGER.debug("search result for %s: %s", searchType, result['name'])
-
+                market=country)["tracks"]['items']
         except IndexError:
             pass
+        _LOGGER.debug("Found %d results for %s. First Track name: %s", len(searchResults), search, searchResults[0]['name'])
 
-    bestMatch = sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]
+    return searchResults
 
-    _LOGGER.debug("Best match for %s is %s", search, bestMatch['name'])
+def search_tracks(search:str, spotify_client:spotipy.Spotify, 
+                            appendToQueue:bool=False, shuffle:bool=False, startRandom:bool=False,
+                            limit:int=20, artistName:str=None, country:str=None):
+    results = get_search_results(search, spotify_client, artistName, limit, country)
+    if len(results) > 0:
+        firstResult = [results[0]]
+        if not startRandom:
+            results = results[1:limit]
+        if shuffle:
+            random.shuffle(results)
+        if not startRandom:
+            results = firstResult + results
 
-    return bestMatch['uri']
+    return results
+
+def add_tracks_to_queue(spotify_client:spotipy.Spotify, tracks:list=[], limit:int=20):
+    if len(tracks) == 0:
+        _LOGGER.debug("Cannot add ZERO tracks to the queue!")
+        return
+
+    for track in tracks[:limit]:
+        _LOGGER.debug("Adding " + track['name'] + " to the playback queue | " + track['uri'])
+        spotify_client.add_to_queue(track['uri'])
+        time.sleep(0.5)
 
 def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:str, country:str=None, limit:int=20) -> str:
     
