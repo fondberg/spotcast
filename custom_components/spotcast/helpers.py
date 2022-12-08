@@ -8,9 +8,11 @@ import difflib
 import random
 from functools import partial, wraps
 
+import homeassistant.core as ha_core
 from homeassistant.components.cast.media_player import CastDevice
 from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.helpers import entity_platform
+from homeassistant.exceptions import HomeAssistantError
 
 # import for type inference
 import spotipy
@@ -18,7 +20,10 @@ import spotipy
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_spotify_devices(hass, spotify_user_id):
+def get_spotify_media_player(hass: ha_core.HomeAssistant, spotify_user_id: str) -> SpotifyMediaPlayer:
+    """
+    Get the spotify media player entity from hass.
+    """
     platforms = entity_platform.async_get_platforms(hass, "spotify")
     spotify_media_player = None
     for platform in platforms:
@@ -41,15 +46,23 @@ def get_spotify_devices(hass, spotify_user_id):
                 break
 
     if spotify_media_player:
+        return spotify_media_player
+    else:
+        raise HomeAssistantError("Could not find spotify media player.")
+
+
+def get_spotify_devices(spotify_media_player: SpotifyMediaPlayer):
+    if spotify_media_player:
         # Need to come from media_player spotify's sp client due to token issues
         try:
-            resp = spotify_media_player._spotify.devices()
+            spotify_devices = spotify_media_player._spotify.devices()
         except(AttributeError):
-            resp = spotify_media_player.data.client.devices()
+            spotify_devices = spotify_media_player.data.client.devices()
 
-        _LOGGER.debug("get_spotify_devices: %s", resp)
+        _LOGGER.debug("get_spotify_devices: %s", spotify_devices)
         
-        return resp
+        return spotify_devices
+    return []
 
 def get_spotify_install_status(hass):
 

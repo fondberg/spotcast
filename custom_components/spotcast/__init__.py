@@ -41,7 +41,7 @@ from .const import (
     WS_TYPE_SPOTCAST_PLAYER,
     WS_TYPE_SPOTCAST_PLAYLISTS,
 )
-from .helpers import async_wrap, get_cast_devices, get_spotify_devices
+from .helpers import async_wrap, get_cast_devices, get_spotify_devices, get_spotify_media_player
 from .spotcast_controller import SpotcastController
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
@@ -97,7 +97,8 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             account = msg.get("account", None)
             client = spotcast_controller.get_spotify_client(account)
             me_resp = client._get("me")
-            resp = get_spotify_devices(hass, me_resp["id"])
+            spotify_media_player = get_spotify_media_player(hass, me_resp["id"])
+            resp = get_spotify_devices(spotify_media_player)
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_devices())
