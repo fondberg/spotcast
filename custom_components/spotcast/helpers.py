@@ -176,6 +176,15 @@ def is_valid_uri(uri: str) -> bool:
     elems = uri.split(":")
 
     # validate number of sub elements
+    if elems[1].lower() == "user":
+        elems = elems[0:1] + elems[3:]
+        types = [ "playlist" ]
+        _LOGGER.debug(f"Excluding user information from the Spotify URI validation. Only supported for playlists")
+
+    # support playing a user's liked songs list (spotify:user:username:collection)
+    if len(elems) == 2 and elems[1].lower() == "collection":
+        return True
+
     if len(elems) != 3:
         _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [spotify:<type>:<unique_id>]")
         return False
