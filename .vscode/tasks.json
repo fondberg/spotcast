@@ -7,7 +7,7 @@
             "command": "bump2version",
             "args": [
                 "--config-file",
-                "./build/bumpversion.cfg",
+                "./config/bumpversion.cfg",
                 "${input:bumpLevel}"
             ],
             "problemMatcher": [],
