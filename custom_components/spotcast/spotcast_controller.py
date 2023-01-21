@@ -301,6 +301,9 @@ class SpotcastController:
                 elif uri.find("playlist") > 0:
                     results = client.playlist_tracks(uri)
                     position = random.randint(0, results["total"] - 1)
+                elif uri.find("collection") > 0:
+                    results = client.current_user_saved_tracks()
+                    position = random.randint(0, results["total"] - 1)
                 _LOGGER.debug("Start playback at random position: %s", position)
             if uri.find("artist") < 1:
                 kwargs["offset"] = {"position": position}
