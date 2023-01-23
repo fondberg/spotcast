@@ -30,11 +30,27 @@ A clear and concise description of what the bug is.
 
 ## Configuration
 
-Add your configuration
+````yaml
+# please remove any sensitive information like cookies and token keys
+<insert configuration here>
+
+````
 
 ## Service Call
 
 If relevant, provide a `yaml` of the service call or explain the action taken to replicate the issue.
+
+````yaml
+<insert the yaml of the service call here>
+````
+
+## Logs
+
+* normal|debug
+
+````log
+<please insert any relevent logs here>
+````
 
 ## Additional context
 
