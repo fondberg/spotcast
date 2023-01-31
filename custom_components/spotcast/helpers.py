@@ -21,9 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def get_spotify_media_player(hass: ha_core.HomeAssistant, spotify_user_id: str) -> SpotifyMediaPlayer:
-    """
-    Get the spotify media player entity from hass.
-    """
+    """Get the spotify media player entity from hass."""
     platforms = entity_platform.async_get_platforms(hass, "spotify")
     spotify_media_player = None
     for platform in platforms:
