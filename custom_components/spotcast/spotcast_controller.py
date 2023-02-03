@@ -19,7 +19,7 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .spotify_controller import SpotifyController
 from .const import CONF_SP_DC, CONF_SP_KEY
-from .helpers import get_cast_devices, get_spotify_devices
+from .helpers import get_cast_devices, get_spotify_devices, get_spotify_media_player
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -105,22 +105,31 @@ class SpotifyCastDevice:
 
         self.spotifyController = sp
 
-    def getSpotifyDeviceId(self, devices_available: dict) -> None:
-        # Look for device to make sure we can start playback
-        _LOGGER.debug(
-            "devices_available: %s %s", devices_available, self.spotifyController.device
-        )
-        if devices := devices_available["devices"]:
-            for device in devices:
-                if device["id"] == self.spotifyController.device:
-                    return device["id"]
+    def getSpotifyDeviceId(self, user_id) -> None:
+        spotify_media_player = get_spotify_media_player(self.hass, user_id)
+        max_retries = 5
+        counter = 0
+        devices_available = None
+        _LOGGER.debug("Searching for Spotify device: {}".format(self.spotifyController.device))
+        while counter < max_retries:
+            devices_available = get_spotify_devices(spotify_media_player)
+            # Look for device to make sure we can start playback
+            if devices := devices_available["devices"]:
+                for device in devices:
+                    if device["id"] == self.spotifyController.device:
+                        _LOGGER.debug("Found matching Spotify device: {}".format(device))
+                        return device["id"]
+
+            sleep = random.uniform(1.5, 1.8) ** counter
+            time.sleep(sleep)
+            counter = counter + 1
 
         _LOGGER.error(
             'No device with id "{}" known by Spotify'.format(
                 self.spotifyController.device
             )
         )
-        _LOGGER.error("Known devices: {}".format(devices))
+        _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
 
         raise HomeAssistantError("Failed to get device id from Spotify")
 
@@ -214,7 +223,8 @@ class SpotcastController:
         return spotipy.Spotify(auth=self.get_token_instance(account).access_token)
 
     def _getSpotifyConnectDeviceId(self, client, device_name):
-        devices_available = get_spotify_devices(self.hass, client._get("me")["id"])
+        media_player = get_spotify_media_player(self.hass, client._get("me")["id"])
+        devices_available = get_spotify_devices(media_player)
         for device in devices_available["devices"]:
             if device["name"] == device_name:
                 return device["id"]
@@ -239,9 +249,7 @@ class SpotcastController:
             me_resp = client._get("me")
             spotify_cast_device.startSpotifyController(access_token, expires)
             # Make sure it is started
-            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(
-                get_spotify_devices(self.hass, me_resp["id"])
-            )
+            spotify_device_id = spotify_cast_device.getSpotifyDeviceId(me_resp["id"])
         return spotify_device_id
 
     def play(

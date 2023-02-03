@@ -51,6 +51,7 @@ from .helpers import (
     get_cast_devices,
     get_spotify_devices,
     get_spotify_install_status,
+    get_spotify_media_player,
     is_empty_str,
     get_random_playlist_from_category,
     get_search_results,
@@ -126,7 +127,8 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             account = msg.get("account", None)
             client = spotcast_controller.get_spotify_client(account)
             me_resp = client._get("me")  # pylint: disable=W0212
-            resp = get_spotify_devices(hass, me_resp["id"])
+            spotify_media_player = get_spotify_media_player(hass, me_resp["id"])
+            resp = get_spotify_devices(spotify_media_player)
             connection.send_message(websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_devices())
