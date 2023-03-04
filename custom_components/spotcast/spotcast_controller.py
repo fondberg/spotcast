@@ -297,7 +297,7 @@ class SpotcastController:
                 _LOGGER.debug(
                     "Cool, you found the easter egg with playing a random playlist"
                 )
-                playlists = client.user_playlists("me", 50)
+                playlists = client.current_user_playlists(50)
                 no_playlists = len(playlists["items"])
                 uri = playlists["items"][random.randint(0, no_playlists - 1)]["uri"]
             kwargs = {"device_id": spotify_device_id, "context_uri": uri}
