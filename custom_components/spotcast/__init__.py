@@ -201,7 +201,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         client = spotcast_controller.get_spotify_client(account)
 
         # verify the uri provided and clean-up if required
-        if not is_empty_str(uri):
+        if not is_empty_str(uri) and uri != "random":
 
             # remove ? from badly formatted URI
             uri = uri.split("?")[0]
