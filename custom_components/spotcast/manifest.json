@@ -1,18 +1,18 @@
 {
   "domain": "spotcast",
   "name": "Spotcast",
-  "documentation": "https://github.com/fondberg/spotcast",
-  "issue_tracker": "https://github.com/fondberg/spotcast/issues",
-  "iot_class": "cloud_polling",
-  "version": "v3.6.30",
-  "dependencies": [
-    "spotify"
-  ],
   "after_dependencies": [
     "cast",
     "spotify"
   ],
   "codeowners": [
     "@fondberg"
-  ]
+  ],
+  "dependencies": [
+    "spotify"
+  ],
+  "documentation": "https://github.com/fondberg/spotcast",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/fondberg/spotcast/issues",
+  "version": "v3.6.30"
 }
