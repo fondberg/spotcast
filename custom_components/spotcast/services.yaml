@@ -106,7 +106,7 @@ start:
         boolean:
     offset:
       name: "Offset"
-      description: "Set offset mode for playback. 0 is the first song."
+      description: "Set offset mode for playback. 0 is the first song (or 1 for latest unplayed episode)."
       example: 1
       required: false
       default: 0

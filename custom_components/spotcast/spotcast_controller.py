@@ -271,25 +271,38 @@ class SpotcastController:
             show_info = client.show(uri, market=country_code)
             limit=50 # maximum allowed
             if show_info and show_info["episodes"]["total"] > 0:
+                search_direction=1
+                if position == "1":
+                    search_direction=-1
+                    search_offset=0
+                else:
+                    search_offset = show_info["episodes"]["total"] - limit -1
                 play_episode = None
-                offset = show_info["episodes"]["total"] - limit
+                _LOGGER.debug("Searching for unplayed eps of %s in direction %s,offset %s, (total eps %s)",show_info["name"],search_direction,search_offset,show_info["episodes"]["total"])
+
                 while play_episode is None:
-                    show_episodes_info = client.show_episodes(uri, limit=limit,offset=offset,market=country_code)
-                    _LOGGER.debug("Retrived %s episodes of %s starting at %s",len(show_episodes_info["items"]),show_info["name"],offset)
-                    show_episodes_info["items"].reverse()
-                    ep_pos = limit+offset
+                    show_episodes_info = client.show_episodes(uri, limit=limit,offset=search_offset,market=country_code)
+                    _LOGGER.debug("Retrived %s episodes of %s starting at %s",len(show_episodes_info["items"]),show_info["name"],search_offset)
+                    if search_direction == 1:
+                        show_episodes_info["items"].reverse()
+                        ep_pos = show_info["episodes"]["total"] -1 - (limit+search_offset)
+                    else:
+                        ep_pos = show_info["episodes"]["total"] -1
+
                     for episode in show_episodes_info["items"]:
                         episode['offset_position'] = ep_pos
-                        ep_pos = ep_pos - 1
+                        ep_pos = ep_pos + search_direction
+                        #_LOGGER.warn("Checking episode: %s", episode["name"])
                         if episode["resume_point"]["fully_played"] is False:
                            play_episode = episode
                            break
-                    if offset == 0:
+                    if (ep_pos == 0 and search_direction == 1) or (ep_pos == show_info["episodes"]["total"]-1 and search_direction == -1):
                       play_episode = show_episodes_info["items"][-1]
                       break
-                    offset = max(0,offset-limit)
-                _LOGGER.debug("Playing episode: %s  offset: %s Resume Position: %s", episode["name"],play_episode["offset_position"],play_episode["resume_point"]["resume_position_ms"])
+                    search_offset = max(0,search_offset-limit)
+                _LOGGER.debug("Playing episode: %s  offset: %s Resume Position: %s", play_episode["name"],play_episode["offset_position"],play_episode["resume_point"]["resume_position_ms"])
                 client.start_playback(device_id=spotify_device_id, context_uri=uri,offset={ "position": play_episode["offset_position"]},position_ms=play_episode["resume_point"]["resume_position_ms"])
+
         elif uri.find("episode") > 0:
             _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
             client.start_playback(device_id=spotify_device_id, uris=[uri])
