@@ -259,7 +259,6 @@ class SpotcastController:
         uri: str,
         random_song: bool,
         position: str,
-        ignore_fully_played: str,
         country_code: str = None
     ) -> None:
         _LOGGER.debug(
