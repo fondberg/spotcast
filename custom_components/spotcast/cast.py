@@ -16,7 +16,14 @@ async def async_get_media_browser_root_object(
     cast_type: str
 ) -> list[BrowseMedia]:
     """Create a root object for media browsing."""
-    result = await ha_spotify.async_browse_media(hass, None, None)
+    try:
+        result = await ha_spotify.async_browse_media(hass, None, None)
+    except KeyError:
+        _LOGGER.debug(
+            "failed to call spotify.async_browse_media, the Home Assistant spotify "
+            "integration may not be setup"
+        )
+        return []
     _LOGGER.debug("async_get_media_browser_root_object return %s", result.children)
     return result.children
 
