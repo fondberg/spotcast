@@ -6,7 +6,8 @@
     "spotify"
   ],
   "codeowners": [
-    "@fondberg"
+    "@fondberg",
+    "@fcusson"
   ],
   "dependencies": [
     "spotify"
