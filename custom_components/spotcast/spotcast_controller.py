@@ -90,7 +90,7 @@ class SpotifyCastDevice:
         )
 
     def startSpotifyController(self, access_token: str, expires: int) -> None:
-        sp = SpotifyController(access_token, expires)
+        sp = SpotifyController(self.castDevice, access_token, expires)
         self.castDevice.register_handler(sp)
         sp.launch_app()
 
