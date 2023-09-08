@@ -24,7 +24,6 @@ CONF_SHUFFLE = "shuffle"
 CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
 CONF_START_VOL = "start_volume"
-CONF_IGNORE_FULLY_PLAYED = "ignore_fully_played"
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
@@ -86,7 +85,6 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
         vol.Optional(CONF_OFFSET, default=0): cv.string,
         vol.Optional(CONF_START_VOL, default=101): cv.positive_int,
-        vol.Optional(CONF_IGNORE_FULLY_PLAYED, default=False): cv.boolean,
     }
 )
 
