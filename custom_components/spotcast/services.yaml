@@ -1,4 +1,5 @@
 start:
+  name: Start Spotcast
   description: Starts spotify playback on chromecast devices
   fields:
     device_name:
