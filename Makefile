@@ -1,4 +1,4 @@
-__VERSION__ = "3.7.0"
+__VERSION__ = "3.7.1"
 
 bump:
 	bump2version --allow-dirty --current-version $(__VERSION__) patch Makefile custom_components/spotcast/manifest.json
