@@ -62,6 +62,22 @@ start:
       required: false
       selector:
         text:
+    artistName:
+      name: "Artist Name"
+      example: "pink floyd"
+      description: "This will filter search results to match the provided artist name"
+      required: false
+      selector:
+        text:
+    searchType:
+      name: "Search Type"
+      description: "This is the type of search."
+      default: "track"
+      selector:
+        select:
+          options:
+            - "track"
+            - "playlist"
     account:
       name: "Account"
       description: "Optionally starts Spotify using an alternative account specified in config."
