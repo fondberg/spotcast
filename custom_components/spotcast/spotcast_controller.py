@@ -208,6 +208,14 @@ class SpotifyToken:
                 allow_redirects=False,
                 headers=headers
             ) as response:
+                if (response.status == 302 and response.headers['Location'] == '/get_access_token?reason=transport&productType=web_player&_authfailed=1'):
+                    _LOGGER.error(
+                        "Unsuccessful token request, received code 302 and "
+                        "Location header %s. sp_dc and sp_key could be "
+                        "expired. Please update in config.",
+                        response.headers['Location']
+                    )
+                    raise HomeAssistantError("Expired sp_dc, sp_key")
                 if (response.status != 200):
                     _LOGGER.info(
                         "Unsuccessful token request, received code %i",
