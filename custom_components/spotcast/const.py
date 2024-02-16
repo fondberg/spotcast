@@ -89,6 +89,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_SPOTIFY_SHOW_NAME): cv.string,
         vol.Optional(CONF_SPOTIFY_EPISODE_NAME): cv.string,
         vol.Optional(CONF_SPOTIFY_AUDIOBOOK_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_GENRE_NAME): cv.string,
         vol.Optional(CONF_SPOTIFY_CATEGORY): cv.string,
         vol.Optional(CONF_SPOTIFY_COUNTRY): cv.string,
         vol.Optional(CONF_SPOTIFY_LIMIT, default=20): cv.positive_int,
