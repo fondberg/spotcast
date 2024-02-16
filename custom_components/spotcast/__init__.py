@@ -239,17 +239,19 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         if (
             is_empty_str(uri)
             and len(
-                filter(
-                    lambda x: not is_empty_str(x),
-                    [
-                        artistName,
-                        playlistName,
-                        trackName,
-                        showName,
-                        episodeName,
-                        audiobookName,
-                        genreName,
-                    ],
+                list(
+                    filter(
+                        lambda x: not is_empty_str(x),
+                        [
+                            artistName,
+                            playlistName,
+                            trackName,
+                            showName,
+                            episodeName,
+                            audiobookName,
+                            genreName,
+                        ],
+                    )
                 )
             )
             == 0

@@ -208,17 +208,19 @@ def get_search_results(
     if (
         not is_empty_str(artistName)
         and len(
-            filter(
-                lambda x: not is_empty_str(x),
-                [
-                    albumName,
-                    playlistName,
-                    trackName,
-                    showName,
-                    episodeName,
-                    audiobookName,
-                    genreName,
-                ],
+            list(
+                filter(
+                    lambda x: not is_empty_str(x),
+                    [
+                        albumName,
+                        playlistName,
+                        trackName,
+                        showName,
+                        episodeName,
+                        audiobookName,
+                        genreName,
+                    ],
+                )
             )
         )
         == 0
