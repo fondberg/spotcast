@@ -243,12 +243,30 @@ def get_search_results(
             episodeName=episodeName,
             audiobookName=audiobookName,
         )
-        try:
-            searchResults = spotify_client.search(
-                q=searchString, limit=limit, offset=0, type=searchTypes, market=country
-            )["tracks"]["items"]
-        except IndexError:
-            pass
+        searchResults = spotify_client.search(
+            q=searchString, limit=limit, offset=0, type=searchTypes, market=country
+        )
+        
+        compiledResults = []
+        if "tracks" in searchResults:
+            for item in searchResults["tracks"]["items"]:
+                compiledResults.append(item)
+        if "albums" in searchResults:
+            for item in searchResults["albums"]["items"]:
+                compiledResults.append(item)
+        if "playlists" in searchResults:
+            for item in searchResults["playlists"]["items"]:
+                compiledResults.append(item)
+        if "shows" in searchResults:
+            for item in searchResults["shows"]["items"]:
+                compiledResults.append(item)
+        if "audiobooks" in searchResults:
+            for item in searchResults["audiobooks"]["items"]:
+                compiledResults.append(item)
+        if "episodes" in searchResults:
+            for item in searchResults["episodes"]["items"]:
+                compiledResults.append(item)
+        
         _LOGGER.debug(
             "Found %d results for %s. First Track name: %s",
             len(searchResults),
