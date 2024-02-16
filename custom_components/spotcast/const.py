@@ -12,8 +12,14 @@ DOMAIN = "spotcast"
 CONF_SPOTIFY_DEVICE_ID = "spotify_device_id"
 CONF_DEVICE_NAME = "device_name"
 CONF_SPOTIFY_URI = "uri"
-CONF_SPOTIFY_SEARCH = "search"
-CONF_SPOTIFY_ARTISTNAME = "artistName"
+CONF_SPOTIFY_TRACK_NAME = "trackName"
+CONF_SPOTIFY_ARTIST_NAME = "artistName"
+CONF_SPOTIFY_ALBUM_NAME = "albumName"
+CONF_SPOTIFY_PLAYLIST_NAME = "playlistName"
+CONF_SPOTIFY_SHOW_NAME = "showName"
+CONF_SPOTIFY_EPISODE_NAME = "episodeName"
+CONF_SPOTIFY_AUDIOBOOK_NAME = "audiobookName"
+CONF_SPOTIFY_GENRE_NAME = "genreName"
 CONF_SPOTIFY_CATEGORY = "category"
 CONF_SPOTIFY_COUNTRY = "country"
 CONF_SPOTIFY_LIMIT = "limit"
@@ -76,8 +82,13 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_SPOTIFY_DEVICE_ID): cv.string,
         vol.Optional(CONF_ENTITY_ID): cv.string,
         vol.Optional(CONF_SPOTIFY_URI): cv.string,
-        vol.Optional(CONF_SPOTIFY_SEARCH): cv.string,
-        vol.Optional(CONF_SPOTIFY_ARTISTNAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_TRACK_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_ALBUM_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_ARTIST_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_PLAYLIST_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_SHOW_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_EPISODE_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_AUDIOBOOK_NAME): cv.string,
         vol.Optional(CONF_SPOTIFY_CATEGORY): cv.string,
         vol.Optional(CONF_SPOTIFY_COUNTRY): cv.string,
         vol.Optional(CONF_SPOTIFY_LIMIT, default=20): cv.positive_int,

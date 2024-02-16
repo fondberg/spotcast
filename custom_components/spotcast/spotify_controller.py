@@ -3,16 +3,16 @@ Controller to interface with Spotify.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import threading
+
 import requests
-import json
-import hashlib
-
-from .const import APP_SPOTIFY
-
 from pychromecast.controllers import BaseController
 from pychromecast.error import LaunchError
+
+from .const import APP_SPOTIFY
 
 APP_NAMESPACE = "urn:x-cast:com.spotify.chromecast.secure.v1"
 TYPE_GET_INFO = "getInfo"
@@ -49,22 +49,30 @@ class SpotifyController(BaseController):
             self.device = self.getSpotifyDeviceID()
             self.client = data["payload"]["clientID"]
             headers = {
-                'authority': 'spclient.wg.spotify.com',
-                'authorization': 'Bearer {}'.format(self.access_token),
-                'content-type': 'text/plain;charset=UTF-8'
+                "authority": "spclient.wg.spotify.com",
+                "authorization": "Bearer {}".format(self.access_token),
+                "content-type": "text/plain;charset=UTF-8",
             }
 
-            request_body = json.dumps({'clientId': self.client, 'deviceId': self.device})
+            request_body = json.dumps(
+                {"clientId": self.client, "deviceId": self.device}
+            )
 
-            response = requests.post('https://spclient.wg.spotify.com/device-auth/v1/refresh', headers=headers, data=request_body)
+            response = requests.post(
+                "https://spclient.wg.spotify.com/device-auth/v1/refresh",
+                headers=headers,
+                data=request_body,
+            )
             json_resp = response.json()
-            self.send_message({
-                "type": TYPE_ADD_USER,
-                "payload": {
-                    "blob": json_resp["accessToken"],
-                    "tokenType": "accesstoken"
+            self.send_message(
+                {
+                    "type": TYPE_ADD_USER,
+                    "payload": {
+                        "blob": json_resp["accessToken"],
+                        "tokenType": "accesstoken",
+                    },
                 }
-            })
+            )
         if data["type"] == TYPE_ADD_USER_RESPONSE:
             self.is_launched = True
             self.waiting.set()
@@ -88,11 +96,16 @@ class SpotifyController(BaseController):
 
         def callback():
             """Callback function"""
-            self.send_message({"type": TYPE_GET_INFO, "payload": {
-                "remoteName": self.castDevice.cast_info.friendly_name,
-                "deviceID": self.getSpotifyDeviceID(),
-                "deviceAPI_isGroup": False,
-            },})
+            self.send_message(
+                {
+                    "type": TYPE_GET_INFO,
+                    "payload": {
+                        "remoteName": self.castDevice.cast_info.friendly_name,
+                        "deviceID": self.getSpotifyDeviceID(),
+                        "deviceAPI_isGroup": False,
+                    },
+                }
+            )
 
         self.device = None
         self.credential_error = False
