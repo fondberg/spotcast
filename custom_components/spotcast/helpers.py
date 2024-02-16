@@ -126,7 +126,6 @@ def get_top_tracks(
 
         artist = spotify_client.search(
             q=search,
-            artistName=artistName,
             limit=1,
             offset=0,
             type="artist",
