@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "bumpversion",
+            "type": "shell",
+            "command": "bump2version",
+            "args": [
+                "--config-file",
+                "./config/bumpversion.cfg",
+                "${input:bumpLevel}"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            }
+        },
+    ],
+    "inputs": [
+        {
+            "id": "bumpLevel",
+            "type": "pickString",
+            "description": "Level of bump to make on version",
+            "options": [
+                "patch",
+                "minor",
+                "major"
+            ],
+            "default": "patch"
+        }
+    ]
+}

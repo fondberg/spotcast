@@ -7,6 +7,7 @@ import logging
 import threading
 import requests
 import json
+import hashlib
 
 from .const import APP_SPOTIFY
 
@@ -25,7 +26,7 @@ TYPE_ADD_USER_ERROR = "addUserError"
 class SpotifyController(BaseController):
     """Controller to interact with Spotify namespace."""
 
-    def __init__(self, access_token=None, expires=None):
+    def __init__(self, castDevice, access_token=None, expires=None):
         super(SpotifyController, self).__init__(APP_NAMESPACE, APP_SPOTIFY)
 
         self.logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class SpotifyController(BaseController):
         self.device = None
         self.credential_error = False
         self.waiting = threading.Event()
+        self.castDevice = castDevice
 
     def receive_message(self, _message, data: dict):
         """
@@ -44,7 +46,7 @@ class SpotifyController(BaseController):
         Called when a message is received.
         """
         if data["type"] == TYPE_GET_INFO_RESPONSE:
-            self.device = data["payload"]["deviceID"]
+            self.device = self.getSpotifyDeviceID()
             self.client = data["payload"]["clientID"]
             headers = {
                 'authority': 'spclient.wg.spotify.com',
@@ -86,7 +88,11 @@ class SpotifyController(BaseController):
 
         def callback():
             """Callback function"""
-            self.send_message({"type": TYPE_GET_INFO, "payload": {}})
+            self.send_message({"type": TYPE_GET_INFO, "payload": {
+                "remoteName": self.castDevice.cast_info.friendly_name,
+                "deviceID": self.getSpotifyDeviceID(),
+                "deviceAPI_isGroup": False,
+            },})
 
         self.device = None
         self.credential_error = False
@@ -115,3 +121,9 @@ class SpotifyController(BaseController):
         self.expires = kwargs["expires"]
 
         self.launch_app(timeout=20)
+
+    def getSpotifyDeviceID(self) -> str:
+        """
+        Retrieve the Spotify deviceID from provided chromecast info
+        """
+        return hashlib.md5(self.castDevice.cast_info.friendly_name.encode()).hexdigest()
