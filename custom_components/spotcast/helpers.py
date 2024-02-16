@@ -151,13 +151,13 @@ def get_search_string(
 ) -> str:
     search = []
     if not is_empty_str(artistName):
-        search.append(f"artistName:{artistName}")
+        search.append(f"artist:{artistName}")
     if not is_empty_str(albumName):
-        search.append(f"albumName:{albumName}")
+        search.append(f"album:{albumName}")
     if not is_empty_str(trackName):
-        search.append(f"trackName:{trackName}")
+        search.append(f"track:{trackName}")
     if not is_empty_str(genreName):
-        search.append(f"genreName:{genreName}")
+        search.append(f"genre:{genreName}")
     return " ".join(search)
 
 

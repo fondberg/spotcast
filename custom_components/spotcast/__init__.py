@@ -295,6 +295,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                     showName=showName,
                     episodeName=episodeName,
                     audiobookName=audiobookName,
+                    genreName=genreName
                 )
                 # play the first track
                 if len(searchResults) > 0:
