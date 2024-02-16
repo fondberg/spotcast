@@ -56,56 +56,56 @@ start:
           step: 1
           min: 0
           max: 50
-    albumName:
+    album_name:
       name: "Album Name"
       example: "The Dark Side of the Moon"
       description: "Filters search results for the provided album name. Don't include this if you don't want an album."
       required: false
       selector:
         text:
-    trackName:
+    track_name:
       name: "Track Name"
       example: "Money"
       description: "Filters search results for the provided track name. Don't include this if you don't want a particular track."
       required: false
       selector:
         text:
-    playlistName:
+    playlist_name:
       name: "Playlist Name"
       example: "Ultimate pink floyd playlist"
       description: "Filters search results for the provided playlist name. Don't include this if you don't want a playlist."
       required: false
       selector:
         text:
-    showName:
+    show_name:
       name: "Show Name"
       example: "Hollywood Handbook"
       description: "Filters search results for the provided podcast show name. Don't include this if you don't want a podcast."
       required: false
       selector:
         text:
-    episodeName:
+    episode_name:
       name: "Episode Name"
       example: "Sarah Sherman, Our Close Friend"
       description: "Filters search results for the provided podcast episode name. Don't include this if you don't want a podcast."
       required: false
       selector:
         text: 
-    genreName:
+    genre_name:
       name: "Genre Name"
       example: "post punk"
       description: "Filters search results by genre of music"
       required: false
       selector:
         text: 
-    audiobookName:
+    audiobook_name:
       name: "Audiobook Name"
       example: "Ulysses"
       description: "Filters search results for the provided audiobook name. Don't include this if you don't want an audiobook."
       required: false
       selector:
         text: 
-    artistName:
+    artist_name:
       name: "Artist Name"
       example: "pink floyd"
       description: "This will filter search results to match the provided artist name. Don't include this if searching for a playlist or genre. Do include the author's name if searching for audiobooks."
