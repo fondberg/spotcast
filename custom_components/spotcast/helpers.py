@@ -269,12 +269,12 @@ def get_search_results(
         
         _LOGGER.debug(
             "Found %d results for %s. First Track name: %s",
-            len(searchResults),
+            len(compiledResults),
             searchString,
-            searchResults[0]["name"],
+            compiledResults[0]["name"],
         )
 
-    return searchResults
+    return compiledResults
 
 
 def search_tracks(
