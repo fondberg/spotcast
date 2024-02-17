@@ -242,6 +242,7 @@ def get_search_results(
     ):
         searchResults = get_top_tracks(artistName, spotify_client)
         _LOGGER.debug("Playing top tracks for artist: %s", searchResults[0]["name"])
+        return searchResults
     else:
         searchString = get_search_string(
             artistName=artistName,
@@ -294,7 +295,7 @@ def get_search_results(
             compiledResults[0]["name"],
         )
 
-    return compiledResults
+        return compiledResults
 
 
 def search_tracks(
