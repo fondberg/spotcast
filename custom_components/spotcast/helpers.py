@@ -303,11 +303,13 @@ def search_tracks(
 def add_tracks_to_queue(
     spotify_client: spotipy.Spotify, tracks: list = [], limit: int = 20
 ):
-    if len(tracks) == 0:
+    filtered = list(filter(lambda x: x['type'] == 'track', tracks))
+    
+    if len(filtered) == 0:
         _LOGGER.debug("Cannot add ZERO tracks to the queue!")
         return
 
-    for track in tracks[:limit]:
+    for track in filtered[:limit]:
         _LOGGER.debug(
             "Adding " + track["name"] + " to the playback queue | " + track["uri"]
         )
