@@ -146,17 +146,33 @@ def get_top_tracks(
 
 
 def get_search_string(
-    artistName: str, albumName: str, trackName: str, genreName: str
+    artistName: str,
+    albumName: str,
+    trackName: str,
+    genreName: str,
+    playlistName: str,
+    showName: str,
+    episodeName: str,
+    audiobookName: str,
 ) -> str:
     search = []
     if not is_empty_str(artistName):
         search.append(f"artist:{artistName}")
+        search.append(artistName)
     if not is_empty_str(albumName):
         search.append(f"album:{albumName}")
+        search.append(albumName)
     if not is_empty_str(trackName):
         search.append(f"track:{trackName}")
+        search.append(trackName)
     if not is_empty_str(genreName):
         search.append(f"genre:{genreName}")
+        search.append(genreName)
+    # if we are searching for a playlist, podcast, audiobook, we need some search query which is probably just the text we are looking for
+    for item in [playlistName, showName, episodeName, audiobookName]:
+        if not is_empty_str(item):
+            search.append(item)
+
     return " ".join(search)
 
 
@@ -232,6 +248,10 @@ def get_search_results(
             albumName=albumName,
             trackName=trackName,
             genreName=genreName,
+            playlistName=playlistName,
+            showName=showName,
+            episodeName=episodeName,
+            audiobookName=audiobookName,
         )
 
         searchTypes = get_types_string(
@@ -246,7 +266,7 @@ def get_search_results(
         searchResults = spotify_client.search(
             q=searchString, limit=limit, offset=0, type=searchTypes, market=country
         )
-        
+
         compiledResults = []
         if "tracks" in searchResults:
             for item in searchResults["tracks"]["items"]:
@@ -266,7 +286,7 @@ def get_search_results(
         if "episodes" in searchResults:
             for item in searchResults["episodes"]["items"]:
                 compiledResults.append(item)
-        
+
         _LOGGER.debug(
             "Found %d results for %s. First Track name: %s",
             len(compiledResults),
@@ -303,8 +323,8 @@ def search_tracks(
 def add_tracks_to_queue(
     spotify_client: spotipy.Spotify, tracks: list = [], limit: int = 20
 ):
-    filtered = list(filter(lambda x: x['type'] == 'track', tracks))
-    
+    filtered = list(filter(lambda x: x["type"] == "track", tracks))
+
     if len(filtered) == 0:
         _LOGGER.debug("Cannot add ZERO tracks to the queue!")
         return
