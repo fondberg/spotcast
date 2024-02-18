@@ -13,7 +13,6 @@ from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
 import homeassistant.core as ha_core
-
 from .const import (
     CONF_ACCOUNTS,
     CONF_DEVICE_NAME,
@@ -44,6 +43,7 @@ from .const import (
     WS_TYPE_SPOTCAST_DEVICES,
     WS_TYPE_SPOTCAST_PLAYER,
     WS_TYPE_SPOTCAST_PLAYLISTS,
+    CONF_LAUNCH_TIMEOUT,
 )
 
 from .helpers import (
@@ -93,8 +93,10 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     sp_dc = conf[CONF_SP_DC]
     sp_key = conf[CONF_SP_KEY]
     accounts = conf.get(CONF_ACCOUNTS)
-
-    spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts)
+    # Fetch the launch timeout configuration, with a default of 10 seconds if not specified
+    launch_timeout = config[DOMAIN].get(CONF_LAUNCH_TIMEOUT, 30)
+    
+    spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts, launch_timeout)
 
     if DOMAIN not in hass.data:
         hass.data[DOMAIN] = {}
