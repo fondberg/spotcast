@@ -98,10 +98,10 @@ class SpotifyCastDevice:
             "Could not find device with name {}".format(device_name)
         )
 
-    def start_spotify_controller(self, access_token: str, expires: int):
+    def start_spotify_controller(self, access_token: str, expires: int, timeout: int = 30):
         sp = SpotifyController(self.castDevice, access_token, expires)
         self.castDevice.register_handler(sp)
-        sp.launch_app()
+        sp.launch_app(timeout=timeout)
 
         if not sp.is_launched and not sp.credential_error:
             raise HomeAssistantError(
