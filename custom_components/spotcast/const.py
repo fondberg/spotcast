@@ -25,6 +25,7 @@ CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
 CONF_START_VOL = "start_volume"
 CONF_IGNORE_FULLY_PLAYED = "ignore_fully_played"
+CONF_LAUNCH_TIMEOUT = "launch_timeout"
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
