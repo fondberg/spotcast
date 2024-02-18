@@ -88,6 +88,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_OFFSET, default=0): cv.string,
         vol.Optional(CONF_START_VOL, default=101): cv.positive_int,
         vol.Optional(CONF_IGNORE_FULLY_PLAYED, default=False): cv.boolean,
+        vol.Optional(CONF_LAUNCH_TIMEOUT, default=30): cv.positive_int,
     }
 )
 

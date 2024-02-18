@@ -137,9 +137,14 @@ start:
       selector:
         boolean:
     set_launch_timeout:
-      description: Sets the timeout for launching the Spotify app.
-      fields:
-        timeout:
-          description: The timeout in seconds to wait for the Spotify app to launch.
-          example: 30
-          required: true
+      name: "Set Launch Timeout"
+      description: "Sets the timeout for launching the Spotify app, minimal 10 seconds."
+      example: 30
+      required: false
+      default: 30
+      selector:
+        number:
+          mode: box
+          step: 1
+          min: 10
+          max: 999999

@@ -17,7 +17,7 @@ from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from homeassistant.exceptions import HomeAssistantError
 from requests import TooManyRedirects
 
-from .const import CONF_SP_DC, CONF_SP_KEY, CONF_LAUNCH_TIMEOUT
+from .const import CONF_SP_DC, CONF_SP_KEY
 from .helpers import get_cast_devices, get_spotify_devices, get_spotify_media_player
 from .spotify_controller import SpotifyController
 
@@ -94,10 +94,12 @@ class SpotifyCastDevice:
             "Could not find device with name {}".format(device_name)
         )
 
-    def start_spotify_controller(self, access_token: str, expires: int, timeout: int):
+    def start_spotify_controller(
+        self, access_token: str, expires: int, launch_timeout: int
+    ):
         sp = SpotifyController(self.castDevice, access_token, expires)
         self.castDevice.register_handler(sp)
-        sp.launch_app(timeout=timeout)
+        sp.launch_app(launch_timeout=launch_timeout)
 
         if not sp.is_launched and not sp.credential_error:
             raise HomeAssistantError(
@@ -244,12 +246,13 @@ class SpotcastController:
         sp_dc: str,
         sp_key: str,
         accs: collections.OrderedDict,
+        launch_timeout,
     ) -> None:
         if accs:
             self.accounts = accs
         self.accounts["default"] = OrderedDict([("sp_dc", sp_dc), ("sp_key", sp_key)])
         self.hass = hass
-        self.launch_timeout: int
+        self.launch_timeout = launch_timeout
 
     def get_token_instance(self, account: str = None) -> any:
         """Get token instance for account"""
@@ -293,7 +296,9 @@ class SpotcastController:
                 entity_id,
             )
             me_resp = client._get("me")
-            spotify_cast_device.start_spotify_controller(access_token, expires)
+            spotify_cast_device.start_spotify_controller(
+                access_token, expires, self.launch_timeout
+            )
             # Make sure it is started
             spotify_device_id = spotify_cast_device.get_spotify_device_id(me_resp["id"])
         return spotify_device_id

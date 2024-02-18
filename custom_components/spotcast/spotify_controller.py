@@ -84,12 +84,12 @@ class SpotifyController(BaseController):
             self.waiting.set()
         return True
 
-    def launch_app(self, timeout):
+    def launch_app(self, launch_timeout):
         """
         Launch Spotify application.
 
         Will raise a LaunchError exception if there is no response from the
-        Spotify app within timeout seconds.
+        Spotify app within launch_timeout seconds.
         """
 
         if self.access_token is None or self.expires is None:
@@ -114,7 +114,7 @@ class SpotifyController(BaseController):
         self.launch(callback_function=callback)
 
         counter = 0
-        while counter < (timeout + 1):
+        while counter < (launch_timeout + 1):
             if self.is_launched:
                 return
             self.waiting.wait(1)
@@ -122,7 +122,7 @@ class SpotifyController(BaseController):
 
         if not self.is_launched:
             raise LaunchError(
-                "Timeout when waiting for status response from Spotify app"
+                f"Timeout when waiting for status response from Spotify app after {launch_timeout} seconds."
             )
 
     # pylint: disable=too-many-locals
