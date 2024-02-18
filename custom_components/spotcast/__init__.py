@@ -95,8 +95,10 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     accounts = conf.get(CONF_ACCOUNTS)
     # Fetch the launch timeout configuration, with a default of 10 seconds if not specified
     launch_timeout = config[DOMAIN].get(CONF_LAUNCH_TIMEOUT, 30)
-    
-    spotcast_controller = SpotcastController(hass, sp_dc, sp_key, accounts, launch_timeout)
+
+    spotcast_controller = SpotcastController(
+        hass, sp_dc, sp_key, accounts, launch_timeout
+    )
 
     if DOMAIN not in hass.data:
         hass.data[DOMAIN] = {}
@@ -204,7 +206,6 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
 
         # verify the uri provided and clean-up if required
         if not is_empty_str(uri):
-
             # remove ? from badly formatted URI
             uri = uri.split("?")[0]
 
@@ -216,7 +217,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             uri = uri.split(":")
             uri[0] = uri[0].lower()
             uri[1] = uri[1].lower()
-            uri = ':'.join(uri)
+            uri = ":".join(uri)
 
         # first, rely on spotify id given in config otherwise get one
         if not spotify_device_id:
@@ -250,7 +251,6 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 ignore_fully_played,
             )
         else:
-
             if is_empty_str(uri):
                 # get uri from search request
                 uri = get_search_results(search, client, country)
