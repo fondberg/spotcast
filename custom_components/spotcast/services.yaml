@@ -136,3 +136,10 @@ start:
       default: false
       selector:
         boolean:
+    set_launch_timeout:
+      description: Sets the timeout for launching the Spotify app.
+      fields:
+        timeout:
+          description: The timeout in seconds to wait for the Spotify app to launch.
+          example: 30
+          required: true
