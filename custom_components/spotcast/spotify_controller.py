@@ -75,7 +75,7 @@ class SpotifyController(BaseController):
             self.waiting.set()
         return True
 
-    def launch_app(self, timeout=10):
+    def launch_app(self, timeout):
         """
         Launch Spotify application.
 
