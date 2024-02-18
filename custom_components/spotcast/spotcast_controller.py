@@ -43,6 +43,7 @@ class SpotifyCastDevice:
         self,
         hass: ha_core.HomeAssistant,
         call_device_name: str,
+        self.launch_timeout = launch_timeout,
         call_entity_id: str
     ) -> None:
         """Initialize a spotify cast device."""
