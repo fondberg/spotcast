@@ -10,9 +10,9 @@ import json
 import hashlib
 
 from .const import APP_SPOTIFY
+from .error import LaunchError
 
 from pychromecast.controllers import BaseController
-from pychromecast.error import LaunchError
 
 APP_NAMESPACE = "urn:x-cast:com.spotify.chromecast.secure.v1"
 TYPE_GET_INFO = "getInfo"
