@@ -18,14 +18,11 @@ from homeassistant.exceptions import HomeAssistantError
 from requests import TooManyRedirects
 
 from .const import CONF_SP_DC, CONF_SP_KEY
+from .error import TokenError
 from .helpers import get_cast_devices, get_spotify_devices, get_spotify_media_player
 from .spotify_controller import SpotifyController
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class TokenError(Exception):
-    pass
 
 
 class SpotifyCastDevice:

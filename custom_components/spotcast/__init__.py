@@ -7,28 +7,29 @@ __version__ = "3.7.1"
 import collections
 import logging
 import time
-import homeassistant
 
+import homeassistant.core as ha_core
 from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
-import homeassistant.core as ha_core
+
 from .const import (
     CONF_ACCOUNTS,
     CONF_DEVICE_NAME,
     CONF_FORCE_PLAYBACK,
     CONF_IGNORE_FULLY_PLAYED,
+    CONF_LAUNCH_TIMEOUT,
     CONF_RANDOM,
     CONF_SHUFFLE,
     CONF_SP_DC,
     CONF_SP_KEY,
     CONF_SPOTIFY_ACCOUNT,
-    CONF_SPOTIFY_DEVICE_ID,
-    CONF_SPOTIFY_URI,
-    CONF_SPOTIFY_SEARCH,
     CONF_SPOTIFY_CATEGORY,
     CONF_SPOTIFY_COUNTRY,
+    CONF_SPOTIFY_DEVICE_ID,
     CONF_SPOTIFY_LIMIT,
+    CONF_SPOTIFY_SEARCH,
+    CONF_SPOTIFY_URI,
     CONF_START_VOL,
     DOMAIN,
     SCHEMA_PLAYLISTS,
@@ -43,21 +44,18 @@ from .const import (
     WS_TYPE_SPOTCAST_DEVICES,
     WS_TYPE_SPOTCAST_PLAYER,
     WS_TYPE_SPOTCAST_PLAYLISTS,
-    CONF_LAUNCH_TIMEOUT,
 )
-
 from .helpers import (
     async_wrap,
     get_cast_devices,
+    get_random_playlist_from_category,
+    get_search_results,
     get_spotify_devices,
     get_spotify_install_status,
     get_spotify_media_player,
     is_empty_str,
-    get_random_playlist_from_category,
-    get_search_results,
     is_valid_uri,
 )
-
 from .spotcast_controller import SpotcastController
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
@@ -105,7 +103,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     hass.data[DOMAIN]["controller"] = spotcast_controller
 
     @callback
-    def websocket_handle_playlists(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_playlists(hass: ha_core.HomeAssistant, connection, msg: str):
         @async_wrap
         def get_playlist():
             """Handle to get playlist"""
@@ -124,7 +122,11 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         hass.async_add_job(get_playlist())
 
     @callback
-    def websocket_handle_devices(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_devices(
+        hass: ha_core.HomeAssistant,
+        connection,
+        msg: str,
+    ):
         @async_wrap
         def get_devices():
             """Handle to get devices. Only for default account"""
@@ -138,7 +140,11 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         hass.async_add_job(get_devices())
 
     @callback
-    def websocket_handle_player(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_player(
+        hass: ha_core.HomeAssistant,
+        connection,
+        msg: str,
+    ):
         @async_wrap
         def get_player():
             """Handle to get player"""
@@ -151,7 +157,11 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         hass.async_add_job(get_player())
 
     @callback
-    def websocket_handle_accounts(hass: ha_core.HomeAssistant, connection, msg):  # pylint: disable=W0613
+    def websocket_handle_accounts(
+        hass: ha_core.HomeAssistant,
+        connection,
+        msg: str,
+    ):
         """Handle to get accounts"""
         _LOGGER.debug("websocket_handle_accounts msg: %s", msg)
         resp = list(accounts.keys()) if accounts is not None else []
@@ -159,7 +169,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
     @callback
-    def websocket_handle_castdevices(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_castdevices(hass: ha_core.HomeAssistant, connection, msg: str):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
 
@@ -278,28 +288,44 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             client.repeat(state=repeat, device_id=spotify_device_id)
 
     # Register websocket and service
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_PLAYLISTS, websocket_handle_playlists, SCHEMA_PLAYLISTS
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_PLAYLISTS,
+        handler=websocket_handle_playlists,
+        schema=SCHEMA_PLAYLISTS,
     )
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_DEVICES, websocket_handle_devices, SCHEMA_WS_DEVICES
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_DEVICES,
+        handler=websocket_handle_devices,
+        schema=SCHEMA_WS_DEVICES,
     )
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_PLAYER, websocket_handle_player, SCHEMA_WS_PLAYER
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_PLAYER,
+        handler=websocket_handle_player,
+        schema=SCHEMA_WS_PLAYER,
     )
 
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_ACCOUNTS, websocket_handle_accounts, SCHEMA_WS_ACCOUNTS
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_ACCOUNTS,
+        handler=websocket_handle_accounts,
+        schema=SCHEMA_WS_ACCOUNTS,
     )
 
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_CASTDEVICES,
-        websocket_handle_castdevices,
-        SCHEMA_WS_CASTDEVICES,
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_CASTDEVICES,
+        handler=websocket_handle_castdevices,
+        schema=SCHEMA_WS_CASTDEVICES,
     )
 
     hass.services.register(
-        DOMAIN, "start", start_casting, schema=SERVICE_START_COMMAND_SCHEMA
+        domain=DOMAIN,
+        service="start",
+        service_func=start_casting,
+        schema=SERVICE_START_COMMAND_SCHEMA,
     )
 
     return True

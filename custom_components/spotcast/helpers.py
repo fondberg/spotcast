@@ -1,26 +1,26 @@
 from __future__ import annotations
 
 import asyncio
-import logging
-import requests
-import urllib
 import difflib
+import logging
 import random
 from functools import partial, wraps
 
 import homeassistant.core as ha_core
-from homeassistant.components.cast.media_player import CastDevice
-from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
-from homeassistant.helpers import entity_platform
-from homeassistant.exceptions import HomeAssistantError
 
 # import for type inference
 import spotipy
+from homeassistant.components.cast.media_player import CastDevice
+from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_platform
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_spotify_media_player(hass: ha_core.HomeAssistant, spotify_user_id: str) -> SpotifyMediaPlayer:
+def get_spotify_media_player(
+    hass: ha_core.HomeAssistant, spotify_user_id: str
+) -> SpotifyMediaPlayer:
     """Get the spotify media player entity from hass."""
     platforms = entity_platform.async_get_platforms(hass, "spotify")
     spotify_media_player = None
@@ -33,13 +33,15 @@ def get_spotify_media_player(hass: ha_core.HomeAssistant, spotify_user_id: str) 
                 isinstance(entity, SpotifyMediaPlayer)
                 and entity.unique_id == spotify_user_id
             ):
-
                 try:
                     entity_devices = entity._devices
-                except(AttributeError):
+                except AttributeError:
                     entity_devices = entity.data.devices.data
 
-                _LOGGER.debug(f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s", entity_devices)
+                _LOGGER.debug(
+                    f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
+                    entity_devices,
+                )
                 spotify_media_player = entity
                 break
 
@@ -54,16 +56,16 @@ def get_spotify_devices(spotify_media_player: SpotifyMediaPlayer):
         # Need to come from media_player spotify's sp client due to token issues
         try:
             spotify_devices = spotify_media_player._spotify.devices()
-        except(AttributeError):
+        except AttributeError:
             spotify_devices = spotify_media_player.data.client.devices()
 
         _LOGGER.debug("get_spotify_devices: %s", spotify_devices)
-        
+
         return spotify_devices
     return []
 
-def get_spotify_install_status(hass):
 
+def get_spotify_install_status(hass):
     platform_string = "spotify"
     platforms = entity_platform.async_get_platforms(hass, platform_string)
     platform_count = len(platforms)
@@ -103,8 +105,10 @@ def async_wrap(func):
 
     return run
 
-def get_search_results(search:str, spotify_client:spotipy.Spotify, country:str=None) -> str:
 
+def get_search_results(
+    search: str, spotify_client: spotipy.Spotify, country: str = None
+) -> str:
     _LOGGER.debug("using search query to find uri")
 
     SEARCH_TYPES = ["artist", "album", "track", "playlist"]
@@ -114,52 +118,56 @@ def get_search_results(search:str, spotify_client:spotipy.Spotify, country:str=N
     results = []
 
     for searchType in SEARCH_TYPES:
-
         try:
-
             result = spotify_client.search(
                 searchType + ":" + search,
                 limit=1,
                 offset=0,
                 type=searchType,
-                market=country)[searchType + 's']['items'][0]
+                market=country,
+            )[searchType + "s"]["items"][0]
 
-            results.append(
-                {
-                    'name': result['name'].upper(),
-                    'uri': result['uri']
-                }
-            )
+            results.append({"name": result["name"].upper(), "uri": result["uri"]})
 
-            _LOGGER.debug("search result for %s: %s", searchType, result['name'])
+            _LOGGER.debug("search result for %s: %s", searchType, result["name"])
 
         except IndexError:
             pass
 
-    bestMatch = sorted(results, key=lambda x: difflib.SequenceMatcher(None, x['name'], search).ratio(), reverse=True)[0]
+    bestMatch = sorted(
+        results,
+        key=lambda x: difflib.SequenceMatcher(None, x["name"], search).ratio(),
+        reverse=True,
+    )[0]
 
-    _LOGGER.debug("Best match for %s is %s", search, bestMatch['name'])
+    _LOGGER.debug("Best match for %s is %s", search, bestMatch["name"])
 
-    return bestMatch['uri']
+    return bestMatch["uri"]
 
-def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:str, country:str=None, limit:int=20) -> str:
-    
+
+def get_random_playlist_from_category(
+    spotify_client: spotipy.Spotify, category: str, country: str = None, limit: int = 20
+) -> str:
     if country is None:
-        
-        _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category}, no country specified.")
+        _LOGGER.debug(
+            f"Get random playlist among {limit} playlists from category {category}, no country specified."
+        )
 
     else:
-
-        _LOGGER.debug(f"Get random playlist among {limit} playlists from category {category} in country {country}")
+        _LOGGER.debug(
+            f"Get random playlist among {limit} playlists from category {category} in country {country}"
+        )
 
         # validate category and country are valid entries
         if country.upper() not in spotify_client.country_codes:
             _LOGGER.error(f"{country} is not a valid country code")
             return None
-    
+
     # get list of playlist from category and localisation provided
     try:
-        playlists = spotify_client.category_playlists(category_id=category, country=country, limit=limit)["playlists"]["items"]
+        playlists = spotify_client.category_playlists(
+            category_id=category, country=country, limit=limit
+        )["playlists"]["items"]
     except spotipy.exceptions.SpotifyException as e:
         _LOGGER.error(e.msg)
         return None
@@ -167,21 +175,16 @@ def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:s
     # choose one at random
     chosen = random.choice(playlists)
 
-    _LOGGER.debug(f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}.")
+    _LOGGER.debug(
+        f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}."
+    )
 
-    return chosen['uri']
+    return chosen["uri"]
+
 
 def is_valid_uri(uri: str) -> bool:
-    
     # list of possible types
-    types = [
-        "artist",
-        "album",
-        "track",
-        "playlist",
-        "show",
-        "episode"
-    ]
+    types = ["artist", "album", "track", "playlist", "show", "episode"]
 
     # split the string
     elems = uri.split(":")
@@ -189,31 +192,42 @@ def is_valid_uri(uri: str) -> bool:
     # validate number of sub elements
     if elems[1].lower() == "user":
         elems = elems[0:1] + elems[3:]
-        types = [ "playlist" ]
-        _LOGGER.debug(f"Excluding user information from the Spotify URI validation. Only supported for playlists")
+        types = ["playlist"]
+        _LOGGER.debug(
+            "Excluding user information from the Spotify URI validation. Only supported for playlists"
+        )
 
     # support playing a user's liked songs list (spotify:user:username:collection)
     if len(elems) == 2 and elems[1].lower() == "collection":
         return True
 
     if len(elems) != 3:
-        _LOGGER.error(f"[{uri}] is not a valid URI. The format should be [spotify:<type>:<unique_id>]")
+        _LOGGER.error(
+            f"[{uri}] is not a valid URI. The format should be [spotify:<type>:<unique_id>]"
+        )
         return False
 
     # check correct format of the sub elements
     if elems[0].lower() != "spotify":
-        _LOGGER.error(f"This is not a valid Spotify URI. This should start with [spotify], but instead starts with [{elems[0]}]")
+        _LOGGER.error(
+            f"This is not a valid Spotify URI. This should start with [spotify], but instead starts with [{elems[0]}]"
+        )
         return False
 
     if elems[1].lower() not in types:
-        _LOGGER.error(f"{elems[1]} is not a valid type for Spotify request. Please make sure to use the following list {str(types)}")
+        _LOGGER.error(
+            f"{elems[1]} is not a valid type for Spotify request. Please make sure to use the following list {str(types)}"
+        )
         return False
 
     if "?" in elems[2]:
-        _LOGGER.warning(f"{elems[2]} contains query character. This should work, but you should probably remove it and anything after.")
-    
+        _LOGGER.warning(
+            f"{elems[2]} contains query character. This should work, but you should probably remove it and anything after."
+        )
+
     # return True if all test passes
     return True
 
-def is_empty_str(string:str) -> bool:
+
+def is_empty_str(string: str) -> bool:
     return string is None or string.strip() == ""
