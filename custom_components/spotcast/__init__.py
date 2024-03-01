@@ -101,7 +101,11 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     hass.data[DOMAIN]["controller"] = spotcast_controller
 
     @callback
-    def websocket_handle_playlists(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_playlists(
+            hass: ha_core.HomeAssistant,
+            connection,
+            msg: str
+    ):
         @async_wrap
         def get_playlist():
             """Handle to get playlist"""
@@ -115,26 +119,37 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             resp = spotcast_controller.get_playlists(
                 account, playlist_type, country_code, locale, limit
             )
-            connection.send_message(websocket_api.result_message(msg["id"], resp))
+            connection.send_message(
+                websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_playlist())
 
     @callback
-    def websocket_handle_devices(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_devices(
+            hass: ha_core.HomeAssistant,
+            connection,
+            msg: str,
+    ):
         @async_wrap
         def get_devices():
             """Handle to get devices. Only for default account"""
             account = msg.get("account", None)
             client = spotcast_controller.get_spotify_client(account)
             me_resp = client._get("me")  # pylint: disable=W0212
-            spotify_media_player = get_spotify_media_player(hass, me_resp["id"])
+            spotify_media_player = get_spotify_media_player(
+                hass, me_resp["id"])
             resp = get_spotify_devices(spotify_media_player)
-            connection.send_message(websocket_api.result_message(msg["id"], resp))
+            connection.send_message(
+                websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_devices())
 
     @callback
-    def websocket_handle_player(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_player(
+            hass: ha_core.HomeAssistant,
+            connection,
+            msg: str,
+    ):
         @async_wrap
         def get_player():
             """Handle to get player"""
@@ -142,12 +157,17 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             _LOGGER.debug("websocket_handle_player msg: %s", msg)
             client = spotcast_controller.get_spotify_client(account)
             resp = client._get("me/player")  # pylint: disable=W0212
-            connection.send_message(websocket_api.result_message(msg["id"], resp))
+            connection.send_message(
+                websocket_api.result_message(msg["id"], resp))
 
         hass.async_add_job(get_player())
 
     @callback
-    def websocket_handle_accounts(hass: ha_core.HomeAssistant, connection, msg):  # pylint: disable=W0613
+    def websocket_handle_accounts(
+            hass: ha_core.HomeAssistant,
+            connection,
+            msg: str,
+    ):
         """Handle to get accounts"""
         _LOGGER.debug("websocket_handle_accounts msg: %s", msg)
         resp = list(accounts.keys()) if accounts is not None else []
@@ -155,7 +175,10 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         connection.send_message(websocket_api.result_message(msg["id"], resp))
 
     @callback
-    def websocket_handle_castdevices(hass: ha_core.HomeAssistant, connection, msg):
+    def websocket_handle_castdevices(
+            hass: ha_core.HomeAssistant,
+            connection, msg: str
+    ):
         """Handle to get cast devices for debug purposes"""
         _LOGGER.debug("websocket_handle_castdevices msg: %s", msg)
 
@@ -222,18 +245,24 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 account, spotify_device_id, device_name, entity_id
             )
 
-        if is_empty_str(uri) and is_empty_str(search) and is_empty_str(category):
+        if (
+                is_empty_str(uri)
+                and is_empty_str(search)
+                and is_empty_str(category)
+        ):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
             if current_playback is not None:
-                _LOGGER.debug("Current_playback from spotify: %s", current_playback)
+                _LOGGER.debug("Current_playback from spotify: %s",
+                              current_playback)
                 force_playback = True
             _LOGGER.debug("Force playback: %s", force_playback)
             client.transfer_playback(
                 device_id=spotify_device_id, force_play=force_playback
             )
         elif category:
-            uri = get_random_playlist_from_category(client, category, country, limit)
+            uri = get_random_playlist_from_category(
+                client, category, country, limit)
 
             if uri is None:
                 _LOGGER.error("No playlist returned. Stop service call")
@@ -265,7 +294,8 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         if start_volume <= 100:
             _LOGGER.debug("Setting volume to %d", start_volume)
             time.sleep(2)
-            client.volume(volume_percent=start_volume, device_id=spotify_device_id)
+            client.volume(volume_percent=start_volume,
+                          device_id=spotify_device_id)
         if shuffle:
             _LOGGER.debug("Turning shuffle on")
             time.sleep(3)
@@ -276,28 +306,44 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             client.repeat(state=repeat, device_id=spotify_device_id)
 
     # Register websocket and service
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_PLAYLISTS, websocket_handle_playlists, SCHEMA_PLAYLISTS
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_PLAYLISTS,
+        handler=websocket_handle_playlists,
+        schema=SCHEMA_PLAYLISTS,
     )
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_DEVICES, websocket_handle_devices, SCHEMA_WS_DEVICES
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_DEVICES,
+        handler=websocket_handle_devices,
+        schema=SCHEMA_WS_DEVICES,
     )
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_PLAYER, websocket_handle_player, SCHEMA_WS_PLAYER
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_PLAYER,
+        handler=websocket_handle_player,
+        schema=SCHEMA_WS_PLAYER,
     )
 
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_ACCOUNTS, websocket_handle_accounts, SCHEMA_WS_ACCOUNTS
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_ACCOUNTS,
+        handler=websocket_handle_accounts,
+        schema=SCHEMA_WS_ACCOUNTS,
     )
 
-    hass.components.websocket_api.async_register_command(
-        WS_TYPE_SPOTCAST_CASTDEVICES,
-        websocket_handle_castdevices,
-        SCHEMA_WS_CASTDEVICES,
+    websocket_api.async_register_command(
+        hass=hass,
+        command_or_handler=WS_TYPE_SPOTCAST_CASTDEVICES,
+        handler=websocket_handle_castdevices,
+        schema=SCHEMA_WS_CASTDEVICES,
     )
 
     hass.services.register(
-        DOMAIN, "start", start_casting, schema=SERVICE_START_COMMAND_SCHEMA
+        domain=DOMAIN,
+        service="start",
+        service_func=start_casting,
+        schema=SERVICE_START_COMMAND_SCHEMA,
     )
 
     return True
