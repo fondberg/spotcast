@@ -56,6 +56,7 @@ from .helpers import (
     get_random_playlist_from_category,
     get_search_results,
     is_valid_uri,
+    url_to_spotify_uri,
 )
 
 from .spotcast_controller import SpotcastController
@@ -228,6 +229,9 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
 
             # remove ? from badly formatted URI
             uri = uri.split("?")[0]
+
+            if uri.startswith("https"):
+                uri = url_to_spotify_uri(uri)
 
             if not is_valid_uri(uri):
                 _LOGGER.error("Invalid URI provided, aborting casting")
