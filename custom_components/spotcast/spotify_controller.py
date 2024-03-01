@@ -10,13 +10,10 @@ import logging
 import threading
 
 import requests
-import json
-import hashlib
+from pychromecast.controllers import BaseController
 
 from .const import APP_SPOTIFY
 from .error import LaunchError
-
-from pychromecast.controllers import BaseController
 
 APP_NAMESPACE = "urn:x-cast:com.spotify.chromecast.secure.v1"
 TYPE_GET_INFO = "getInfo"
