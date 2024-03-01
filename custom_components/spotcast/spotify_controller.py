@@ -121,7 +121,8 @@ class SpotifyController(BaseController):
     def quick_play(self, **kwargs):
         """
         Launches the spotify controller and returns when it's ready.
-        To actually play media, another application using spotify connect is required.
+        To actually play media, another application using spotify
+        connect is required.
         """
         self.access_token = kwargs["access_token"]
         self.expires = kwargs["expires"]
@@ -132,4 +133,6 @@ class SpotifyController(BaseController):
         """
         Retrieve the Spotify deviceID from provided chromecast info
         """
-        return hashlib.md5(self.castDevice.cast_info.friendly_name.encode()).hexdigest()
+        return hashlib.md5(
+            self.castDevice.cast_info.friendly_name.encode()
+        ).hexdigest()
