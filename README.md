@@ -135,7 +135,7 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 - service: spotcast.start
   data:
     spotify_device_id: "ab123c5d7347324c2b1234567890f8d6dc40350"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
     random_song: true
 ```
 
@@ -145,7 +145,7 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 - service: spotcast.start
   data:
     device_name: "Kitchen"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
     random_song: true
 ```
 
@@ -169,7 +169,7 @@ Optionally you can specify the `entity_id` of an existing Home Assistant chromec
 - service: spotcast.start
   data:
     entity_id: "media_player.vardagsrum"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
 ```
 
 ### Find Spotify Device ID
@@ -282,7 +282,7 @@ where:
   data:
     account: "niklas"
     device_name: "Speaker kitchen"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
 ```
 
 where:
