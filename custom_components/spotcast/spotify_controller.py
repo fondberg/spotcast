@@ -1,18 +1,19 @@
 """
 Controller to interface with Spotify.
 """
+
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import threading
+
 import requests
-import json
-import hashlib
+from pychromecast.controllers import BaseController
 
 from .const import APP_SPOTIFY
 from .error import LaunchError
-
-from pychromecast.controllers import BaseController
 
 APP_NAMESPACE = "urn:x-cast:com.spotify.chromecast.secure.v1"
 TYPE_GET_INFO = "getInfo"
@@ -38,6 +39,7 @@ class SpotifyController(BaseController):
         self.credential_error = False
         self.waiting = threading.Event()
         self.castDevice = castDevice
+        self.timeout = CONF_LAUNCH_TIMEOUT
 
     def receive_message(self, _message, data: dict):
         """
@@ -49,28 +51,31 @@ class SpotifyController(BaseController):
             self.device = self.getSpotifyDeviceID()
             self.client = data["payload"]["clientID"]
             headers = {
-                'authority': 'spclient.wg.spotify.com',
-                'authorization': 'Bearer {}'.format(self.access_token),
-                'content-type': 'text/plain;charset=UTF-8'
+                "authority": "spclient.wg.spotify.com",
+                "authorization": "Bearer {}".format(self.access_token),
+                "content-type": "text/plain;charset=UTF-8",
             }
 
             request_body = json.dumps(
-                {'clientId': self.client, 'deviceId': self.device})
+                {"clientId": self.client, "deviceId": self.device}
+            )
 
             response = requests.post(
-                'https://spclient.wg.spotify.com/device-auth/v1/refresh',
+                "https://spclient.wg.spotify.com/device-auth/v1/refresh",
                 headers=headers,
-                data=request_body
+                data=request_body,
             )
 
             json_resp = response.json()
-            self.send_message({
-                "type": TYPE_ADD_USER,
-                "payload": {
-                    "blob": json_resp["accessToken"],
-                    "tokenType": "accesstoken"
+            self.send_message(
+                {
+                    "type": TYPE_ADD_USER,
+                    "payload": {
+                        "blob": json_resp["accessToken"],
+                        "tokenType": "accesstoken",
+                    },
                 }
-            })
+            )
         if data["type"] == TYPE_ADD_USER_RESPONSE:
             self.is_launched = True
             self.waiting.set()
@@ -81,12 +86,12 @@ class SpotifyController(BaseController):
             self.waiting.set()
         return True
 
-    def launch_app(self, timeout=10):
+    def launch_app(self, launch_timeout):
         """
         Launch Spotify application.
 
         Will raise a LaunchError exception if there is no response from the
-        Spotify app within timeout seconds.
+        Spotify app within launch_timeout seconds.
         """
 
         if self.access_token is None or self.expires is None:
@@ -94,11 +99,16 @@ class SpotifyController(BaseController):
 
         def callback(*_):
             """Callback function"""
-            self.send_message({"type": TYPE_GET_INFO, "payload": {
-                "remoteName": self.castDevice.cast_info.friendly_name,
-                "deviceID": self.getSpotifyDeviceID(),
-                "deviceAPI_isGroup": False,
-            }, })
+            self.send_message(
+                {
+                    "type": TYPE_GET_INFO,
+                    "payload": {
+                        "remoteName": self.castDevice.cast_info.friendly_name,
+                        "deviceID": self.getSpotifyDeviceID(),
+                        "deviceAPI_isGroup": False,
+                    },
+                }
+            )
 
         self.device = None
         self.credential_error = False
@@ -106,7 +116,7 @@ class SpotifyController(BaseController):
         self.launch(callback_function=callback)
 
         counter = 0
-        while counter < (timeout + 1):
+        while counter < (launch_timeout + 1):
             if self.is_launched:
                 return
             self.waiting.wait(1)
@@ -114,7 +124,7 @@ class SpotifyController(BaseController):
 
         if not self.is_launched:
             raise LaunchError(
-                "Timeout when waiting for status response from Spotify app"
+                f"Timeout when waiting for status response from Spotify app after {launch_timeout} seconds."
             )
 
     # pylint: disable=too-many-locals
@@ -133,6 +143,4 @@ class SpotifyController(BaseController):
         """
         Retrieve the Spotify deviceID from provided chromecast info
         """
-        return hashlib.md5(
-            self.castDevice.cast_info.friendly_name.encode()
-        ).hexdigest()
+        return hashlib.md5(self.castDevice.cast_info.friendly_name.encode()).hexdigest()

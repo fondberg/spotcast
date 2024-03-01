@@ -25,6 +25,7 @@ CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
 CONF_START_VOL = "start_volume"
 CONF_IGNORE_FULLY_PLAYED = "ignore_fully_played"
+CONF_LAUNCH_TIMEOUT = "set_launch_timeout"
 
 WS_TYPE_SPOTCAST_PLAYLISTS = "spotcast/playlists"
 
@@ -87,6 +88,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_OFFSET, default=0): cv.string,
         vol.Optional(CONF_START_VOL, default=101): cv.positive_int,
         vol.Optional(CONF_IGNORE_FULLY_PLAYED, default=False): cv.boolean,
+        vol.Optional(CONF_LAUNCH_TIMEOUT, default=30): cv.positive_int,
     }
 )
 
@@ -105,6 +107,7 @@ SPOTCAST_CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_SP_KEY): cv.string,
                 vol.Optional(CONF_ACCOUNTS): cv.schema_with_slug_keys(ACCOUNTS_SCHEMA),
                 vol.Optional(CONF_SPOTIFY_COUNTRY): cv.string,
+                vol.Optional(CONF_LAUNCH_TIMEOUT, default=30): cv.positive_int,
             }
         ),
     },
