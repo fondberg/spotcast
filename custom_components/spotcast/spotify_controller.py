@@ -1,6 +1,7 @@
 """
 Controller to interface with Spotify.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -9,10 +10,13 @@ import logging
 import threading
 
 import requests
-from pychromecast.controllers import BaseController
-from pychromecast.error import LaunchError
+import json
+import hashlib
 
-from .const import APP_SPOTIFY, CONF_LAUNCH_TIMEOUT
+from .const import APP_SPOTIFY
+from .error import LaunchError
+
+from pychromecast.controllers import BaseController
 
 APP_NAMESPACE = "urn:x-cast:com.spotify.chromecast.secure.v1"
 TYPE_GET_INFO = "getInfo"
@@ -64,6 +68,7 @@ class SpotifyController(BaseController):
                 headers=headers,
                 data=request_body,
             )
+
             json_resp = response.json()
             self.send_message(
                 {
@@ -95,7 +100,7 @@ class SpotifyController(BaseController):
         if self.access_token is None or self.expires is None:
             raise ValueError("access_token and expires cannot be empty")
 
-        def callback():
+        def callback(*_):
             """Callback function"""
             self.send_message(
                 {
@@ -129,7 +134,8 @@ class SpotifyController(BaseController):
     def quick_play(self, **kwargs):
         """
         Launches the spotify controller and returns when it's ready.
-        To actually play media, another application using spotify connect is required.
+        To actually play media, another application using spotify
+        connect is required.
         """
         self.access_token = kwargs["access_token"]
         self.expires = kwargs["expires"]
