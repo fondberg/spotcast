@@ -54,9 +54,15 @@ class SpotifyController(BaseController):
                 'content-type': 'text/plain;charset=UTF-8'
             }
 
-            request_body = json.dumps({'clientId': self.client, 'deviceId': self.device})
+            request_body = json.dumps(
+                {'clientId': self.client, 'deviceId': self.device})
 
-            response = requests.post('https://spclient.wg.spotify.com/device-auth/v1/refresh', headers=headers, data=request_body)
+            response = requests.post(
+                'https://spclient.wg.spotify.com/device-auth/v1/refresh',
+                headers=headers,
+                data=request_body
+            )
+
             json_resp = response.json()
             self.send_message({
                 "type": TYPE_ADD_USER,
@@ -86,13 +92,13 @@ class SpotifyController(BaseController):
         if self.access_token is None or self.expires is None:
             raise ValueError("access_token and expires cannot be empty")
 
-        def callback():
+        def callback(*_):
             """Callback function"""
             self.send_message({"type": TYPE_GET_INFO, "payload": {
                 "remoteName": self.castDevice.cast_info.friendly_name,
                 "deviceID": self.getSpotifyDeviceID(),
                 "deviceAPI_isGroup": False,
-            },})
+            }, })
 
         self.device = None
         self.credential_error = False
