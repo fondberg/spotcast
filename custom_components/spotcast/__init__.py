@@ -7,12 +7,11 @@ __version__ = "3.7.1"
 import collections
 import logging
 import time
-import homeassistant
 
+import homeassistant.core as ha_core
 from homeassistant.components import websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
-import homeassistant.core as ha_core
 
 from .const import (
     CONF_ACCOUNTS,
@@ -24,12 +23,19 @@ from .const import (
     CONF_SP_DC,
     CONF_SP_KEY,
     CONF_SPOTIFY_ACCOUNT,
-    CONF_SPOTIFY_DEVICE_ID,
-    CONF_SPOTIFY_URI,
-    CONF_SPOTIFY_SEARCH,
+    CONF_SPOTIFY_ALBUM_NAME,
+    CONF_SPOTIFY_ARTIST_NAME,
+    CONF_SPOTIFY_AUDIOBOOK_NAME,
     CONF_SPOTIFY_CATEGORY,
     CONF_SPOTIFY_COUNTRY,
+    CONF_SPOTIFY_DEVICE_ID,
+    CONF_SPOTIFY_EPISODE_NAME,
+    CONF_SPOTIFY_GENRE_NAME,
     CONF_SPOTIFY_LIMIT,
+    CONF_SPOTIFY_PLAYLIST_NAME,
+    CONF_SPOTIFY_SHOW_NAME,
+    CONF_SPOTIFY_TRACK_NAME,
+    CONF_SPOTIFY_URI,
     CONF_START_VOL,
     DOMAIN,
     SCHEMA_PLAYLISTS,
@@ -45,19 +51,18 @@ from .const import (
     WS_TYPE_SPOTCAST_PLAYER,
     WS_TYPE_SPOTCAST_PLAYLISTS,
 )
-
 from .helpers import (
+    add_tracks_to_queue,
     async_wrap,
     get_cast_devices,
+    get_random_playlist_from_category,
+    get_search_results,
     get_spotify_devices,
     get_spotify_install_status,
     get_spotify_media_player,
     is_empty_str,
-    get_random_playlist_from_category,
-    get_search_results,
     is_valid_uri,
 )
-
 from .spotcast_controller import SpotcastController
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
@@ -201,7 +206,14 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         category = call.data.get(CONF_SPOTIFY_CATEGORY)
         country = call.data.get(CONF_SPOTIFY_COUNTRY)
         limit = call.data.get(CONF_SPOTIFY_LIMIT)
-        search = call.data.get(CONF_SPOTIFY_SEARCH)
+        artistName = call.data.get(CONF_SPOTIFY_ARTIST_NAME)
+        albumName = call.data.get(CONF_SPOTIFY_ALBUM_NAME)
+        playlistName = call.data.get(CONF_SPOTIFY_PLAYLIST_NAME)
+        trackName = call.data.get(CONF_SPOTIFY_TRACK_NAME)
+        showName = call.data.get(CONF_SPOTIFY_SHOW_NAME)
+        episodeName = call.data.get(CONF_SPOTIFY_EPISODE_NAME)
+        audiobookName = call.data.get(CONF_SPOTIFY_AUDIOBOOK_NAME)
+        genreName = call.data.get(CONF_SPOTIFY_GENRE_NAME)
         random_song = call.data.get(CONF_RANDOM, False)
         repeat = call.data.get(CONF_REPEAT, False)
         shuffle = call.data.get(CONF_SHUFFLE, False)
@@ -237,7 +249,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             uri = uri.split(":")
             uri[0] = uri[0].lower()
             uri[1] = uri[1].lower()
-            uri = ':'.join(uri)
+            uri = ":".join(uri)
 
         # first, rely on spotify id given in config otherwise get one
         if not spotify_device_id:
@@ -246,9 +258,24 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             )
 
         if (
-                is_empty_str(uri)
-                and is_empty_str(search)
-                and is_empty_str(category)
+            is_empty_str(uri)
+            and len(
+                list(
+                    filter(
+                        lambda x: not is_empty_str(x),
+                        [
+                            artistName,
+                            playlistName,
+                            trackName,
+                            showName,
+                            episodeName,
+                            audiobookName,
+                            genreName,
+                        ],
+                    )
+                )
+            )
+            == 0
         ):
             _LOGGER.debug("Transfering playback")
             current_playback = client.current_playback()
@@ -260,9 +287,8 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             client.transfer_playback(
                 device_id=spotify_device_id, force_play=force_playback
             )
-        elif category:
-            uri = get_random_playlist_from_category(
-                client, category, country, limit)
+        elif not is_empty_str(category):
+            uri = get_random_playlist_from_category(client, category, country, limit)
 
             if uri is None:
                 _LOGGER.error("No playlist returned. Stop service call")
@@ -277,10 +303,25 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 ignore_fully_played,
             )
         else:
-
+            searchResults = []
             if is_empty_str(uri):
                 # get uri from search request
-                uri = get_search_results(search, client, country)
+                searchResults = get_search_results(
+                    spotify_client=client,
+                    limit=limit,
+                    artistName=artistName,
+                    country=country,
+                    albumName=albumName,
+                    playlistName=playlistName,
+                    trackName=trackName,
+                    showName=showName,
+                    episodeName=episodeName,
+                    audiobookName=audiobookName,
+                    genreName=genreName,
+                )
+                # play the first track
+                if len(searchResults) > 0:
+                    uri = searchResults[0]["uri"]
 
             spotcast_controller.play(
                 client,
@@ -290,6 +331,9 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 position,
                 ignore_fully_played,
             )
+
+            if len(searchResults) > 1:
+                add_tracks_to_queue(client, searchResults[1 : len(searchResults)])
 
         if start_volume <= 100:
             _LOGGER.debug("Setting volume to %d", start_volume)

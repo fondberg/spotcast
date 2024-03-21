@@ -5,17 +5,14 @@ import collections
 import json
 import logging
 from datetime import timedelta
-import homeassistant.core as ha_core
 
+import homeassistant.core as ha_core
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_OK, STATE_UNKNOWN
 from homeassistant.util import dt
 
+from .const import CONF_SPOTIFY_COUNTRY, DOMAIN
 from .helpers import get_cast_devices
-from .const import (
-    DOMAIN,
-    CONF_SPOTIFY_COUNTRY
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +20,12 @@ SENSOR_SCAN_INTERVAL_SECS = 60
 SCAN_INTERVAL = timedelta(seconds=SENSOR_SCAN_INTERVAL_SECS)
 
 
-def setup_platform(hass:ha_core.HomeAssistant, config:collections.OrderedDict, add_devices, discovery_info=None):
+def setup_platform(
+    hass: ha_core.HomeAssistant,
+    config: collections.OrderedDict,
+    add_devices,
+    discovery_info=None,
+):
 
     try:
         country = config[CONF_SPOTIFY_COUNTRY]
@@ -116,7 +118,9 @@ class ChromecastPlaylistSensor(SensorEntity):
         resp = self.hass.data[DOMAIN]["controller"].get_playlists(
             account, playlist_type, country_code, locale, limit
         )
-        self._attributes["playlists"] = [{ "uri": x['uri'], "name": x['name']} for x in resp['items'] ]
+        self._attributes["playlists"] = [
+            {"uri": x["uri"], "name": x["name"]} for x in resp["items"]
+        ]
 
         self._attributes["last_update"] = dt.now().isoformat("T")
         self._state = STATE_OK
