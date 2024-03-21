@@ -7,10 +7,15 @@ import hashlib
 import json
 import logging
 import threading
+import requests
+import json
+import hashlib
+
+from .const import APP_SPOTIFY
+from .error import LaunchError
 
 import requests
 from pychromecast.controllers import BaseController
-from pychromecast.error import LaunchError
 
 from .const import APP_SPOTIFY
 
@@ -94,7 +99,7 @@ class SpotifyController(BaseController):
         if self.access_token is None or self.expires is None:
             raise ValueError("access_token and expires cannot be empty")
 
-        def callback():
+        def callback(*_):
             """Callback function"""
             self.send_message(
                 {
@@ -128,7 +133,8 @@ class SpotifyController(BaseController):
     def quick_play(self, **kwargs):
         """
         Launches the spotify controller and returns when it's ready.
-        To actually play media, another application using spotify connect is required.
+        To actually play media, another application using spotify
+        connect is required.
         """
         self.access_token = kwargs["access_token"]
         self.expires = kwargs["expires"]

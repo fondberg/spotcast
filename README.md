@@ -4,8 +4,6 @@
 [![spotcast](https://img.shields.io/github/release/fondberg/spotcast.svg?1)](https://github.com/fondberg/spotcast)
 ![Maintenance](https://img.shields.io/maintenance/yes/2022.svg)
 
-[![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)
-
 Home Assistant custom component to start Spotify playback on an idle chromecast device or a Spotify Connect device (thanks to @kleinc80) which means that you can target your automation for chromecast as well as connect devices.
 
 Spotcast implements a cast platform (requires Home Assistant Core 2022.2.0 or later), which enables Google Cast media player entities to play Spotify URI as well as to browse the Spotify library.
@@ -135,7 +133,7 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 - service: spotcast.start
   data:
     spotify_device_id: "ab123c5d7347324c2b1234567890f8d6dc40350"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
     random_song: true
 ```
 
@@ -145,7 +143,7 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 - service: spotcast.start
   data:
     device_name: "Kitchen"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
     random_song: true
 ```
 
@@ -169,7 +167,7 @@ Optionally you can specify the `entity_id` of an existing Home Assistant chromec
 - service: spotcast.start
   data:
     entity_id: "media_player.vardagsrum"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
 ```
 
 ### Find Spotify Device ID
@@ -282,7 +280,7 @@ where:
   data:
     account: "niklas"
     device_name: "Speaker kitchen"
-    uri: "spotify:playlist:37i9dQZF1DX3yvAYDslnv8"
+    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
 ```
 
 where:
@@ -412,19 +410,12 @@ logger:
     custom_components.spotcast: debug
 ```
 
-## Donate
-
-If you like what I do and want to support me - I love coffee!
-
-<a href=
-  "https://www.buymeacoffee.com/fondberg" target="_blank">
-  <img src=
-    "https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" >
-</a>
-
 ## Contribute
 
 Please do! Open a Pull Request with your improvements.
+
+This project was made possible by the original creator Niklas Fondberg. All
+your great work are greatly appreciated.
 
 ## License
 
