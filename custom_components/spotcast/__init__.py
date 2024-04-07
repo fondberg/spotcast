@@ -37,6 +37,7 @@ from .const import (
     SCHEMA_WS_CASTDEVICES,
     SCHEMA_WS_DEVICES,
     SCHEMA_WS_PLAYER,
+    CONF_START_POSITION,
     SERVICE_START_COMMAND_SCHEMA,
     SPOTCAST_CONFIG_SCHEMA,
     WS_TYPE_SPOTCAST_ACCOUNTS,
@@ -208,6 +209,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
         start_volume = call.data.get(CONF_START_VOL)
         spotify_device_id = call.data.get(CONF_SPOTIFY_DEVICE_ID)
         position = call.data.get(CONF_OFFSET)
+        start_position = call.data.get(CONF_START_POSITION)
         force_playback = call.data.get(CONF_FORCE_PLAYBACK)
         account = call.data.get(CONF_SPOTIFY_ACCOUNT)
         ignore_fully_played = call.data.get(CONF_IGNORE_FULLY_PLAYED)
@@ -245,6 +247,9 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 account, spotify_device_id, device_name, entity_id
             )
 
+        if (start_position):
+            start_position *= 1000
+
         if (
                 is_empty_str(uri)
                 and is_empty_str(search)
@@ -275,6 +280,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 random_song,
                 position,
                 ignore_fully_played,
+                start_position,
             )
         else:
 
@@ -289,6 +295,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 random_song,
                 position,
                 ignore_fully_played,
+                start_position,
             )
 
         if start_volume <= 100:
