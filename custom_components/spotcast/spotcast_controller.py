@@ -253,6 +253,9 @@ class SpotcastController:
         """Get token instance for account"""
         if account is None:
             account = "default"
+
+        # TODO: add error logging when user provide invalid account
+        # name
         dc = self.accounts.get(account).get(CONF_SP_DC)
         key = self.accounts.get(account).get(CONF_SP_KEY)
 
