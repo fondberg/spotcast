@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import requests
-import urllib
+import urllib.parse
 import difflib
 import random
 from functools import partial, wraps
@@ -170,6 +170,26 @@ def get_random_playlist_from_category(spotify_client:spotipy.Spotify, category:s
     _LOGGER.debug(f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}.")
 
     return chosen['uri']
+
+
+def url_to_spotify_uri(url: str) -> str:
+    """
+    Convert a spotify web url (e.g. https://open.spotify.com/track/XXXX) to
+    a spotify-style URI (spotify:track:XXXX). Returns None on error.
+    """
+
+    o: urllib.parse.ParseResult
+    # will raise ValueError if URL is invalid
+    o = urllib.parse.urlparse(url)
+
+    if o.hostname != "open.spotify.com":
+        raise ValueError('Spotify URLs must have a hostname of "open.spotify.com"')
+
+    path = o.path.split("/")
+    if len(path) != 3:
+        raise ValueError('Spotify URLs must be of the form "https://open.spotify.com/<kind>/<target>"')
+
+    return f'spotify:{path[1]}:{path[2]}'
 
 def is_valid_uri(uri: str) -> bool:
     
