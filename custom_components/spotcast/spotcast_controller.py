@@ -370,13 +370,13 @@ class SpotcastController:
             if random_song:
                 if uri.find("album") > 0:
                     results = client.album_tracks(uri, market=country_code)
-                    position = random.randint(0, results["total"] - 1)
+                    position = random.randint(0, int(results["total"]) - 1)
                 elif uri.find("playlist") > 0:
                     results = client.playlist_tracks(uri)
-                    position = random.randint(0, results["total"] - 1)
+                    position = random.randint(0, int(results["total"]) - 1)
                 elif uri.find("collection") > 0:
                     results = client.current_user_saved_tracks()
-                    position = random.randint(0, results["total"] - 1)
+                    position = random.randint(0, int(results["total"]) - 1)
                 _LOGGER.debug(
                     "Start playback at random position: %s", position)
             if uri.find("artist") < 1:
