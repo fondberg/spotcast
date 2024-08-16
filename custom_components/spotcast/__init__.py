@@ -247,7 +247,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 account, spotify_device_id, device_name, entity_id
             )
 
-        if (start_position):
+        if start_position is not None:
             start_position *= 1000
 
         if (
