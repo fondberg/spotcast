@@ -288,7 +288,8 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 device_id=spotify_device_id, force_play=force_playback
             )
         elif not is_empty_str(category):
-            uri = get_random_playlist_from_category(client, category, country, limit)
+            uri = get_random_playlist_from_category(
+                client, category, country, limit)
 
             if uri is None:
                 _LOGGER.error("No playlist returned. Stop service call")
@@ -332,8 +333,13 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 ignore_fully_played,
             )
 
+            # TODO: change to an API native way to monitor if playback
+            # has started. developper site down at the moment of
+            # writting
+            time.sleep(2)
+
             if len(searchResults) > 1:
-                add_tracks_to_queue(client, searchResults[1 : len(searchResults)])
+                add_tracks_to_queue(client, searchResults[1:])
 
         if start_volume <= 100:
             _LOGGER.debug("Setting volume to %d", start_volume)
