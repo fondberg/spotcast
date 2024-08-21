@@ -41,8 +41,8 @@ def get_spotify_media_player(
                     entity_devices = entity.data.devices.data
 
                 _LOGGER.debug(
-                    f"get_spotify_devices: {
-                        entity.entity_id}: {entity.name}: %s",
+                    f"get_spotify_devices: {entity.entity_id}: "
+                    f"{entity.name}: %s",
                     entity_devices,
                 )
                 spotify_media_player = entity
@@ -56,7 +56,8 @@ def get_spotify_media_player(
 
 def get_spotify_devices(spotify_media_player: SpotifyMediaPlayer):
     if spotify_media_player:
-        # Need to come from media_player spotify's sp client due to token issues
+        # Need to come from media_player spotify's sp client due to
+        # token issues
         try:
             spotify_devices = spotify_media_player._spotify.devices()
         except (AttributeError):
@@ -91,8 +92,8 @@ def get_cast_devices(hass):
         for entity in platform.entities.values():
             if isinstance(entity, CastDevice):
                 _LOGGER.debug(
-                    f"get_cast_devices: {entity.entity_id}: {
-                        entity.name} cast info: %s",
+                    f"get_cast_devices: {entity.entity_id}: "
+                    f"{entity.name} cast info: % s",
                     entity._cast_info,
                 )
                 cast_infos.append(entity._cast_info)
@@ -171,8 +172,10 @@ def get_search_string(
     if not is_empty_str(genreName):
         search.append(f"genre:{genreName}")
         search.append(genreName)
-    # if we are searching for a playlist, podcast, audiobook, we need some search query which is probably just the text we are looking for
-   for item in [playlistName, showName, episodeName, audiobookName]:
+    # if we are searching for a playlist, podcast, audiobook, we need
+    # some search query which is probably just the text we are looking
+    # for
+    for item in [playlistName, showName, episodeName, audiobookName]:
         if not is_empty_str(item):
             search.append(item)
 
@@ -269,7 +272,11 @@ def get_search_results(
             audiobookName=audiobookName,
         )
         searchResults = spotify_client.search(
-            q=searchString, limit=limit, offset=0, type=searchTypes, market=country
+            q=searchString,
+            limit=limit,
+            offset=0,
+            type=searchTypes,
+            market=country
         )
 
         compiledResults = []
@@ -365,26 +372,29 @@ def add_tracks_to_queue(
                 continue
 
             break
-                
+
         time.sleep(0.5)
 
 
 def get_random_playlist_from_category(
-    spotify_client: spotipy.Spotify, category: str, country: str = None, limit: int = 20
+    spotify_client: spotipy.Spotify,
+    category: str,
+    country: str = None,
+    limit: int = 20,
 ) -> str:
 
     if country is None:
 
         _LOGGER.debug(
-            f"Get random playlist among {limit} playlists from category {
-                category}, no country specified."
+            f"Get random playlist among {limit} playlists from category "
+            f"{category}, no country specified."
         )
 
     else:
 
         _LOGGER.debug(
-            f"Get random playlist among {limit} playlists from category {
-                category} in country {country}"
+            f"Get random playlist among {limit} playlists from category "
+            f"{category} in country {country}"
         )
 
         # validate category and country are valid entries
@@ -405,8 +415,8 @@ def get_random_playlist_from_category(
     chosen = random.choice(playlists)
 
     _LOGGER.debug(
-        f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {
-            category}."
+        f"Chose playlist {chosen['name']}({chosen['uri']}) from category "
+        f"{category}."
     )
 
     return chosen["uri"]
@@ -425,37 +435,41 @@ def is_valid_uri(uri: str) -> bool:
         elems = elems[0:1] + elems[3:]
         types = ["playlist"]
         _LOGGER.debug(
-            "Excluding user information from the Spotify URI validation. Only supported for playlists"
+            "Excluding user information from the Spotify URI validation. Only"
+            " supported for playlists"
         )
 
-    # support playing a user's liked songs list (spotify:user:username:collection)
+    # support playing a user's liked songs list
+    # (spotify:user:username:collection)
     if len(elems) == 2 and elems[1].lower() == "collection":
         return True
 
     if len(elems) != 3:
         _LOGGER.error(
-            f"[{uri}] is not a valid URI. The format should be [spotify:<type>:<unique_id>]"
+            f"[{uri}] is not a valid URI. The format should be "
+            "[spotify:<type>:<unique_id>]"
         )
         return False
 
     # check correct format of the sub elements
     if elems[0].lower() != "spotify":
         _LOGGER.error(
-            f"This is not a valid Spotify URI. This should start with [spotify], but instead starts with [{
-                elems[0]}]"
+            f"This is not a valid Spotify URI. This should start with "
+            f"[spotify], but instead starts with [{elems[0]}]"
         )
         return False
 
     if elems[1].lower() not in types:
         _LOGGER.error(
-            f"{elems[1]} is not a valid type for Spotify request. Please make sure to use the following list {
-                str(types)}"
+            f"{elems[1]} is not a valid type for Spotify request. Please "
+            f"make sure to use the following list {str(types)}"
         )
         return False
 
     if "?" in elems[2]:
         _LOGGER.warning(
-            f"{elems[2]} contains query character. This should work, but you should probably remove it and anything after."
+            f"{elems[2]} contains query character. This should work, but you"
+            " should probably remove it and anything after."
         )
 
     # return True if all test passes
