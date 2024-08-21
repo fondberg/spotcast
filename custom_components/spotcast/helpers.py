@@ -10,6 +10,7 @@ import homeassistant.core as ha_core
 
 # import for type inference
 import spotipy
+from spotipy import SpotifyException
 from homeassistant.components.cast.media_player import CastDevice
 from homeassistant.components.spotify.media_player import SpotifyMediaPlayer
 from homeassistant.exceptions import HomeAssistantError
@@ -40,7 +41,8 @@ def get_spotify_media_player(
                     entity_devices = entity.data.devices.data
 
                 _LOGGER.debug(
-                    f"get_spotify_devices: {entity.entity_id}: {entity.name}: %s",
+                    f"get_spotify_devices: {
+                        entity.entity_id}: {entity.name}: %s",
                     entity_devices,
                 )
                 spotify_media_player = entity
@@ -89,7 +91,8 @@ def get_cast_devices(hass):
         for entity in platform.entities.values():
             if isinstance(entity, CastDevice):
                 _LOGGER.debug(
-                    f"get_cast_devices: {entity.entity_id}: {entity.name} cast info: %s",
+                    f"get_cast_devices: {entity.entity_id}: {
+                        entity.name} cast info: %s",
                     entity._cast_info,
                 )
                 cast_infos.append(entity._cast_info)
@@ -169,7 +172,7 @@ def get_search_string(
         search.append(f"genre:{genreName}")
         search.append(genreName)
     # if we are searching for a playlist, podcast, audiobook, we need some search query which is probably just the text we are looking for
-    for item in [playlistName, showName, episodeName, audiobookName]:
+   for item in [playlistName, showName, episodeName, audiobookName]:
         if not is_empty_str(item):
             search.append(item)
 
@@ -241,7 +244,8 @@ def get_search_results(
         == 0
     ):
         searchResults = get_top_tracks(artistName, spotify_client)
-        _LOGGER.debug("Playing top tracks for artist: %s", searchResults[0]["name"])
+        _LOGGER.debug("Playing top tracks for artist: %s",
+                      searchResults[0]["name"])
         return searchResults
     else:
         searchString = get_search_string(
@@ -308,7 +312,8 @@ def search_tracks(
     artistName: str = None,
     country: str = None,
 ):
-    results = get_search_results(search, spotify_client, artistName, limit, country)
+    results = get_search_results(
+        search, spotify_client, artistName, limit, country)
     if len(results) > 0:
         firstResult = [results[0]]
         if not startRandom:
@@ -332,9 +337,35 @@ def add_tracks_to_queue(
 
     for track in filtered[:limit]:
         _LOGGER.debug(
-            "Adding " + track["name"] + " to the playback queue | " + track["uri"]
+            "Adding " + track["name"] +
+            " to the playback queue | " + track["uri"]
         )
-        spotify_client.add_to_queue(track["uri"])
+
+        max_attemps = 5
+        backoff_rate = 1.2
+        delay = 1
+        current_attempt = 0
+
+        while True:
+            try:
+                spotify_client.add_to_queue(track["uri"])
+            except SpotifyException as exc:
+
+                if current_attempt >= max_attemps:
+                    raise HomeAssistantError(
+                        "Coulddn't addd song to queue"
+                    ) from exc
+
+                _LOGGER.warning("Couldn't add song to queue retrying")
+
+                time.sleep(delay)
+                current_attempt += 1
+                delay *= backoff_rate
+
+                continue
+
+            break
+                
         time.sleep(0.5)
 
 
@@ -345,13 +376,15 @@ def get_random_playlist_from_category(
     if country is None:
 
         _LOGGER.debug(
-            f"Get random playlist among {limit} playlists from category {category}, no country specified."
+            f"Get random playlist among {limit} playlists from category {
+                category}, no country specified."
         )
 
     else:
 
         _LOGGER.debug(
-            f"Get random playlist among {limit} playlists from category {category} in country {country}"
+            f"Get random playlist among {limit} playlists from category {
+                category} in country {country}"
         )
 
         # validate category and country are valid entries
@@ -372,7 +405,8 @@ def get_random_playlist_from_category(
     chosen = random.choice(playlists)
 
     _LOGGER.debug(
-        f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {category}."
+        f"Chose playlist {chosen['name']} ({chosen['uri']}) from category {
+            category}."
     )
 
     return chosen["uri"]
@@ -407,13 +441,15 @@ def is_valid_uri(uri: str) -> bool:
     # check correct format of the sub elements
     if elems[0].lower() != "spotify":
         _LOGGER.error(
-            f"This is not a valid Spotify URI. This should start with [spotify], but instead starts with [{elems[0]}]"
+            f"This is not a valid Spotify URI. This should start with [spotify], but instead starts with [{
+                elems[0]}]"
         )
         return False
 
     if elems[1].lower() not in types:
         _LOGGER.error(
-            f"{elems[1]} is not a valid type for Spotify request. Please make sure to use the following list {str(types)}"
+            f"{elems[1]} is not a valid type for Spotify request. Please make sure to use the following list {
+                str(types)}"
         )
         return False
 

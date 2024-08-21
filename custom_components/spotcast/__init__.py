@@ -333,11 +333,6 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 ignore_fully_played,
             )
 
-            # TODO: change to an API native way to monitor if playback
-            # has started. developper site down at the moment of
-            # writting
-            time.sleep(2)
-
             if len(searchResults) > 1:
                 add_tracks_to_queue(client, searchResults[1:])
 
