@@ -127,7 +127,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             connection.send_message(
                 websocket_api.result_message(msg["id"], resp))
 
-        hass.async_add_job(get_playlist())
+        hass.async_create_task(get_playlist())
 
     @callback
     def websocket_handle_devices(
@@ -147,7 +147,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             connection.send_message(
                 websocket_api.result_message(msg["id"], resp))
 
-        hass.async_add_job(get_devices())
+        hass.async_create_task(get_devices())
 
     @callback
     def websocket_handle_player(
@@ -165,7 +165,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             connection.send_message(
                 websocket_api.result_message(msg["id"], resp))
 
-        hass.async_add_job(get_player())
+        hass.async_create_task(get_player())
 
     @callback
     def websocket_handle_accounts(
