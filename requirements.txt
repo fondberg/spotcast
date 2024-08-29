@@ -1,0 +1,5 @@
+atomicwrites-homeassistant==1.4.1
+homeassistant==2024.8.3
+spotipy==2.24.0
+PyChromecast==14.0.1
+requests==2.32.3
