@@ -117,3 +117,5 @@ venv.bak/
 .vscode/
 
 .config/
+config/
+! config/configuration.yaml

@@ -6,4 +6,5 @@ services:
     network_mode: host
     volumes:
       - ../custom_components/spotcast:/config/custom_components/spotcast
+      - ../config/:/config/
 
