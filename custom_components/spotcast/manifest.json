@@ -15,5 +15,6 @@
     "documentation": "https://github.com/fondberg/spotcast",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/fondberg/spotcast/issues",
-    "version": "v3.8.0"
+    "version": "v4.0.0-beta",
+    "integration_type": "hub"
 }

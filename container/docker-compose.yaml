@@ -1,0 +1,9 @@
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:latest
+    privileged: true
+    network_mode: host
+    volumes:
+      - ../custom_components/spotcast:/config/custom_components/spotcast
+
