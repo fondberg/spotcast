@@ -1,3 +1,8 @@
 default_config:
 
 spotcast:
+
+logger:
+  default: info
+  logs:
+    custom_components.spotcast: debug

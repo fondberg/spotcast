@@ -1,9 +1,10 @@
 from logging import getLogger
+from time import sleep
 
 from homeassistant.core import HomeAssistant
 from homeassistant.util.yaml.objects import NodeDictClass
 
-from custom_components.spotcast.test import hello_world
+from custom_components.spotcast.chromecast.device import ChromecastDevice
 
 DOMAIN = "spotcast"
 LOGGER = getLogger(__name__)
@@ -15,6 +16,9 @@ def setup(hass: HomeAssistant, config: NodeDictClass) -> bool:
     Returns:
         - bool: returns `True` if the integration setup was successfull
     """
-    LOGGER.error(hello_world())
+
+    sleep(2)
+
+    player = ChromecastDevice(hass, "media_player.atelier")
 
     return True
