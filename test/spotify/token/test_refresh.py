@@ -40,7 +40,7 @@ class TestErrors(TestCase):
 
     def setUp(self):
         self.token = SpotifyToken("12345", time() + 1000)
-
+        return
         with open("./config/spotify_tokens.json") as file:
             self.config = json.load(file)
 

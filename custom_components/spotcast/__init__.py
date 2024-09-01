@@ -4,7 +4,7 @@ from time import sleep
 from homeassistant.core import HomeAssistant
 from homeassistant.util.yaml.objects import NodeDictClass
 
-from custom_components.spotcast.chromecast.device import ChromecastDevice
+from custom_components.spotcast.media_player.chromecast_player import Chromecast
 
 DOMAIN = "spotcast"
 LOGGER = getLogger(__name__)
@@ -19,6 +19,7 @@ def setup(hass: HomeAssistant, config: NodeDictClass) -> bool:
 
     sleep(2)
 
-    player = ChromecastDevice(hass, "media_player.atelier")
+    devices = Chromecast._get_entities_from_platforms(hass)
+    LOGGER.debug(devices)
 
     return True
