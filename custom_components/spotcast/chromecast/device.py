@@ -5,11 +5,11 @@ Classes:
 """
 
 from logging import getLogger
+from hashlib import md5
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
 from homeassistant.components.cast.media_player import CastDevice
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from pychromecast import get_chromecast_from_cast_info
 
@@ -36,7 +36,7 @@ class ChromecastDevice:
             integration in HomeAssistant
 
     methods:
-        - ...
+        - spotify_id
 
     functions:
         - get_hass_devices
@@ -52,7 +52,10 @@ class ChromecastDevice:
             - entity_id(str): the entity_id of the device to create
 
         Raises:
-            - 
+            - EntityNotFoundError: the entity couldn't be found in
+                home assistant
+            - NotCastCapableError: the device is not listed as
+                chromecast capable
         """
 
         # check for existence of entity_id
@@ -86,6 +89,12 @@ class ChromecastDevice:
         LOGGER.info("Waiting for `%s` to be ready", self.entity_id)
         self.cast_device.wait()
         LOGGER.info("Device `%s` is ready", self.entity_id)
+
+    def spotify_device_id(self) -> str:
+        """Calculates the spotify device id based on the friendly name"""
+        friendly_name = self.cast_device.cast_info.friendly_name
+
+        return md5(friendly_name.encode()).hexdigest()
 
     @staticmethod
     def get_hass_devices(

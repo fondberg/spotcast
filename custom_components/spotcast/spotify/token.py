@@ -1,6 +1,7 @@
 """Module containing the spotify token class"""
 
 from time import time
+from logging import getLogger
 
 from requests import HTTPError
 from requests.utils import cookiejar_from_dict
@@ -11,6 +12,8 @@ from custom_components.spotcast.spotify.exceptions import (
     InvalidCookiesError,
     UnknownTokenError,
 )
+
+LOGGER = getLogger(__name__)
 
 
 class SpotifyToken:
@@ -63,7 +66,17 @@ class SpotifyToken:
 
         # skip if current token is valid
         if not self.is_expired():
+            LOGGER.debug("Access Token still valid, skipping refresh")
             return
+
+        if access_token is None:
+            LOGGER.debug(
+                "Access Token is missing, getting one from Spotify"
+            )
+        else:
+            LOGGER.debug(
+                "Access Token is expired. refreshing"
+            )
 
         # raise error if missing sp_dc or sp_key when the other is
         # provided
@@ -76,6 +89,7 @@ class SpotifyToken:
 
     def is_expired(self) -> bool:
         """Returns True if the token is expired"""
+
         return (
             self._access_token is None
             or self.expires is None
@@ -100,6 +114,10 @@ class SpotifyToken:
         Returns:
             - str: the updated token
         """
+
+        if force:
+            LOGGER.debug("Refresh of token forced")
+
         if force or self.is_expired():
             self._access_token, self.expires = self._refresh(
                 sp_dc,
@@ -134,10 +152,12 @@ class SpotifyToken:
         with Session() as session:
 
             # add cookies
+            LOGGER.debug("Adding Cookie to session Cookie Jar")
             cookies = cookiejar_from_dict(cookie_dict)
             session.cookies.update(cookies)
 
             # make get request to spotify
+            LOGGER.debug("Making request to spotify api for new token")
             response = session.get(
                 SpotifyToken.URL,
                 headers=headers
@@ -146,6 +166,9 @@ class SpotifyToken:
             try:
                 response.raise_for_status()
             except HTTPError as exc:
+
+                LOGGER.debug("%s: %s", response.status_code, response.text)
+
                 if response.status_code == 401:
                     raise InvalidCookiesError(
                         "The sp_dc and sp_key provided are invalid"
@@ -154,12 +177,6 @@ class SpotifyToken:
                 raise UnknownTokenError(
                     "Couldn't retrieve Spotify Token"
                 ) from exc
-
-            if (
-                response.status_code == 302
-                and "_authfailed=1" in response.headers["Location"]
-            ):
-                raise ExpiredCookiesError("sp_dc and sp_key have expired")
 
             config = response.json()
 
@@ -172,5 +189,7 @@ class SpotifyToken:
             ) from exc
 
         expires = expires / 1000
+
+        LOGGER.debug("Token and expiration retrieved successfully")
 
         return access_token, expires
