@@ -1,7 +1,7 @@
 """Module for the spotify accout class"""
 
 from logging import getLogger
-from asyncio import get_running_loop
+from asyncio import get_running_loop, new_event_loop, set_event_loop
 
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
 from spotipy import Spotify
@@ -38,14 +38,20 @@ class SpotifyAccount:
             country: str = None,
     ):
         self.name = None
+        self.country = country
         self._spotify = spotify
-        self.loop = get_running_loop()
 
     async def async_connect(self) -> dict:
         """Tests the connection and returns the current user profile"""
-        profile = await self.loop.run_in_executor(None, self._spotify.me)
+        loop = get_running_loop()
+        profile = await loop.run_in_executor(None, self._spotify.me)
         self.name = profile["display_name"]
         return profile
+
+    async def async_devices(self):
+        loop = get_running_loop()
+        devices = await loop.run_in_executor(None, self._spotify.devices)
+        return devices
 
     @staticmethod
     def from_oauth_session(

@@ -114,8 +114,9 @@ class SpotifyController(BaseController):
             self.waiting.wait(1)
             counter += 1
 
-        devices = self.account._spotify.devices()
-        foo = "bar"
+    def stop_app(self, device: Chromecast):
+        """Stops the Spotify app on the device"""
+        device.stop_app
 
     def receive_message(self, _message: CastMessage, data: dict) -> bool:
         """Called when a message is received that matches the namespace.
