@@ -1,7 +1,5 @@
 default_config:
 
-spotcast:
-
 logger:
   default: info
   logs:

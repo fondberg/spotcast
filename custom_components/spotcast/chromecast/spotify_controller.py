@@ -3,13 +3,18 @@
 
 from logging import getLogger
 import threading
+import json
 
 from pychromecast.controllers import BaseController
 from pychromecast.controllers import CastMessage
-from requests import post, Response
+from requests import post, Response, HTTPError
 
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.chromecast import ChromecastDevice
+from custom_components.spotcast.media_player.chromecast_player import (
+    Chromecast
+)
+
+from custom_components.spotcast.chromecast.exceptions import AppLaunchError
 
 LOGGER = getLogger(__name__)
 
@@ -22,7 +27,7 @@ class SpotifyController(BaseController):
             spotify controller
 
     Constants:
-        - APP_CODE(str): the chromecast app code for spotify
+        - APP_ID(str): the chromecast app code for spotify
         - APP_NAME(str): the chromecast namespace for spotify
         - APP_HOSTNAME(str): the hostname for the spotify API
         - TYPE_GET_INFO(str): mesage type to get info
@@ -34,7 +39,7 @@ class SpotifyController(BaseController):
         - TYPE_ADD_USER_ERROR(str): message type for add user error
     """
 
-    APP_CODE = "CC32E753"
+    APP_ID = "CC32E753"
     APP_NAMESPACE = "urn:x-cast:com.spotify.chromecast.secure.v1"
     APP_HOSTNAME = "spclient.wg.spotify.com"
 
@@ -47,7 +52,6 @@ class SpotifyController(BaseController):
     def __init__(
             self,
             account: SpotifyAccount,
-            device: ChromecastDevice,
     ):
         """A Chromecast controller for interacting with spotify
 
@@ -58,30 +62,79 @@ class SpotifyController(BaseController):
                 controller
         """
         super(SpotifyController, self).__init__(
-            self.APP_CODE,
-            self.APP_NAMESPACE
+            self.APP_NAMESPACE,
+            self.APP_ID
         )
 
         self.account = account
-        self.device = device
         self.waiting = threading.Event()
+        self.is_launched = False
 
-    def receive_message(self, _message: CastMessage, _data: dict) -> bool:
+    def launch_app(self, device: Chromecast, max_attempts=10):
+        """Launches the spotify app"""
+
+        def callback(*_):
+            self.send_message({
+                "type": self.TYPE_GET_INFO,
+                "payload": {
+                    "remoteName": device.name,
+                    "deviceID": device.id(),
+                    "deviceAPI_isGroup": False,
+                }
+            })
+
+        device.start_app(self.APP_ID)
+        device.wait()
+
+        self.waiting.clear()
+
+        LOGGER.debug("Requesting Spotify App to launch on `%s`", device.name)
+        self.launch(callback_function=callback)
+
+        counter = 0
+
+        while True:
+
+            if self.is_launched:
+                LOGGER.debug(
+                    "Spotify App Launched successfully on `%s`",
+                    device.name,
+                )
+                break
+
+            if max_attempts is not None and counter >= max_attempts:
+                raise AppLaunchError(
+                    "Timeout when waiting for status response from Spotify app"
+                )
+
+            LOGGER.debug(
+                "Spotify App not yet launched on `%s`. Waiting Before retry",
+                device.name,
+            )
+            self.waiting.wait(1)
+            counter += 1
+
+        devices = self.account._spotify.devices()
+        foo = "bar"
+
+    def receive_message(self, _message: CastMessage, data: dict) -> bool:
         """Called when a message is received that matches the namespace.
         Returns boolean indicating if message was handled.
         data is message.payload_utf8 interpreted as a JSON dict.
         """
 
-        message_type = _data["type"]
+        message_type = data["type"]
+
+        LOGGER.debug("Received message of type `%s`", message_type)
 
         if message_type == SpotifyController.TYPE_GET_INFO_RESPONSE:
-            return self._get_info_response_handler(_message, _data)
+            return self._get_info_response_handler(_message, data)
 
         if message_type == SpotifyController.TYPE_ADD_USER_RESPONSE:
-            return self._add_user_response_handler(_message, _data)
+            return self._add_user_response_handler(_message, data)
 
         if message_type == SpotifyController.TYPE_ADD_USER_ERROR:
-            return self._add_user_error_handler(_message, _data)
+            return self._add_user_error_handler(_message, data)
 
     def _get_info_response_handler(
             self,
@@ -97,18 +150,25 @@ class SpotifyController(BaseController):
         }
 
         body = {
-            "clientId": data["payload"]["clientId"],
-            "deviceId": self.device.spotify_device_id(),
+            "clientId": data["payload"]["clientID"],
+            "deviceId": data["payload"]["deviceID"],
         }
 
         response: Response = post(
             url=(
-                f"https://{SpotifyController.APP_HOSTNAME}/device-auth/v2"
+                f"https://{SpotifyController.APP_HOSTNAME}/device-auth/v1"
                 "/refresh"
             ),
             headers=headers,
-            data=body,
-        ),
+            data=json.dumps(body),
+        )
+
+        try:
+            response.raise_for_status()
+        except HTTPError as exc:
+            raise AppLaunchError(
+                f"{response.status_code}: {response.reason}"
+            ) from exc
 
         content = response.json()
 

@@ -9,13 +9,15 @@
         "@fondberg",
         "@fcusson"
     ],
+    "config_flow": true,
     "dependencies": [
         "spotify",
-        "cast"
+        "cast",
+        "application_credentials"
     ],
     "documentation": "https://github.com/fondberg/spotcast",
+    "integration_type": "service",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/fondberg/spotcast/issues",
-    "version": "v4.0.0-beta",
-    "integration_type": "hub"
+    "version": "v4.0.0-beta"
 }
