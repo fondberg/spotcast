@@ -17,3 +17,7 @@ class UnknownTokenError(TokenError):
 
 class InvalidCookiesError(TokenError):
     """Raised in the case of invalid cookies provided"""
+
+
+class NoAuthManagerError(TokenError):
+    """The Spotify Account has no Authentication manager in place"""

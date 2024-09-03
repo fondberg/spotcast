@@ -6,6 +6,8 @@ from asyncio import get_running_loop, new_event_loop, set_event_loop
 from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
 from spotipy import Spotify
 
+from custom_components.spotcast.spotify.exceptions import NoAuthManagerError
+
 
 LOGGER = getLogger(__name__)
 
@@ -40,10 +42,12 @@ class SpotifyAccount:
         self.name = None
         self.country = country
         self._spotify = spotify
+        self.session: OAuth2Session = None
 
     async def async_connect(self) -> dict:
         """Tests the connection and returns the current user profile"""
         loop = get_running_loop()
+        LOGGER.debug("Getting Profile from Spotify")
         profile = await loop.run_in_executor(None, self._spotify.me)
         self.name = profile["display_name"]
         return profile
@@ -52,6 +56,17 @@ class SpotifyAccount:
         loop = get_running_loop()
         devices = await loop.run_in_executor(None, self._spotify.devices)
         return devices
+
+    def get_token(self) -> str:
+        """Returns a valid token according to the auth system in place
+        """
+        if self.session is not None:
+            LOGGER.debug("getting token from %s", self.session)
+            return self.session.token["access_token"]
+
+        raise NoAuthManagerError(
+            "No Valid Authentication Manager could be found"
+        )
 
     @staticmethod
     def from_oauth_session(
@@ -62,4 +77,7 @@ class SpotifyAccount:
 
         spotify = Spotify(auth=session.token["access_token"])
 
-        return SpotifyAccount(spotify, country=country)
+        account = SpotifyAccount(spotify, country=country)
+        account.session = session
+
+        return account

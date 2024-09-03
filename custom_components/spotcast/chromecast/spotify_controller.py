@@ -72,6 +72,8 @@ class SpotifyController(BaseController):
 
     def launch_app(self, device: Chromecast, max_attempts=10):
         """Launches the spotify app"""
+        self.is_launched = False
+        self.current_device = device
 
         def callback(*_):
             self.send_message({
@@ -116,7 +118,8 @@ class SpotifyController(BaseController):
 
     def stop_app(self, device: Chromecast):
         """Stops the Spotify app on the device"""
-        device.stop_app
+        device.quit_app()
+        self.is_launched = False
 
     def receive_message(self, _message: CastMessage, data: dict) -> bool:
         """Called when a message is received that matches the namespace.
