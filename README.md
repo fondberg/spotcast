@@ -149,8 +149,8 @@ The spotcast custom component creates a service called 'spotcast.start' in Home 
 
 where:
 
-* `spotify_device_id` is the device ID of the Spotify Connect device
-* `device_name` is the friendly name of the chromecast device
+* `spotify_device_id` is the device ID of the Spotify Connect device. It can be used with `device_name` when the Spotify Connect name differs from the Chromecast name.
+* `device_name` is the friendly name of the Chromecast device
 * `uri` is the Spotify uri, supports all uris including track (limit to one track)
 * `search` is a search query to resolve into a uri. This parameter will be overlooked if a uri is provided
 * `category` let spotify pick a random playlist inside a given [category](https://developer.spotify.com/console/get-browse-categories/)
