@@ -251,11 +251,10 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             uri[1] = uri[1].lower()
             uri = ":".join(uri)
 
-        # first, rely on spotify id given in config otherwise get one
-        if not spotify_device_id:
-            spotify_device_id = spotcast_controller.get_spotify_device_id(
-                account, spotify_device_id, device_name, entity_id
-            )
+        # verify spotify id given in config or get one
+        spotify_device_id = spotcast_controller.get_spotify_device_id(
+            account, spotify_device_id, device_name, entity_id
+        )
 
         if (
             is_empty_str(uri)
