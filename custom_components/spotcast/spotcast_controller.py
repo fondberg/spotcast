@@ -10,13 +10,12 @@ from collections import OrderedDict
 from datetime import datetime
 
 import aiohttp
-import homeassistant.core as ha_core
 import pychromecast
 import spotipy
 from homeassistant.components.cast.helpers import ChromeCastZeroconf
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from requests import TooManyRedirects
-from .spotify_controller import SpotifyController
 from .error import TokenError
 from .const import CONF_SP_DC, CONF_SP_KEY
 from .helpers import get_cast_devices, get_spotify_devices, get_spotify_media_player
@@ -28,20 +27,16 @@ _LOGGER = logging.getLogger(__name__)
 class SpotifyCastDevice:
     """Represents a spotify device."""
 
-    hass = None
-    castDevice = None
-    spotifyController = None
+    spotify_controller: SpotifyController | None = None
 
     def __init__(
-        self, hass: ha_core.HomeAssistant, call_device_name: str, call_entity_id: str
+        self, hass: HomeAssistant, device_name: str | None, entity_id: str | None
     ) -> None:
         """Initialize a spotify cast device."""
         self.hass = hass
 
-        # Get device name from either device_name or entity_id
-        device_name = None
-        if call_device_name is None:
-            entity_id = call_entity_id
+        # Get device name from entity_id
+        if device_name is None:
             if entity_id is None:
                 raise HomeAssistantError(
                     "Either entity_id or device_name must be specified"
@@ -51,18 +46,13 @@ class SpotifyCastDevice:
                 _LOGGER.error("Could not find entity_id: %s", entity_id)
             else:
                 device_name = entity_states.attributes.get("friendly_name")
-        else:
-            device_name = call_device_name
 
         if device_name is None or device_name.strip() == "":
             raise HomeAssistantError("device_name is empty")
 
-        # Find chromecast device
-        self.castDevice = self.get_chromecast_device(device_name)
-        _LOGGER.debug("Found cast device: %s", self.castDevice)
-        self.castDevice.wait()
+        self.device_name = device_name
 
-    def get_chromecast_device(self, device_name: str) -> None:
+    def get_chromecast_device(self) -> pychromecast.Chromecast:
         # Get cast from discovered devices of cast platform
         known_devices = get_cast_devices(self.hass)
 
@@ -71,26 +61,30 @@ class SpotifyCastDevice:
             (
                 castinfo
                 for castinfo in known_devices
-                if castinfo.friendly_name == device_name
+                if castinfo.friendly_name == self.device_name
             ),
             None,
         )
-        _LOGGER.debug("cast info: %s", cast_info)
+        _LOGGER.debug("Cast info: %s", cast_info)
         if cast_info:
             return pychromecast.get_chromecast_from_cast_info(
                 cast_info.cast_info, ChromeCastZeroconf.get_zeroconf()
             )
         _LOGGER.error(
-            "Could not find device %s from hass.data",
-            device_name,
+            "Could not find Chromecast device %s from hass.data",
+            self.device_name,
         )
         raise HomeAssistantError(
-            "Could not find device with name {}".format(device_name)
+            "Could not find Chromecast device with name {}".format(self.device_name)
         )
 
-    def start_spotify_controller(self, access_token: str, expires: int):
-        sp = SpotifyController(self.castDevice, access_token, expires)
-        self.castDevice.register_handler(sp)
+    def start_spotify_controller(self, access_token: str, expires: int) -> None:
+        cast_device = self.get_chromecast_device()
+        _LOGGER.debug("Found cast device: %s", cast_device)
+        cast_device.wait()
+
+        sp = SpotifyController(cast_device, access_token, expires)
+        cast_device.register_handler(sp)
         sp.launch_app()
 
         if not sp.is_launched and not sp.credential_error:
@@ -102,39 +96,12 @@ class SpotifyCastDevice:
                 "Failed to launch spotify controller due to credentials error"
             )
 
-        self.spotifyController = sp
+        self.spotify_controller = sp
 
-    def get_spotify_device_id(self, user_id) -> None:
-        spotify_media_player = get_spotify_media_player(self.hass, user_id)
-        max_retries = 5
-        counter = 0
-        devices_available = None
-        _LOGGER.debug(
-            "Searching for Spotify device: {}".format(self.spotifyController.device)
-        )
-        while counter < max_retries:
-            devices_available = get_spotify_devices(spotify_media_player)
-            # Look for device to make sure we can start playback
-            if devices := devices_available["devices"]:
-                for device in devices:
-                    if device["id"] == self.spotifyController.device:
-                        _LOGGER.debug(
-                            "Found matching Spotify device: {}".format(device)
-                        )
-                        return device["id"]
-
-            sleep = random.uniform(1.5, 1.8) ** counter
-            time.sleep(sleep)
-            counter = counter + 1
-
-        _LOGGER.error(
-            'No device with id "{}" known by Spotify'.format(
-                self.spotifyController.device
-            )
-        )
-        _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
-
-        raise HomeAssistantError("Failed to get device id from Spotify")
+    def get_device_id(self) -> str:
+        if self.spotify_controller is None:
+            raise HomeAssistantError("SpotifyController is not started")
+        return self.spotify_controller.device
 
 
 class SpotifyToken:
@@ -146,14 +113,14 @@ class SpotifyToken:
     _access_token = None
     _token_expires = 0
 
-    def __init__(self, hass: ha_core.HomeAssistant, sp_dc: str, sp_key: str):
+    def __init__(self, hass: HomeAssistant, sp_dc: str, sp_key: str) -> None:
         self.hass = hass
         self.sp_dc = sp_dc
         self.sp_key = sp_key
 
-    def ensure_token_valid(self) -> bool:
+    def ensure_token_valid(self) -> None:
         if float(self._token_expires) > time.time():
-            return True
+            return
         self.get_spotify_token()
 
     @property
@@ -178,7 +145,7 @@ class SpotifyToken:
         except (TokenError, Exception):  # noqa: E722
             raise HomeAssistantError("Could not get spotify token.")
 
-    async def start_session(self):
+    async def start_session(self) -> tuple[str, int]:
         """ Starts session to get access token. """
         cookies = {"sp_dc": self.sp_dc, "sp_key": self.sp_key}
 
@@ -232,11 +199,10 @@ class SpotcastController:
 
     spotifyTokenInstances = {}
     accounts: dict = {}
-    hass = None
 
     def __init__(
         self,
-        hass: ha_core.HomeAssistant,
+        hass: HomeAssistant,
         sp_dc: str,
         sp_key: str,
         accs: collections.OrderedDict,
@@ -246,7 +212,7 @@ class SpotcastController:
         self.accounts["default"] = OrderedDict([("sp_dc", sp_dc), ("sp_key", sp_key)])
         self.hass = hass
 
-    def get_token_instance(self, account: str = None) -> any:
+    def get_token_instance(self, account: str | None = None) -> SpotifyToken:
         """Get token instance for account"""
         if account is None:
             account = "default"
@@ -256,45 +222,92 @@ class SpotcastController:
         dc = self.accounts.get(account).get(CONF_SP_DC)
         key = self.accounts.get(account).get(CONF_SP_KEY)
 
-        _LOGGER.debug("setting up with  account %s", account)
+        _LOGGER.debug("Setting up with account %s", account)
         if account not in self.spotifyTokenInstances:
             self.spotifyTokenInstances[account] = SpotifyToken(self.hass, dc, key)
         return self.spotifyTokenInstances[account]
 
-    def get_spotify_client(self, account: str) -> spotipy.Spotify:
+    def get_spotify_client(self, account: str | None) -> spotipy.Spotify:
         return spotipy.Spotify(auth=self.get_token_instance(account).access_token)
 
-    def _getSpotifyConnectDeviceId(self, client, device_name):
-        media_player = get_spotify_media_player(self.hass, client._get("me")["id"])
-        devices_available = get_spotify_devices(media_player)
-        for device in devices_available["devices"]:
-            if device["name"] == device_name:
-                return device["id"]
+    def query_spotify_device_id(
+        self,
+        user_id: str,
+        device_name: str | None,
+        spotify_device_ids: list[str],
+        max_retries: int = 1,
+        error: bool = False,
+    ) -> str | None:
+        _LOGGER.debug(
+            'Searching for a Spotify device with the name "%s" or IDs in %s',
+            device_name,
+            spotify_device_ids,
+        )
+        media_player = get_spotify_media_player(self.hass, user_id)
+        attempt = 0
+        devices = None
+        while attempt < max_retries:
+            devices_available = get_spotify_devices(media_player)
+            if devices := devices_available["devices"]:
+                for device in devices:
+                    if (
+                        device_name is not None
+                        and device["name"] == device_name
+                        or device["id"] in spotify_device_ids
+                    ):
+                        _LOGGER.debug("Found matching Spotify device: %s", device)
+                        return device["id"]
+            sleep_secs = random.uniform(1.5, 1.8) ** attempt
+            time.sleep(sleep_secs)
+            attempt += 1
+        if error:
+            _LOGGER.error(
+                'No device with the name "%s" or ID "%s" is known to Spotify. Known devices: %s',
+                device_name,
+                spotify_device_ids,
+                devices,
+            )
         return None
 
-    def get_spotify_device_id(self, account, spotify_device_id, device_name, entity_id):
+
+    def get_spotify_device_id(
+        self,
+        account: str | None,
+        spotify_device_id: str | None,
+        device_name: str | None,
+        entity_id: str | None,
+    ) -> str:
+        search_device_ids: list[str] = []
+        if spotify_device_id is not None:
+            search_device_ids.append(spotify_device_id)
         # login as real browser to get powerful token
         access_token, expires = self.get_token_instance(account).get_spotify_token()
         # get the spotify web api client
         client = spotipy.Spotify(auth=access_token)
-        # first, rely on spotify id given in config
-        if not spotify_device_id:
-            # if not present, check if there's a spotify connect device
-            # with that name
-            spotify_device_id = self._getSpotifyConnectDeviceId(client, device_name)
-        if not spotify_device_id:
-            # if still no id available, check cast devices and launch
-            # the app on chromecast
+        user_id = client._get("me")["id"]
+        # first, check if spotify id is already available
+        found_spotify_device_id = self.query_spotify_device_id(
+            user_id, device_name, search_device_ids
+        )
+        if found_spotify_device_id is None:
+            # if device id is still not available, launch the app on chromecast
             spotify_cast_device = SpotifyCastDevice(
                 self.hass,
                 device_name,
                 entity_id,
             )
-            me_resp = client._get("me")
             spotify_cast_device.start_spotify_controller(access_token, expires)
-            # Make sure it is started
-            spotify_device_id = spotify_cast_device.get_spotify_device_id(me_resp["id"])
-        return spotify_device_id
+            # get spotify device id from SpotifyController
+            controller_device_id = spotify_cast_device.get_device_id()
+            if controller_device_id not in search_device_ids:
+                search_device_ids.append(controller_device_id)
+            found_spotify_device_id = self.query_spotify_device_id(
+                user_id, device_name, search_device_ids, max_retries=5, error=True
+            )
+        if found_spotify_device_id is None:
+            raise HomeAssistantError("Failed to get device ID from Spotify")
+        return found_spotify_device_id
+
 
     def play(
         self,
@@ -304,7 +317,7 @@ class SpotcastController:
         random_song: bool,
         position: str,
         ignore_fully_played: str,
-        country_code: str = None,
+        country_code: str | None = None,
     ) -> None:
         _LOGGER.debug(
             "Playing URI: %s on device-id: %s",
