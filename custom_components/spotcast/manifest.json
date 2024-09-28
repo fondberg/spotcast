@@ -15,5 +15,5 @@
     "documentation": "https://github.com/fondberg/spotcast",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/fondberg/spotcast/issues",
-    "version": "v3.8.1"
+    "version": "v3.8.2"
 }
