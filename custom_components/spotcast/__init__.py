@@ -1,5 +1,6 @@
 from logging import getLogger
 from aiohttp import ClientError
+from asyncio import sleep
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -11,6 +12,13 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.spotify.exceptions import TokenError
+from custom_components.spotcast.media_player.chromecast_player import (
+    Chromecast,
+)
+
+from custom_components.spotcast.chromecast.spotify_controller import (
+    SpotifyController,
+)
 
 
 DOMAIN = "spotcast"
@@ -24,19 +32,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         - bool: returns `True` if the integration setup was successfull
     """
 
-    implementation = await async_get_config_entry_implementation(hass, entry)
-    session = OAuth2Session(hass, entry, implementation)
-
-    try:
-        await session.async_ensure_token_valid()
-    except ClientError as exc:
-        raise ConfigEntryNotReady from exc
-
-    try:
-        account = SpotifyAccount.from_oauth_session(session)
-    except TokenError as exc:
-        raise ConfigEntryNotReady from exc
-
-    LOGGER.debug(await account.async_connect())
+    LOGGER.debug(entry)
 
     return True

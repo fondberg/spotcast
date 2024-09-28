@@ -17,7 +17,7 @@ class TestObjectCreation(TestCase):
         session.token = {
             "access_token": "123456"
         }
-        self.account = SpotifyAccount.from_oauth_session(session, "CA")
+        self.account = SpotifyAccount.from_hass_oauth(session, "CA")
 
     def test_spotify_account_is_created(self):
         self.assertIsInstance(self.account, SpotifyAccount)

@@ -61,6 +61,8 @@ class SpotifyController(BaseController):
             - device(ChromecastDevice): The device managed by the
                 controller
         """
+
+        LOGGER.debug("Build SpotifyController for Chromecast")
         super(SpotifyController, self).__init__(
             self.APP_NAMESPACE,
             self.APP_ID
@@ -69,29 +71,40 @@ class SpotifyController(BaseController):
         self.account = account
         self.waiting = threading.Event()
         self.is_launched = False
+        self._current_message: dict = None
+
+    def _send_message_callback(self, *_):
+        """Call back method to send a message after the launch method"""
+        print("sending message")
+        self.send_message(self._current_message)
+        self._current_message = None
 
     def launch_app(self, device: Chromecast, max_attempts=10):
         """Launches the spotify app"""
         self.is_launched = False
         self.current_device = device
 
-        def callback(*_):
-            self.send_message({
-                "type": self.TYPE_GET_INFO,
-                "payload": {
-                    "remoteName": device.name,
-                    "deviceID": device.id(),
-                    "deviceAPI_isGroup": False,
-                }
-            })
+        self._current_message = {
+            "type": self.TYPE_GET_INFO,
+            "payload": {
+                "remoteName": device.name,
+                "deviceID": device.id(),
+                "deviceAPI_isGroup": False,
+            }
+        }
 
+        LOGGER.debug("Waiting for `%s` to be ready", device.name)
+        device.wait()
+
+        LOGGER.debug("Starting Spotify on `%s`", device.name)
         device.start_app(self.APP_ID)
+        LOGGER.debug("Waiting for `%s` to be available", device.name)
         device.wait()
 
         self.waiting.clear()
 
         LOGGER.debug("Requesting Spotify App to launch on `%s`", device.name)
-        self.launch(callback_function=callback)
+        self.launch(callback_function=self._send_message_callback)
 
         counter = 0
 

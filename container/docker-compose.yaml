@@ -1,7 +1,7 @@
 services:
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:latest
+    image: ghcr.io/home-assistant/home-assistant:beta
     privileged: true
     network_mode: host
     volumes:

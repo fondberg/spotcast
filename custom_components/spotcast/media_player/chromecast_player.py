@@ -66,6 +66,7 @@ class Chromecast(ParentChromecast, MediaPlayer):
             ) from exc
 
         LOGGER.debug("Found matching entity %s", device)
+        LOGGER.debug("Casting info %s", device._cast_info.cast_info)
 
         cast_device = Chromecast(
             device._cast_info.cast_info,
