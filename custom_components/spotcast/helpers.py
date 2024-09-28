@@ -38,7 +38,10 @@ def get_spotify_media_player(
                 try:
                     entity_devices = entity._devices
                 except (AttributeError):
-                    entity_devices = entity.data.devices.data
+                    try:
+                        entity_devices = entity.data.devices.data
+                    except AttributeError:
+                        entity_devices = entity.devices.data
 
                 _LOGGER.debug(
                     f"get_spotify_devices: {entity.entity_id}: "
@@ -54,14 +57,23 @@ def get_spotify_media_player(
         raise HomeAssistantError("Could not find spotify media player.")
 
 
-def get_spotify_devices(spotify_media_player: SpotifyMediaPlayer):
+def get_spotify_devices(spotify_media_player: SpotifyMediaPlayer, hass):
+
     if spotify_media_player:
         # Need to come from media_player spotify's sp client due to
         # token issues
         try:
             spotify_devices = spotify_media_player._spotify.devices()
         except (AttributeError):
-            spotify_devices = spotify_media_player.data.client.devices()
+            try:
+                spotify_devices = spotify_media_player.data.client.devices()
+            except AttributeError:
+                asyncio.run_coroutine_threadsafe(
+                    spotify_media_player.devices.async_refresh(),
+                    hass.loop
+                ).result()
+                spotify_devices = {}
+                spotify_devices["devices"] = spotify_media_player.devices.data
 
         _LOGGER.debug("get_spotify_devices: %s", spotify_devices)
 
