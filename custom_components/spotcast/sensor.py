@@ -9,7 +9,6 @@ from datetime import timedelta
 import homeassistant.core as ha_core
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_OK, STATE_UNKNOWN
-from homeassistant.util import dt
 
 from .const import CONF_SPOTIFY_COUNTRY, DOMAIN
 from .helpers import get_cast_devices
@@ -76,7 +75,6 @@ class ChromecastDevicesSensor(SensorEntity):
 
         self._attributes["devices_json"] = json.dumps(chromecasts, ensure_ascii=False)
         self._attributes["devices"] = chromecasts
-        self._attributes["last_update"] = dt.now().isoformat("T")
         self._state = STATE_OK
 
 
@@ -122,5 +120,4 @@ class ChromecastPlaylistSensor(SensorEntity):
             {"uri": x["uri"], "name": x["name"]} for x in resp["items"]
         ]
 
-        self._attributes["last_update"] = dt.now().isoformat("T")
         self._state = STATE_OK
