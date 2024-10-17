@@ -276,6 +276,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                             episodeName,
                             audiobookName,
                             genreName,
+                            category, 
                         ],
                     )
                 )
