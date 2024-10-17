@@ -63,6 +63,7 @@ from .helpers import (
     get_spotify_media_player,
     is_empty_str,
     is_valid_uri,
+    url_to_spotify_uri,
 )
 from .spotcast_controller import SpotcastController
 
@@ -242,6 +243,14 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
 
             # remove ? from badly formatted URI
             uri = uri.split("?")[0]
+
+            if uri.startswith("http"):
+                try:
+                    u = url_to_spotify_uri(uri)
+                    _LOGGER.debug("converted web URL %s to spotify URI %s", uri, u)
+                    uri = u
+                except ValueError:
+                    _LOGGER.error("invalid web URL provided, could not convert to spotify URI: %s", uri)
 
             if not is_valid_uri(uri):
                 _LOGGER.error("Invalid URI provided, aborting casting")
