@@ -177,15 +177,8 @@ To use the Spotcast service with a Spotify Connect device, you need the `spotify
 #### With Spotify developer portal
 
 1. Go to [Spotify developer console](https://developer.spotify.com/console/get-users-available-devices/)
-2. Click `GET TOKEN` <br/>
-![get_token](./images/get_token.png)
-3. Select `user-read-playback-state` as a scope<br/>
-![select_scope](./images/select_scope.png)
-4. If prompt give permission to your Spotify profile
-5. For chromecast devices, make sure to play media on the device prior to checking the logs as they will not show unless active
-6. Press the option `Try it`
-7. Read the result in the console in the right.<br/>
-![device_id](./images/device_id.png)
+2. Click `TRY IT` <br/>
+3. Extract the ID (there could be more than one if you have more than one speaker) from the 'RESPONSE SAMPLE' on the right
 
 #### Through Spotcast log
 

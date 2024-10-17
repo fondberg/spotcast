@@ -12,7 +12,14 @@ DOMAIN = "spotcast"
 CONF_SPOTIFY_DEVICE_ID = "spotify_device_id"
 CONF_DEVICE_NAME = "device_name"
 CONF_SPOTIFY_URI = "uri"
-CONF_SPOTIFY_SEARCH = "search"
+CONF_SPOTIFY_TRACK_NAME = "track_name"
+CONF_SPOTIFY_ARTIST_NAME = "artist_name"
+CONF_SPOTIFY_ALBUM_NAME = "album_name"
+CONF_SPOTIFY_PLAYLIST_NAME = "playlist_name"
+CONF_SPOTIFY_SHOW_NAME = "show_name"
+CONF_SPOTIFY_EPISODE_NAME = "episode_name"
+CONF_SPOTIFY_AUDIOBOOK_NAME = "audiobook_name"
+CONF_SPOTIFY_GENRE_NAME = "genre_name"
 CONF_SPOTIFY_CATEGORY = "category"
 CONF_SPOTIFY_COUNTRY = "country"
 CONF_SPOTIFY_LIMIT = "limit"
@@ -21,6 +28,7 @@ CONF_SPOTIFY_ACCOUNT = "account"
 CONF_FORCE_PLAYBACK = "force_playback"
 CONF_RANDOM = "random_song"
 CONF_SHUFFLE = "shuffle"
+CONF_START_POSITION = "start_position"
 CONF_SP_DC = "sp_dc"
 CONF_SP_KEY = "sp_key"
 CONF_START_VOL = "start_volume"
@@ -75,7 +83,14 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_SPOTIFY_DEVICE_ID): cv.string,
         vol.Optional(CONF_ENTITY_ID): cv.string,
         vol.Optional(CONF_SPOTIFY_URI): cv.string,
-        vol.Optional(CONF_SPOTIFY_SEARCH): cv.string,
+        vol.Optional(CONF_SPOTIFY_TRACK_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_ALBUM_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_ARTIST_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_PLAYLIST_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_SHOW_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_EPISODE_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_AUDIOBOOK_NAME): cv.string,
+        vol.Optional(CONF_SPOTIFY_GENRE_NAME): cv.string,
         vol.Optional(CONF_SPOTIFY_CATEGORY): cv.string,
         vol.Optional(CONF_SPOTIFY_COUNTRY): cv.string,
         vol.Optional(CONF_SPOTIFY_LIMIT, default=20): cv.positive_int,
@@ -85,6 +100,7 @@ SERVICE_START_COMMAND_SCHEMA = vol.Schema(
         vol.Optional(CONF_REPEAT, default="off"): cv.string,
         vol.Optional(CONF_SHUFFLE, default=False): cv.boolean,
         vol.Optional(CONF_OFFSET, default=0): cv.string,
+        vol.Optional(CONF_START_POSITION): cv.positive_int,
         vol.Optional(CONF_START_VOL, default=101): cv.positive_int,
         vol.Optional(CONF_IGNORE_FULLY_PLAYED, default=False): cv.boolean,
     }
