@@ -143,7 +143,7 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
             me_resp = client._get("me")  # pylint: disable=W0212
             spotify_media_player = get_spotify_media_player(
                 hass, me_resp["id"])
-            resp = get_spotify_devices(spotify_media_player)
+            resp = get_spotify_devices(spotify_media_player, hass)
             connection.send_message(
                 websocket_api.result_message(msg["id"], resp))
 
