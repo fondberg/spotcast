@@ -314,7 +314,8 @@ class SpotcastController:
         random_song: bool,
         position: str,
         ignore_fully_played: str,
-        country_code: str = None,
+        position_ms: str,
+        country_code: str = None
     ) -> None:
         _LOGGER.debug(
             "Playing URI: %s on device-id: %s",
@@ -342,14 +343,14 @@ class SpotcastController:
                     episode_uri,
                 )
                 client.start_playback(
-                    device_id=spotify_device_id, uris=[episode_uri])
+                    device_id=spotify_device_id, uris=[episode_uri], position_ms = position_ms)
         elif uri.find("episode") > 0:
             _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
-            client.start_playback(device_id=spotify_device_id, uris=[uri])
+            client.start_playback(device_id=spotify_device_id, uris=[uri], position_ms = position_ms)
 
         elif uri.find("track") > 0:
             _LOGGER.debug("Playing track using uris= for uri: %s", uri)
-            client.start_playback(device_id=spotify_device_id, uris=[uri])
+            client.start_playback(device_id=spotify_device_id, uris=[uri], position_ms = position_ms)
         else:
             if uri == "random":
                 _LOGGER.debug(
@@ -359,7 +360,7 @@ class SpotcastController:
                 no_playlists = len(playlists["items"])
                 uri = playlists["items"][random.randint(
                     0, no_playlists - 1)]["uri"]
-            kwargs = {"device_id": spotify_device_id, "context_uri": uri}
+            kwargs = {"device_id": spotify_device_id, "context_uri": uri, "position_ms": position_ms}
 
             if random_song:
                 if uri.find("album") > 0:
