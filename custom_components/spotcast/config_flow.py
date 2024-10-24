@@ -1,23 +1,14 @@
 """Module to manage the configuration flow for the integration"""
 
 from logging import getLogger
+from typing import Any
 
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL
-from homeassistant.helpers.config_entry_oauth2_flow import (
-    async_get_implementations,
-    async_get_application_credentials,
-)
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.components.spotify.config_flow import SpotifyFlowHandler
-from homeassistant.components import http
-from homeassistant.data_entry_flow import FlowResult
-from homeassistant.core import callback
 import voluptuous as vol
-from homeassistant.helpers.selector import (
-    TextSelector,
-    TextSelectorConfig,
-    TextSelectorType,
-)
+from homeassistant.config_entries import ConfigFlowResult
+from spotipy import Spotify
 
 from custom_components.spotcast import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
@@ -37,88 +28,71 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         vol.Required("sp_key", default=""): str,
     })
 
+    def __init__(self):
+        self.data: dict = {}
+        super().__init__()
+
     @property
     def extra_authorize_data(self) -> dict[str]:
         """Extra data to append to authorization url"""
         return {"scope": ",".join(SpotifyAccount.SCOPE)}
 
-    async def async_step_user(
-        self,
-        user_input: dict[str] = None,
-    ) -> FlowResult:
-        """Handles flwo initiated by the user interface"""
-
-        LOGGER.debug("Config flow for domain `%s` initiated", self.DOMAIN)
-        LOGGER.debug("Requesting Spotify Internal API credentials")
-
-        return self.async_show_form(
-            step_id="internal_api",
-            data_schema=self.INTERNAL_API_SCHEMA
-        )
-
     async def async_step_internal_api(
-        self,
-        user_input: dict[str] = None
-    ) -> FlowResult:
-        LOGGER.debug("Requesting OAuth Implementation setup")
-        return self.async_step_pick_implementation(user_input)
+            self,
+            user_input: dict[str]
+    ) -> ConfigFlowResult:
+        """Manages the data entry from the internal api step"""
+        LOGGER.debug("Adding internal api to entry data")
+        self.data["internal_api"] = user_input
+        return await self.async_oauth_create_entry(self.data)
 
-    async def async_step_pick_implementation(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
-        """Handle a flow start."""
-        implementations = await async_get_implementations(
-            self.hass,
-            self.DOMAIN
-        )
+    async def async_oauth_create_entry(
+            self,
+            data: dict[str, Any]
+    ) -> ConfigFlowResult:
+        """Create an entry for Spotify."""
 
-        if user_input is not None and "implementation" in user_input:
-            self.flow_impl = implementations[user_input["implementation"]]
-            return await self.async_step_auth()
+        LOGGER.debug(f"Current entry data: {self.data}")
+        LOGGER.debug(f"New entry data: {data}")
 
-        if not implementations:
-            if self.DOMAIN in await async_get_application_credentials(self.hass):
-                return self.async_abort(reason="missing_credentials")
-            return self.async_abort(reason="missing_configuration")
+        if "external_api" not in self.data:
+            LOGGER.debug("Adding external api to entry data")
+            self.data["external_api"] = data
 
-        req = http.current_request.get()
-        if len(implementations) == 1 and req is not None:
-            # Pick first implementation if we have only one, but only
-            # if this is triggered by a user interaction (request).
-            self.flow_impl = list(implementations.values())[0]
-            return await self.async_step_auth()
-
-        return self.async_show_form(
-            step_id="pick_implementation",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        "implementation", default=list(implementations)[0]
-                    ): vol.In({key: impl.name for key, impl in implementations.items()})
-                }
-            ),
-        )
-
-    def _show_form(
-        self,
-        errors: str = None,
-        step: str = "internal_api",
-        user_data: dict = None,
-    ) -> FlowResult:
-
-        if step == "internal_api":
+        if "internal_api" not in self.data:
             return self.async_show_form(
                 step_id="internal_api",
-                data_schema=self.INTERNAL_API_SCHEMA
+                data_schema=self.INTERNAL_API_SCHEMA,
+                errors={},
             )
 
-        if step == "external_api":
-            return self.async_step_pick_implementation(user_data)
+        external_api = self.data["external_api"]
 
-        raise InvalidConfigStepError(
-            f"`{step}` is not a valid configuration step. Open an issue "
-            "in github"
-        )
+        spotify = Spotify(auth=external_api["token"]["access_token"])
+
+        try:
+            current_user = await self.hass.async_add_executor_job(
+                spotify.current_user
+            )
+        except Exception:  # noqa: BLE001
+            return self.async_abort(reason="connection_error")
+
+        name = external_api["id"] = current_user["id"]
+
+        if (
+            self.reauth_entry
+            and self.reauth_entry.data["id"] != current_user["id"]
+        ):
+            return self.async_abort(reason="reauth_account_mismatch")
+
+        if current_user.get("display_name"):
+            name = current_user["display_name"]
+
+        data["name"] = name
+
+        await self.async_set_unique_id(current_user["id"])
+
+        return self.async_create_entry(title=name, data=data)
 
 
 class InvalidConfigStepError(HomeAssistantError):
