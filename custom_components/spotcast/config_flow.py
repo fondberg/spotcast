@@ -4,7 +4,6 @@ from logging import getLogger
 from typing import Any
 
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.components.spotify.config_flow import SpotifyFlowHandler
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlowResult
@@ -52,9 +51,6 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Create an entry for Spotify."""
 
-        LOGGER.debug(f"Current entry data: {self.data}")
-        LOGGER.debug(f"New entry data: {data}")
-
         if "external_api" not in self.data:
             LOGGER.debug("Adding external api to entry data")
             self.data["external_api"] = data
@@ -74,7 +70,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             current_user = await self.hass.async_add_executor_job(
                 spotify.current_user
             )
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
             return self.async_abort(reason="connection_error")
 
         name = external_api["id"] = current_user["id"]
@@ -88,12 +84,8 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         if current_user.get("display_name"):
             name = current_user["display_name"]
 
-        data["name"] = name
+        self.data["name"] = name
 
         await self.async_set_unique_id(current_user["id"])
 
-        return self.async_create_entry(title=name, data=data)
-
-
-class InvalidConfigStepError(HomeAssistantError):
-    """raised if an invalid config step is provided."""
+        return self.async_create_entry(title=name, data=self.data)

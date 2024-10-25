@@ -160,9 +160,11 @@ class SpotifyController(BaseController):
     ) -> bool:
         """Handler for the get info response message"""
 
+        token = self.account.async_get_token("internal")
+
         headers = {
             "authority": SpotifyController.APP_HOSTNAME,
-            "authorization": f"Bearer {self.account.get_token()}",
+            "authorization": f"Bearer {token}",
             "content-type": "text/plain;charset=UTF-8",
         }
 

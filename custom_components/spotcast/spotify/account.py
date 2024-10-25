@@ -1,60 +1,71 @@
-"""Module for the spotify accout class"""
+"""Module for the spotify account class"""
 
 from logging import getLogger
-from typing import Any, Callable
-from asyncio import get_running_loop
 
-from homeassistant.helpers.config_entry_oauth2_flow import OAuth2Session
-from spotipy import Spotify, SpotifyOAuth
+from spotipy import Spotify
 
-from custom_components.spotcast.spotify.exceptions import NoAuthManagerError
-
+from custom_components.spotcast.sessions import (
+    OAuth2Session,
+    InternalSession,
+    ConnectionSession,
+)
 
 LOGGER = getLogger(__name__)
 
 
 class SpotifyAccount:
-    """A Spotify Account with the cookies information
-
-    Attributes:
-        - country(str): The ISO3166-2 country code for the account
-        - name(str): Name of the account. Used for distinguishing
-            between accounts when calling services
-    """
-
-    SCOPE = [
-        "user-modify-playback-state",
-        "user-read-playback-state",
-        "user-read-private",
-        "playlist-read-private",
-        "playlist-read-collaborative",
-        "user-library-read",
-        "user-top-read",
-        "user-read-playback-position",
-        "user-read-recently-played",
-        "user-follow-read",
-    ]
 
     def __init__(
             self,
-            spotify: Spotify,
+            external_session: OAuth2Session,
+            internal_session: InternalSession,
             country: str = None,
     ):
-        self.name = None
-        self.country = country
-        self._spotify = spotify
-        self.auth_manager: OAuth2Session | SpotifyOAuth = None
+        self.sessions: dict[str, ConnectionSession] = {
+            "external": external_session,
+            "internal": internal_session,
+        }
 
-    def connect(self) -> dict:
-        """Tests the connection and returns the current user profile"""
+        await self.async_ensure_tokens_valid()
+
+        self._spotify = Spotify(auth=self.sessions["external"].token)
+
+        self.country = country
+        self.name = None
+
+        self.async_profile()
+
+    async def async_get_token(self, api: str) -> str:
+        """Retrives a token from the requested session.
+
+        Args:
+            - api(str): The api to retrive from. Can be `internal` or
+                `external`.
+        """
+        self.sessions[api].async_ensure_token_valid()
+        return self.sessions[api].token
+
+    async def async_ensure_tokens_valid(self):
+        """Ensures the token are valid"""
+        for key, session in self.sessions.items():
+            LOGGER.debug("Refreshing %s api token", key)
+            session.async_ensure_token_valid()
+            LOGGER.debug("Done refreshing %s api token", key)
+
+    async def async_profile(self) -> dict:
+        """Test the connection and returns a user profile"""
         LOGGER.debug("Getting Profile from Spotify")
         profile = self._spotify.me()
-        LOGGER.debug("Profile retrived for user %s", profile["display_name"])
-        self.name = profile["display_name"]
+
+        name = profile["id"] if "id" in profile else profile["display_name"]
+
+        LOGGER.debug("Profile retrived for user %s", name)
+        self.name = name
         return profile
 
-    def devices(self):
+    async def async_devices(self) -> list[dict]:
         """Returns the list of devices"""
+        await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Devices for account `%s`", self.name)
         devices = self._spotify.devices()["devices"]
 
@@ -63,64 +74,3 @@ class SpotifyAccount:
             LOGGER.debug("Found Device [%s](%s)", device["name"], device["id"])
 
         return devices
-
-    @staticmethod
-    async def _async_wrapper(func: Callable, *args) -> Any:
-        """Wrapper to execute a function inside an executor
-
-        Args:
-            - func(Callable): the function to run
-            - *args: arguments to send to the function
-
-        Return:
-            - Any: the result of the function
-        """
-        loop = get_running_loop()
-        return await loop.run_in_executor(None, func, *args)
-
-    async def async_connect(self) -> dict:
-        """Tests the connection and returns the current user profile"""
-        return await self._async_wrapper(self.connect)
-
-    async def async_devices(self):
-        """Returns the list of devices"""
-        return await self._async_wrapper(self.devices)
-
-    def get_token(self) -> str:
-        """Returns a valid token according to the auth system in place
-        """
-        if isinstance(self.auth_manager, (OAuth2Session, SpotifyOAuth)):
-            LOGGER.debug("getting token from Hass %s", type(self.auth_manager))
-            return self.auth_manager.token["access_token"]
-
-        raise NoAuthManagerError(
-            "No Valid Authentication Manager could be found"
-        )
-
-    @staticmethod
-    def from_hass_oauth(
-        session: OAuth2Session,
-        country: str = None,
-    ) -> "SpotifyAccount":
-        """Builds a SpotifyAccount from a Home Assistant OAuth Session"""
-
-        spotify = Spotify(auth=session.token["access_token"])
-
-        account = SpotifyAccount(spotify, country=country)
-        account.auth_manager = session
-
-        return account
-
-    @staticmethod
-    def from_spotipy_oauth(
-            spotipy_oauth: SpotifyOAuth,
-            country: str = None,
-    ) -> "SpotifyAccount":
-        """Builds a SpotifyAccount from a Spotipy Local OAuth Session"""
-
-        spotify = Spotify(auth_manager=spotipy_oauth)
-
-        account = SpotifyAccount(spotify, country)
-        account.auth_manager = spotipy_oauth
-
-        return account

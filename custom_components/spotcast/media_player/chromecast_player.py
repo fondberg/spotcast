@@ -75,6 +75,9 @@ class Chromecast(ParentChromecast, MediaPlayer):
 
         return cast_device
 
+    def id(self) -> str:
+        return md5(self.name.encode()).hexdigest()
+
     @staticmethod
     def from_network(
             host: str,
@@ -101,6 +104,3 @@ class Chromecast(ParentChromecast, MediaPlayer):
         device = Chromecast(cast_info)
 
         return device
-
-    def id(self) -> str:
-        return md5(self.name.encode()).hexdigest()
