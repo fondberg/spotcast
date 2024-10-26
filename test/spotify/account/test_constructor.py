@@ -1,26 +1,55 @@
-"""Module to test the SpotifyAccount constructor"""
+"""Module to test the constructor of the Spotify Account"""
 
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from spotipy import Spotify
+from custom_components.spotcast.sessions import (
+    OAuth2Session,
+    InternalSession
+)
 
 from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class TestDataRetention(TestCase):
 
-    def setUp(self):
+    @patch("custom_components.spotcast.spotify.account.Spotify")
+    def setUp(self, mock_spotify: MagicMock):
 
-        self.spotify = MagicMock(spec=Spotify)
+        mock_internal = MagicMock(spec=InternalSession)
+        mock_external = MagicMock(spec=OAuth2Session)
 
-        self.account = SpotifyAccount(
-            self.spotify,
-            country="CA"
+        self.mock_spotify = mock_spotify
+
+        mock_external.token = {
+            "access_token": "12345",
+            "expires_at": 12345.61,
+        }
+
+        self.account = SpotifyAccount(mock_external, mock_internal, "CA")
+
+    def test_sessions_contain_both_sessions(self):
+        self.assertIn("external", self.account.sessions)
+        self.assertIn("internal", self.account.sessions)
+        self.assertIsInstance(self.account.sessions["external"], OAuth2Session)
+        self.assertIsInstance(
+            self.account.sessions["internal"],
+            InternalSession
         )
 
-    def test_country_value_is_retained(self):
+    def test_spotify_created_with_proper_auth(self):
+        try:
+            self.mock_spotify.assert_called_with(
+                auth={
+                    "access_token": "12345",
+                    "expires_at": 12345.61,
+                }
+            )
+        except AssertionError:
+            self.fail("Spotify object didn't receive proper token'")
+
+    def test_country_saved(self):
         self.assertEqual(self.account.country, "CA")
 
-    def test_name_set_to_default_none(self):
+    def test_name_is_declared(self):
         self.assertIsNone(self.account.name)

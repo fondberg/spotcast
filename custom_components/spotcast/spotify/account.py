@@ -15,6 +15,19 @@ LOGGER = getLogger(__name__)
 
 class SpotifyAccount:
 
+    SCOPE = [
+        "user-modify-playback-state",
+        "user-read-playback-state",
+        "user-read-private",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "user-library-read",
+        "user-top-read",
+        "user-read-playback-position",
+        "user-read-recently-played",
+        "user-follow-read",
+    ]
+
     def __init__(
             self,
             external_session: OAuth2Session,
@@ -26,14 +39,10 @@ class SpotifyAccount:
             "internal": internal_session,
         }
 
-        await self.async_ensure_tokens_valid()
-
         self._spotify = Spotify(auth=self.sessions["external"].token)
 
         self.country = country
         self.name = None
-
-        self.async_profile()
 
     async def async_get_token(self, api: str) -> str:
         """Retrives a token from the requested session.
@@ -42,7 +51,7 @@ class SpotifyAccount:
             - api(str): The api to retrive from. Can be `internal` or
                 `external`.
         """
-        self.sessions[api].async_ensure_token_valid()
+        await self.sessions[api].async_ensure_token_valid()
         return self.sessions[api].token
 
     async def async_ensure_tokens_valid(self):

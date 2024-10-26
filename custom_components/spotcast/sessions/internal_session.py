@@ -13,8 +13,8 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
     CLOCK_OUT_OF_SYNC_MAX_SEC
 )
 
-from custom_components.spotcast.home_assistant.connection_session import (
-    ConnectionSession
+from custom_components.spotcast.sessions.connection_session import (
+    ConnectionSession,
 )
 
 LOGGER = getLogger(__name__)
@@ -109,12 +109,10 @@ class InternalSession(ConnectionSession):
 
                 data = await response.json()
 
-                try:
-                    response.raise_for_status()
-                except ClientResponseError as exc:
+                if not response.ok:
                     raise TokenError(
                         f"{response.status}: {data}"
-                    ) from exc
+                    )
 
             self._access_token = data[TOKEN_KEY]
             self._expires_at = int(data[EXPIRATION_KEY]) // 1000

@@ -15,8 +15,8 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
     async_get_implementations
 )
 
-from custom_components.spotcast.home_assistant.connection_session import (
-    ConnectionSession
+from custom_components.spotcast.sessions.connection_session import (
+    ConnectionSession,
 )
 
 
