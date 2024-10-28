@@ -7,7 +7,7 @@ import datetime as dt
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import EntityPlatform
 
-from custom_components.spotcast.media_player._abstract_player import (
+from custom_components.spotcast.media_players._abstract_player import (
     MediaPlayer,
     MissingDeviceTypeError,
     InvalidPlatformError,

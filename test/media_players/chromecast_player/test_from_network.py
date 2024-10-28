@@ -3,7 +3,7 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from custom_components.spotcast.media_player.chromecast_player import (
+from custom_components.spotcast.media_players.chromecast_player import (
     Chromecast,
     CastInfo,
     HostServiceInfo

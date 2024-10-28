@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from pychromecast import CastInfo, HostServiceInfo
 
-from custom_components.spotcast.media_player.chromecast_player import (
+from custom_components.spotcast.media_players.chromecast_player import (
     Chromecast,
     md5
 )
