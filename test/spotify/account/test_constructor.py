@@ -53,5 +53,5 @@ class TestDataRetention(TestCase):
     def test_country_saved(self):
         self.assertEqual(self.account.country, "CA")
 
-    def test_name_is_declared(self):
-        self.assertIsNone(self.account.name)
+    def test_profile_is_declared(self):
+        self.assertEqual(self.account._profile, {})

@@ -1,7 +1,7 @@
 """Module to test the async_from_config_entry static method"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
@@ -27,6 +27,13 @@ class TestAccountCreation(IsolatedAsyncioTestCase):
     ):
         mock_hass = MagicMock(spec=HomeAssistant)
         mock_entry = MagicMock(spec=ConfigEntry)
+
+        mock_hass.async_add_executor_job = AsyncMock(
+            return_value={
+                "id": "dummy",
+                "display_name": "Dummy Account",
+            }
+        )
 
         mock_entry.data = {
             "external_api": {

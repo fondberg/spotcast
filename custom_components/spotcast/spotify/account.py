@@ -58,12 +58,12 @@ class SpotifyAccount:
         self._profile = {}
 
     @property
-    def id(self):
+    def id(self) -> str:
         """Returns the id of the account"""
         return self.get_profile_value("id")
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Returns the name of the account. In case of no display name,
         returns the id
         """
@@ -75,7 +75,7 @@ class SpotifyAccount:
         return name
 
     @property
-    def profile(self):
+    def profile(self) -> dict:
         self.get_profile_value("id")
         return self._profile
 
@@ -93,7 +93,7 @@ class SpotifyAccount:
         Returns:
             - Any: the value at the key in the profile
         """
-        if self._profile is None:
+        if self._profile == {}:
             raise ProfileNotLoadedError(
                 "The profile has not been loaded properly in the account. Call"
                 " `async_profile`"
@@ -163,6 +163,31 @@ class SpotifyAccount:
             LOGGER.debug("Found Device [%s](%s)", device["name"], device["id"])
 
         return devices
+
+    async def async_playlists(self) -> list[dict]:
+        """Returns a list of playlist for the current user"""
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Getting Playlist for account `%s`", self.name)
+
+        offset = 0
+        all_playllists = []
+        total = None
+
+        while total is None or len(all_playllists) < total:
+
+            current_playlist: dict = await self.hass.async_add_executor_job(
+                self._spotify.current_user_playlists,
+                50,
+                offset
+            )
+
+            if total is None:
+                total = current_playlist["total"]
+
+            all_playllists.extend(current_playlist["items"])
+            offset = len(all_playllists)
+
+        return all_playllists
 
     async def async_wait_for_device(self, device_id: str, timeout: int = 12):
         """Asycnhronously wait for a device to become available"""

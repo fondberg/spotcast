@@ -24,6 +24,11 @@ class TestGettingDevices(IsolatedAsyncioTestCase):
             MagicMock(spec=InternalSession),
         )
 
+        self.account._profile = {
+            "id": "dummy",
+            "display_name": "Dummy Account"
+        }
+
         self.dummy_devices = {
             "devices": [
                 {
