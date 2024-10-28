@@ -41,7 +41,7 @@ class TestInvalidImplementation(TestCase):
 class TestEntityCrawling(TestCase):
 
     @patch(
-        "custom_components.spotcast.media_player._abstract_player"
+        "custom_components.spotcast.media_players._abstract_player"
         ".async_get_platforms"
     )
     def test_no_platform_with_propoer_domain(self, mock_platforms: MagicMock):
@@ -65,7 +65,7 @@ class TestEntityCrawling(TestCase):
         self.assertEqual(len(result), 0)
 
     @patch(
-        "custom_components.spotcast.media_player._abstract_player"
+        "custom_components.spotcast.media_players._abstract_player"
         ".async_get_platforms"
     )
     def test_single_platform(self, mock_platforms: MagicMock):
@@ -93,7 +93,7 @@ class TestEntityCrawling(TestCase):
         self.assertEqual(len(result), 1)
 
     @patch(
-        "custom_components.spotcast.media_player._abstract_player"
+        "custom_components.spotcast.media_players._abstract_player"
         ".async_get_platforms"
     )
     def test_multiple_platforms(self, mock_platforms: MagicMock):
@@ -135,7 +135,7 @@ class TestEntityCrawling(TestCase):
         self.assertEqual(len(result), 2)
 
     @patch(
-        "custom_components.spotcast.media_player._abstract_player"
+        "custom_components.spotcast.media_players._abstract_player"
         ".async_get_platforms"
     )
     def test_wrong_type_entity(self, mock_platforms: MagicMock):
@@ -163,7 +163,7 @@ class TestEntityCrawling(TestCase):
         self.assertEqual(len(result), 0)
 
     @patch(
-        "custom_components.spotcast.media_player._abstract_player"
+        "custom_components.spotcast.media_players._abstract_player"
         ".async_get_platforms"
     )
     def test_default_provides_entity_id_as_key(
@@ -195,7 +195,7 @@ class TestEntityCrawling(TestCase):
         self.assertIn("media_player.mock_player", result)
 
     @patch(
-        "custom_components.spotcast.media_player._abstract_player"
+        "custom_components.spotcast.media_players._abstract_player"
         ".async_get_platforms"
     )
     def test_provides_device_name_as_key_on_request(

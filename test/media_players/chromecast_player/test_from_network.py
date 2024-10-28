@@ -13,7 +13,7 @@ from custom_components.spotcast.media_players.chromecast_player import (
 class TestBaseDevice(TestCase):
 
     @patch(
-        "custom_components.spotcast.media_player.chromecast_player."
+        "custom_components.spotcast.media_players.chromecast_player."
         "pychromecast.get_cast_type"
     )
     def setUp(self, mock_cast_type: MagicMock):
