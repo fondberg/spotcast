@@ -21,3 +21,7 @@ class InvalidCookiesError(TokenError):
 
 class NoAuthManagerError(TokenError):
     """The Spotify Account has no Authentication manager in place"""
+
+
+class ProfileNotLoadedError(HomeAssistantError):
+    """Raised when the profile is not yet loaded"""

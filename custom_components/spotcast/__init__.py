@@ -1,21 +1,27 @@
 from logging import getLogger
 from aiohttp import ClientError
+import datetime as dt
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
-
-from custom_components.spotcast.sessions import (
-    OAuth2Session,
-    InternalSession,
-    async_get_config_entry_implementation,
-)
+from homeassistant.const import Platform
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from custom_components.spotcast.spotify import SpotifyAccount
 
 
 DOMAIN = "spotcast"
 LOGGER = getLogger(__name__)
+PLATFORMS = [Platform.SENSOR]
+
+
+def setup_platform(
+    hass: HomeAssistant,
+    *_,
+    **__,
+):
+    LOGGER.warn("Here")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -25,18 +31,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         - bool: returns `True` if the integration setup was successfull
     """
 
-    implementation = await async_get_config_entry_implementation(hass, entry)
-    country = entry.data.get("country")
-
-    account = SpotifyAccount(
-        external_session=OAuth2Session(hass, entry, implementation),
-        internal_session=InternalSession(hass, **entry.data["internal_api"]),
-        country=country,
-    )
+    account = await SpotifyAccount.async_from_config_entry(hass, entry)
 
     try:
         await account.async_ensure_tokens_valid()
     except ClientError as exc:
         raise ConfigEntryNotReady from exc
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True

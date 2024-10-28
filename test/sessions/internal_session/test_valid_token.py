@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from custom_components.spotcast.sessions.internal_session import (
     InternalSession,
     CLOCK_OUT_OF_SYNC_MAX_SEC,
+    ConfigEntry,
 )
 
 
@@ -16,7 +17,8 @@ class TestInvalidToken(TestCase):
 
     def setUp(self):
         mock_hass = MagicMock(spec=HomeAssistant)
-        self.session = InternalSession(mock_hass, "foo", "bar")
+        mock_entry = MagicMock(spec=ConfigEntry)
+        self.session = InternalSession(mock_hass, mock_entry)
         self.session._access_token = "boo"
 
     def test_invalid_if_expires_at_later_than_current_time(self):
@@ -29,7 +31,8 @@ class TestValidToken(TestCase):
 
     def setUp(self):
         mock_hass = MagicMock(spec=HomeAssistant)
-        self.session = InternalSession(mock_hass, "foo", "bar")
+        mock_entry = MagicMock(spec=ConfigEntry)
+        self.session = InternalSession(mock_hass, mock_entry)
         self.session._access_token = "boo"
 
     def test_invalid_if_expires_at_later_than_current_time(self):

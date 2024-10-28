@@ -3,10 +3,11 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, patch
 
-from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.sessions import (
+from custom_components.spotcast.spotify.account import (
+    SpotifyAccount,
     OAuth2Session,
     InternalSession,
+    HomeAssistant,
 )
 
 
@@ -23,7 +24,11 @@ class TestInternalApi(IsolatedAsyncioTestCase):
 
         mock_internal.token = "98765"
 
-        self.account = SpotifyAccount(mock_external, mock_internal)
+        self.account = SpotifyAccount(
+            MagicMock(spec=HomeAssistant),
+            mock_external,
+            mock_internal,
+        )
 
         self.result = await self.account.async_get_token("internal")
 
@@ -44,7 +49,11 @@ class TestInternalApi(IsolatedAsyncioTestCase):
 
         mock_internal.token = "98765"
 
-        self.account = SpotifyAccount(mock_external, mock_internal)
+        self.account = SpotifyAccount(
+            MagicMock(spec=HomeAssistant),
+            mock_external,
+            mock_internal,
+        )
 
         self.result = await self.account.async_get_token("external")
 

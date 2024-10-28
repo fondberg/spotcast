@@ -6,7 +6,7 @@ Classes:
     - ConnectionSession
 
 Functions:
-    - async_get_implementations
+    - async_get_config_entry_implementation
 """
 
 from custom_components.spotcast.sessions.internal_session import (

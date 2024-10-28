@@ -3,12 +3,12 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from custom_components.spotcast.sessions import (
+from custom_components.spotcast.spotify.account import (
+    SpotifyAccount,
     OAuth2Session,
-    InternalSession
+    InternalSession,
+    HomeAssistant,
 )
-
-from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class TestDataRetention(TestCase):
@@ -26,7 +26,12 @@ class TestDataRetention(TestCase):
             "expires_at": 12345.61,
         }
 
-        self.account = SpotifyAccount(mock_external, mock_internal, "CA")
+        self.account = SpotifyAccount(
+            MagicMock(spec=HomeAssistant),
+            mock_external,
+            mock_internal,
+            "CA"
+        )
 
     def test_sessions_contain_both_sessions(self):
         self.assertIn("external", self.account.sessions)
@@ -40,10 +45,7 @@ class TestDataRetention(TestCase):
     def test_spotify_created_with_proper_auth(self):
         try:
             self.mock_spotify.assert_called_with(
-                auth={
-                    "access_token": "12345",
-                    "expires_at": 12345.61,
-                }
+                auth="12345",
             )
         except AssertionError:
             self.fail("Spotify object didn't receive proper token'")

@@ -10,8 +10,9 @@ from logging import getLogger
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.config_entry_oauth2_flow import (
-    CLOCK_OUT_OF_SYNC_MAX_SEC
+    CLOCK_OUT_OF_SYNC_MAX_SEC,
 )
+from homeassistant.config_entries import ConfigEntry
 
 from custom_components.spotcast.sessions.connection_session import (
     ConnectionSession,
@@ -42,10 +43,9 @@ EXPIRATION_KEY = "accessTokenExpirationTimestampMs"
 
 class InternalSession(ConnectionSession):
 
-    def __init__(self, hass: HomeAssistant, sp_dc: str, sp_key: str):
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
         self.hass = hass
-        self.sp_dc = sp_dc
-        self.sp_key = sp_key
+        self.entry = entry
         self._access_token = None
         self._expires_at = 0
         self._token_lock = Lock()
@@ -63,7 +63,10 @@ class InternalSession(ConnectionSession):
     @property
     def cookies(self) -> dict[str, str]:
         """The cookie dictionary with the sp_dc and sp_key"""
-        return {"sp_dc": self.sp_dc, "sp_key": self.sp_key}
+        internal_api = self.entry.data["internal_api"]
+        sp_dc = internal_api["sp_dc"]
+        sp_key = internal_api["sp_key"]
+        return {"sp_dc": sp_dc, "sp_key": sp_key}
 
     async def async_ensure_token_valid(self) -> None:
         """Ensure the current token is valid or gets a new one"""
@@ -117,7 +120,10 @@ class InternalSession(ConnectionSession):
             self._access_token = data[TOKEN_KEY]
             self._expires_at = int(data[EXPIRATION_KEY]) // 1000
 
-            return self._access_token, self._expires_at
+            return {
+                "access_token": self._access_token,
+                "expires_at": self._expires_at
+            }
 
 
 class ExpiredSpotifyKeyError(HomeAssistantError):

@@ -43,9 +43,9 @@ class Chromecast(ParentChromecast, MediaPlayer):
 
         Args:
             - hass(HomeAssistant): the home assistant server
-            - id(str): the identifier of the device. Can be an entity
-                id or a device name. See is_device_name arguments for
-                more details.
+            - device_id(str): the identifier of the device. Can be an
+                entity id or a device name. See is_device_name
+                arguments for more details.
             - is_device_name(bool, optional): If True, treats the
                 device_id as the device name. Otherwise treats it as
                 an entity_id. Defaults to False.
@@ -75,6 +75,7 @@ class Chromecast(ParentChromecast, MediaPlayer):
 
         return cast_device
 
+    @property
     def id(self) -> str:
         return md5(self.name.encode()).hexdigest()
 

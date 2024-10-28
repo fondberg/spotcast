@@ -33,4 +33,4 @@ class TestHashCalculation(TestCase):
     def test_hash_value(self):
         expected = md5("Mock Player".encode()).hexdigest()
 
-        self.assertEqual(expected, self.device.id())
+        self.assertEqual(expected, self.device.id)

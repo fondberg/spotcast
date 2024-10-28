@@ -12,6 +12,7 @@ from custom_components.spotcast.sessions.internal_session import (
     ExpiredSpotifyKeyError,
     TokenError,
     ClientResponseError,
+    ConfigEntry
 )
 
 
@@ -20,7 +21,16 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
     @patch.object(ClientSession, "get")
     async def asyncSetUp(self, mock_get: MagicMock):
         mock_hass = MagicMock(spec=HomeAssistant)
-        self.session = InternalSession(mock_hass, "foo", "bar")
+        mock_entry = MagicMock(spec=ConfigEntry)
+
+        mock_entry.data = {
+            "internal_api": {
+                "sp_dc": "foo",
+                "sp_key": "bar",
+            }
+        }
+
+        self.session = InternalSession(mock_hass, mock_entry)
 
         mock_get.return_value.__aenter__.return_value.headers = {}
         mock_get.return_value.__aenter__.return_value.status = 200
@@ -37,10 +47,10 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
         }
 
     async def test_valid_token_returned(self):
-        self.assertEqual(self.result[0], "boo")
+        self.assertEqual(self.result["access_token"], "boo")
 
     async def test_valid_expiration_returnd(self):
-        self.assertEqual(self.result[1], 12)
+        self.assertEqual(self.result["expires_at"], 12)
 
     async def test_token_set_in_session(self):
         self.assertEqual(self.session._access_token, "boo")
@@ -51,17 +61,18 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
 
 class TestExpirationReply(IsolatedAsyncioTestCase):
 
-    @patch.object(ClientSession, "get")
-    async def asyncSetUp(self, mock_get: MagicMock):
+    async def asyncSetUp(self):
         mock_hass = MagicMock(spec=HomeAssistant)
-        self.session = InternalSession(mock_hass, "foo", "bar")
+        mock_entry = MagicMock(spec=ConfigEntry)
 
-        mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": EXPIRED_LOCATION
+        mock_entry.data = {
+            "internal_api": {
+                "sp_dc": "foo",
+                "sp_key": "bar",
+            }
         }
-        mock_get.return_value.__aenter__.return_value.status = 302
-        mock_get.return_value.__aenter__.return_value.json\
-            .return_value = await self.async_json_reply()
+
+        self.session = InternalSession(mock_hass, mock_entry)
 
     async def async_json_reply(self):
         return {
@@ -70,7 +81,14 @@ class TestExpirationReply(IsolatedAsyncioTestCase):
 
         }
 
-    async def test_expiration_error_raised(self):
+    @patch.object(ClientSession, "get")
+    async def test_expiration_error_raised(self, mock_get: MagicMock):
+        mock_get.return_value.__aenter__.return_value.headers = {
+            "Location": EXPIRED_LOCATION
+        }
+        mock_get.return_value.__aenter__.return_value.status = 302
+        mock_get.return_value.__aenter__.return_value.json\
+            .return_value = await self.async_json_reply()
         with self.assertRaises(ExpiredSpotifyKeyError):
             await self.session.async_refresh_token()
 
@@ -79,7 +97,16 @@ class TestClientErrors(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         mock_hass = MagicMock(spec=HomeAssistant)
-        self.session = InternalSession(mock_hass, "foo", "bar")
+        mock_entry = MagicMock(spec=ConfigEntry)
+
+        mock_entry.data = {
+            "internal_api": {
+                "sp_dc": "foo",
+                "sp_key": "bar",
+            }
+        }
+
+        self.session = InternalSession(mock_hass, mock_entry)
 
     async def async_json_reply(self):
         return {

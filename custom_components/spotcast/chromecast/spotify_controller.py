@@ -14,7 +14,10 @@ from custom_components.spotcast.media_player.chromecast_player import (
     Chromecast
 )
 
-from custom_components.spotcast.chromecast.exceptions import AppLaunchError
+from custom_components.spotcast.chromecast.exceptions import (
+    AppLaunchError,
+    UnknownMessageError,
+)
 
 LOGGER = getLogger(__name__)
 
@@ -48,6 +51,8 @@ class SpotifyController(BaseController):
     TYPE_ADD_USER = "addUser"
     TYPE_ADD_USER_RESPONSE = "addUserResponse"
     TYPE_ADD_USER_ERROR = "addUserError"
+    TYPE_TRANSFER_ERROR = "transferError"
+    TYPE_TRANSFER_SUCCESS = "transferSuccess"
 
     def __init__(
             self,
@@ -88,7 +93,7 @@ class SpotifyController(BaseController):
             "type": self.TYPE_GET_INFO,
             "payload": {
                 "remoteName": device.name,
-                "deviceID": device.id(),
+                "deviceID": device.id,
                 "deviceAPI_isGroup": False,
             }
         }
@@ -115,7 +120,7 @@ class SpotifyController(BaseController):
                     "Spotify App Launched successfully on `%s`",
                     device.name,
                 )
-                break
+                return
 
             if max_attempts is not None and counter >= max_attempts:
                 raise AppLaunchError(
@@ -143,15 +148,22 @@ class SpotifyController(BaseController):
         message_type = data["type"]
 
         LOGGER.debug("Received message of type `%s`", message_type)
+        LOGGER.debug(data)
 
-        if message_type == SpotifyController.TYPE_GET_INFO_RESPONSE:
-            return self._get_info_response_handler(_message, data)
+        handlers = {
+            self.TYPE_GET_INFO_RESPONSE: self._get_info_response_handler,
+            self.TYPE_ADD_USER_RESPONSE: self._add_user_response_handler,
+            self.TYPE_ADD_USER_ERROR: self._add_user_error_handler,
+            self.TYPE_TRANSFER_ERROR: self._transfer_error_handler,
+            self.TYPE_TRANSFER_SUCCESS: self._transfer_success_handler,
+        }
 
-        if message_type == SpotifyController.TYPE_ADD_USER_RESPONSE:
-            return self._add_user_response_handler(_message, data)
-
-        if message_type == SpotifyController.TYPE_ADD_USER_ERROR:
-            return self._add_user_error_handler(_message, data)
+        try:
+            return handlers[message_type](_message, data)
+        except KeyError as exc:
+            raise UnknownMessageError(
+                f"Received unknown message `{message_type}`",
+            ) from exc
 
     def _get_info_response_handler(
             self,
@@ -159,8 +171,7 @@ class SpotifyController(BaseController):
             data: dict
     ) -> bool:
         """Handler for the get info response message"""
-
-        token = self.account.async_get_token("internal")
+        token = self.account.get_token("internal")
 
         headers = {
             "authority": SpotifyController.APP_HOSTNAME,
@@ -222,4 +233,24 @@ class SpotifyController(BaseController):
         self.credential_error = True
         self.waiting.set()
 
+        raise AppLaunchError("Credentials error. Laucnhgin spotify failed")
+
+    def _transfer_error_handler(
+            self,
+            message: CastMessage,
+            data: dict,
+    ) -> bool:
+        """Handler for the transfer error message"""
+        self.device = None
+        self.credential_error = True
+        self.waiting.set()
+
+        raise AppLaunchError("Device took too much time to start playback")
+
+    def _transfer_success_handler(
+        self,
+        message: CastMessage,
+        data: dict,
+    ) -> bool:
+        """Handles the transfer success message"""
         return True
