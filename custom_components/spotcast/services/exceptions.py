@@ -8,5 +8,9 @@ class AccountNotFoundError(HomeAssistantError):
     currently set accounts"""
 
 
+class NoDefaultAccountError(HomeAssistantError):
+    """Raised if there are no default account to be found"""
+
+
 class UnknownServiceError(HomeAssistantError):
     """Raised if the service name called is not known to spotcast"""

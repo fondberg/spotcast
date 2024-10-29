@@ -76,10 +76,13 @@ class SpotifyAccount:
 
     @property
     def profile(self) -> dict:
+        """Returns the full profile dictionary of the account"""
         self.get_profile_value("id")
         return self._profile
 
+    @property
     def country(self) -> str:
+        """Returns the current country in which the account resides"""
         return self.get_profile_value("country")
 
     def get_profile_value(self, attribute: str) -> Any:

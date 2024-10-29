@@ -1,22 +1,39 @@
-"""Generic utility functions for spotcast
+"""Module for utility functions
 
 Functions:
-    - valid_country_code
+    - get_account_entry
 """
 
-from voluptuous import Invalid
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+
+from custom_components.spotcast.services.exceptions import (
+    AccountNotFoundError,
+    NoDefaultAccountError,
+)
+from custom_components.spotcast import DOMAIN
 
 
-def valid_country_code(value: str) -> bool:
-    """Validates if a country code provided is valid"""
+def get_account_entry(
+        hass: HomeAssistant,
+        account_id: str = None
+) -> ConfigEntry:
+    """Returns the config entry of the account. Returns the
+    default account if not specified"""
 
-    if value is None:
-        return None
+    if account_id is not None:
+        try:
+            return hass.data[DOMAIN][account_id]
+        except KeyError as exc:
+            raise AccountNotFoundError(
+                f"The account {account_id} could not be found. Known accounts "
+                f"are {hass.data[DOMAIN]}."
+            ) from exc
 
-    if not isinstance(value, str):
-        raise Invalid("Country Code must be a string")
+    for entry in hass.data[DOMAIN].values():
 
-    if len(value) != 2:
-        raise Invalid("Country code must be a 2 character code")
+        entry: ConfigEntry
+        if entry.data["is_default"]:
+            return entry
 
-    return value.upper()
+    raise NoDefaultAccountError("No Default account could be found")

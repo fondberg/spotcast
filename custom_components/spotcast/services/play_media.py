@@ -8,17 +8,10 @@ from homeassistant.const import CONF_ENTITY_ID
 import voluptuous as vol
 
 
-from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.services.exceptions import (
-    AccountNotFoundError,
-)
-from custom_components.spotcast.media_players.chromecast_player import (
-    Chromecast
-)
-from custom_components.spotcast.chromecast.spotify_controller import (
-    SpotifyController
-)
+from custom_components.spotcast.media_players import Chromecast
+from custom_components.spotcast.chromecast import SpotifyController
+from custom_components.spotcast.utils import get_account_entry
 
 LOGGER = getLogger(__name__)
 
@@ -40,13 +33,7 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     account_id = call.data.get("account")
     entity_id = call.data.get("entity_id")
 
-    try:
-        entry = hass.data[DOMAIN][account_id]
-    except KeyError as exc:
-        raise AccountNotFoundError(
-            f"The account {account_id} could not be found. Known accounts "
-            f"are {hass.data[DOMAIN]}."
-        ) from exc
+    entry = get_account_entry(hass, account_id)
 
     LOGGER.debug("Loading Spotify Account for User `%s`", account_id)
     account = await SpotifyAccount.async_from_config_entry(

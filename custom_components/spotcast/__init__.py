@@ -10,8 +10,7 @@ from homeassistant.const import Platform
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.services import ServiceHandler
-from custom_components.spotcast.services.play_media import PLAY_MEDIA_SCHEMA
+from custom_components.spotcast.services import ServiceHandler, SERVICE_SCHEMAS
 
 __version__ = "4.0.0-beta"
 
@@ -46,11 +45,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     service_handler = ServiceHandler(hass)
 
-    hass.services.async_register(
-        domain=DOMAIN,
-        service="play_media",
-        service_func=service_handler.async_relay_service_call,
-        schema=PLAY_MEDIA_SCHEMA,
-    )
+    for service, schema in SERVICE_SCHEMAS.items():
+
+        LOGGER.debug("Registering service %s.%s", DOMAIN, service)
+
+        hass.services.async_register(
+            domain=DOMAIN,
+            service=service,
+            service_func=service_handler.async_relay_service_call,
+            schema=schema,
+        )
 
     return True
