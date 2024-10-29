@@ -30,7 +30,7 @@ class TestDataRetention(TestCase):
             MagicMock(spec=HomeAssistant),
             mock_external,
             mock_internal,
-            "CA"
+            is_default=True
         )
 
     def test_sessions_contain_both_sessions(self):
@@ -50,8 +50,8 @@ class TestDataRetention(TestCase):
         except AssertionError:
             self.fail("Spotify object didn't receive proper token'")
 
-    def test_country_saved(self):
-        self.assertEqual(self.account.country, "CA")
+    def test_is_ddefault_saved(self):
+        self.assertTrue(self.account.is_default)
 
     def test_profile_is_declared(self):
         self.assertEqual(self.account._profile, {})

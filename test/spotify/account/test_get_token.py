@@ -31,7 +31,6 @@ class TestThreadsafeFunctionCall(TestCase):
             hass=self.mock_hass,
             external_session=mock_external,
             internal_session=mock_internal,
-            country="CA"
         )
 
         self.result = self.account.get_token("internal")

@@ -48,7 +48,7 @@ class TestAccountCreation(IsolatedAsyncioTestCase):
                 "sp_dc": "foo",
                 "sp_key": "bar"
             },
-            "country": "CA",
+            "is_default": False,
         }
 
         self.account = await SpotifyAccount.async_from_config_entry(

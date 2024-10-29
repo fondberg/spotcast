@@ -23,7 +23,6 @@ class TestMediaCasting(IsolatedAsyncioTestCase):
             self.mock_hass,
             MagicMock(spec=OAuth2Session),
             MagicMock(spec=InternalSession),
-            country="CA",
         )
 
         await self.account.async_play_media("foo", "uri")

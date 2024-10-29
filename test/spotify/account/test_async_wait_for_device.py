@@ -26,7 +26,6 @@ class TestDeviceBecomesAvailable(IsolatedAsyncioTestCase):
             hass=mock_hass,
             internal_session=mock_internal,
             external_session=mock_external,
-            country="CA",
         )
 
         mock_devices.side_effect = [
@@ -53,7 +52,6 @@ class TestFunctionTimesOut(IsolatedAsyncioTestCase):
             hass=mock_hass,
             internal_session=mock_internal,
             external_session=mock_external,
-            country="CA",
         )
 
         mock_devices.return_value = [

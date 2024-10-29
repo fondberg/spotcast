@@ -12,7 +12,8 @@ from custom_components.spotcast.sessions.internal_session import (
     ExpiredSpotifyKeyError,
     TokenError,
     ClientResponseError,
-    ConfigEntry
+    ConfigEntry,
+    ContentTypeError
 )
 
 
@@ -115,8 +116,14 @@ class TestClientErrors(IsolatedAsyncioTestCase):
 
         }
 
+    async def async_text_reply(self):
+        return "Error Message"
+
     def raise_client_error(self):
         raise ClientResponseError(MagicMock(), MagicMock())
+
+    def raise_content_error(self):
+        raise ContentTypeError(MagicMock(), MagicMock())
 
     @patch.object(ClientSession, "get")
     async def test_token_error_raised(self, mock_get: MagicMock):
@@ -128,6 +135,22 @@ class TestClientErrors(IsolatedAsyncioTestCase):
         mock_get.return_value.__aenter__.return_value.ok = False
         mock_get.return_value.__aenter__.return_value.json\
             .return_value = await self.async_json_reply()
+
+        with self.assertRaises(TokenError):
+            await self.session.async_refresh_token()
+
+    @patch.object(ClientSession, "get")
+    async def test_none_json_answer(self, mock_get: MagicMock):
+
+        mock_get.return_value.__aenter__.return_value.headers = {
+            "Location": EXPIRED_LOCATION
+        }
+        mock_get.return_value.__aenter__.return_value.status = 403
+        mock_get.return_value.__aenter__.return_value.ok = False
+        mock_get.return_value.__aenter__.return_value.json\
+            .side_effect = ContentTypeError(MagicMock(), MagicMock())
+        mock_get.return_value.__aenter__.return_value.text\
+            .return_value = await self.async_text_reply()
 
         with self.assertRaises(TokenError):
             await self.session.async_refresh_token()

@@ -43,7 +43,6 @@ class TestInternalApiSetup(IsolatedAsyncioTestCase):
             mock_create.assert_called_with({
                 "external_api": self.external_api,
                 "internal_api": self.internal_api,
-                "country": None,
             })
         except AssertionError:
             self.fail("The provided data was not the expected one")
@@ -67,7 +66,6 @@ class TestCountryCodeProvided(IsolatedAsyncioTestCase):
         self.internal_api = {
             "sp_dc": "foo",
             "sp_key": "bar",
-            "country": "CA",
         }
 
         self.flow_handler = SpotcastFlowHandler()
@@ -87,7 +85,6 @@ class TestCountryCodeProvided(IsolatedAsyncioTestCase):
             mock_create.assert_called_with({
                 "external_api": self.external_api,
                 "internal_api": self.internal_api,
-                "country": "CA",
             })
         except AssertionError:
             self.fail("The provided data was not the expected one")

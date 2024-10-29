@@ -20,7 +20,6 @@ class TestProfileLoaded(TestCase):
             MagicMock(spec=HomeAssistant),
             MagicMock(spec=OAuth2Session),
             MagicMock(spec=InternalSession),
-            country="CA"
         )
 
         self.account._profile = {
@@ -43,7 +42,6 @@ class TestProfileNotLoaded(TestCase):
             MagicMock(spec=HomeAssistant),
             MagicMock(spec=OAuth2Session),
             MagicMock(spec=InternalSession),
-            country="CA"
         )
 
     def test_raises_error(self):
