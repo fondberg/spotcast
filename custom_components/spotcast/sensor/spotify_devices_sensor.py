@@ -16,25 +16,27 @@ LOGGER = getLogger(__name__)
 
 class SpotifyDevicesSensor(SensorEntity):
 
-    _attr_has_entity_name = True
-    _attr_name = None
+    CLASS_NAME = "Spotify Devices Sensor"
 
     def __init__(self, hass: HomeAssistant, account: SpotifyAccount):
         self.account = account
 
         LOGGER.debug("Loading Spotify Device sensor for %s", self.account.name)
 
-        self._id = f"{self.account.id}_devices"
-        self._attr_unique_id = f"{self.account.id}_devices"
         self._attributes = {"devices": [], "last_update": None}
         self._attr_device_info = device_from_account(self.account)
 
         self._devices = []
         self._attr_state = STATE_UNKNOWN
+        self.entity_id = f"sensor.{self.account.id}_spotify_devices"
 
     @property
     def unit_of_mesaurement(self) -> str:
         return "devices"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self.account.id}_spotify_devices"
 
     @property
     def name(self) -> str:
@@ -45,23 +47,16 @@ class SpotifyDevicesSensor(SensorEntity):
         return self._attr_state
 
     @property
-    def extra_state_attributes(self) -> dict:
-        return self._attributes
-
-    @property
     def state_class(self) -> str:
         return "measurement"
 
-    def update(self):
+    async def async_update(self):
         LOGGER.debug(
             "Getting Spotify Device for account %s",
             self.account.name
         )
 
-        devices = run_coroutine_threadsafe(
-            self.account.async_devices(),
-            self.hass.loop
-        ).result()
+        devices = await self.account.async_devices(),
 
         device_count = len(devices)
 

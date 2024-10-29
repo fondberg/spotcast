@@ -1,11 +1,10 @@
-"""The SpotifyPlaylistsSensor object"""
+"""The SpotifyProfileSensor object"""
 
 from logging import getLogger
-import datetime as dt
 
 from homeassistant.core import HomeAssistant
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import STATE_UNKNOWN
+from homeassistant.const import STATE_UNKNOWN, STATE_OK
 
 from custom_components.spotcast import SpotifyAccount
 from custom_components.spotcast.sensor.utils import device_from_account
@@ -13,9 +12,9 @@ from custom_components.spotcast.sensor.utils import device_from_account
 LOGGER = getLogger(__name__)
 
 
-class SpotifyPlaylistsSensor(SensorEntity):
+class SpotifyProfileSensor(SensorEntity):
 
-    CLASS_NAME = "Spotify Playlists Sensor"
+    CLASS_NAME = "Spotify Profile Sensor"
 
     def __init__(self, hass: HomeAssistant, account: SpotifyAccount):
         self.account = account
@@ -25,36 +24,28 @@ class SpotifyPlaylistsSensor(SensorEntity):
             self.account.name
         )
 
-        self._attributes = {"playlists": [], "last_update": None}
+        self._attributes = {}
         self._attr_device_info = device_from_account(self.account)
 
         self._playlists = []
         self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_playlists"
+        self.entity_id = f"sensor.{self.account.id}_spotify_profile"
 
     @property
     def extra_state_attributes(self) -> dict:
         return self._attributes
 
     @property
-    def unit_of_measurement(self) -> str:
-        return "playlists"
-
-    @property
     def name(self) -> str:
-        return f"{self.account.name} Spotify Playlists"
+        return f"{self.account.name} Spotify Profile"
 
     @property
     def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_playlists"
+        return f"{self.account.id}_spotify_profile"
 
     @property
     def state(self) -> str:
         return self._attr_state
-
-    @property
-    def state_class(self) -> str:
-        return "measurement"
 
     async def async_update(self):
         LOGGER.debug(
@@ -62,16 +53,11 @@ class SpotifyPlaylistsSensor(SensorEntity):
             self.account.name
         )
 
-        playlists = await self.account.async_playlists()
-
-        playlist_count = len(playlists)
+        profile = await self.account.async_profile()
 
         LOGGER.debug(
-            "Found %d playlist for spotify account `%s`",
-            playlist_count,
-            self.account.name
+            "Profile retrieve for account id `%s`", profile["id"],
         )
 
-        self._attr_state = playlist_count
-        self._attributes["first_10_playlists"] = playlists[:10]
-        self._attributes["last_update"] = dt.datetime.now().isoformat("T")
+        self._attributes = profile
+        self._attr_state = STATE_OK
