@@ -42,19 +42,19 @@ class SpotifyAccount:
             hass: HomeAssistant,
             external_session: OAuth2Session,
             internal_session: InternalSession,
-            country: str = None,
+            is_default: bool = False,
     ):
         self.hass = hass
         self.sessions: dict[str, ConnectionSession] = {
             "external": external_session,
             "internal": internal_session,
         }
+        self.is_default = is_default
 
         self._spotify = Spotify(
             auth=self.sessions["external"].token["access_token"]
         )
 
-        self.country = country
         self._profile = {}
 
     @property
@@ -78,6 +78,9 @@ class SpotifyAccount:
     def profile(self) -> dict:
         self.get_profile_value("id")
         return self._profile
+
+    def country(self) -> str:
+        return self.get_profile_value("country")
 
     def get_profile_value(self, attribute: str) -> Any:
         """Returns the value for a profile element. Raises Error if not
@@ -215,7 +218,7 @@ class SpotifyAccount:
 
         await self.async_ensure_tokens_valid()
 
-        LOGGER.debug(
+        LOGGER.info(
             "Starting playback of `%s` on device `%s`",
             context_uri,
             device_id
@@ -254,9 +257,9 @@ class SpotifyAccount:
         internal_api = InternalSession(hass, entry)
         await internal_api.async_ensure_token_valid()
 
-        country = entry.data.get("country")
+        is_default = "is_default" in entry.data and entry.data["is_default"]
 
-        account = SpotifyAccount(hass, external_api, internal_api, country)
+        account = SpotifyAccount(hass, external_api, internal_api, is_default)
         await account.async_profile()
 
         return account

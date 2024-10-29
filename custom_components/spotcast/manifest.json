@@ -15,6 +15,9 @@
         "cast",
         "application_credentials"
     ],
+    "requirements": [
+        "iso3166-2>=1.6.1"
+    ],
     "documentation": "https://github.com/fondberg/spotcast",
     "integration_type": "service",
     "iot_class": "cloud_polling",

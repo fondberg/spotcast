@@ -3,7 +3,7 @@ internal api credentials"""
 
 from time import time
 from asyncio import Lock
-from aiohttp import ClientSession, ClientResponseError
+from aiohttp import ClientSession, ClientResponseError, ContentTypeError
 from types import MappingProxyType
 from logging import getLogger
 
@@ -110,7 +110,11 @@ class InternalSession(ConnectionSession):
                     )
                     raise ExpiredSpotifyKeyError("Expired sp_dc, sp_key")
 
-                data = await response.json()
+                try:
+                    data = await response.json()
+                except ContentTypeError as exc:
+                    error_message = await response.text()
+                    raise TokenError(error_message) from exc
 
                 if not response.ok:
                     raise TokenError(

@@ -4,6 +4,7 @@ from logging import getLogger
 from typing import Any
 
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL
+from homeassistant.helpers import config_validation as cv
 from homeassistant.components.spotify.config_flow import SpotifyFlowHandler
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlowResult
@@ -23,8 +24,8 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
     INTERNAL_API_SCHEMA = vol.Schema({
-        vol.Required("sp_dc", default=""): str,
-        vol.Required("sp_key", default=""): str,
+        vol.Required("sp_dc", default=""): cv.string,
+        vol.Required("sp_key", default=""): cv.string
     })
 
     def __init__(self):
@@ -70,7 +71,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             current_user = await self.hass.async_add_executor_job(
                 spotify.current_user
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception:  # noqa: BLE001
             return self.async_abort(reason="connection_error")
 
         name = external_api["id"] = current_user["id"]
@@ -85,6 +86,10 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             name = current_user["display_name"]
 
         self.data["name"] = name
+
+        current_entries = self.hass.config_entries.async_entries(DOMAIN)
+
+        self.data["is_default"] = len(current_entries) == 0
 
         await self.async_set_unique_id(current_user["id"])
 

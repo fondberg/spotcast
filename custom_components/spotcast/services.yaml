@@ -1,0 +1,29 @@
+play_media:
+  name: Spotcast Play
+  description: Play spotify media on chromecast devices
+  fields:
+    entity_id:
+      name: Entity ID
+      description: The entity_id of the chromecast media player
+      example: media_player.living_room
+      required: true
+      selector:
+        entity:
+          domain: media_player
+          integration: cast
+    spotify_uri:
+      name: URI
+      description: Supported Spotify URI as string
+      example: spotify:album:5l5m1hnH4punS1GQXgEi3T
+      required: true
+      selector:
+        text:
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use
+      example: "pirate_jeanne"
+      required: true
+      selector:
+        text:
+
+

@@ -89,6 +89,10 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             "display_name": "Dummy User",
         }
 
+        mock_hass.config_entries.async_entries.return_value = [
+            "foo"
+        ]
+
         await self.flow_handler.async_oauth_create_entry(
             self.flow_handler.data
         )
@@ -114,6 +118,11 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             "id": "foo",
             "display_name": "Dummy User",
         }
+
+        mock_hass.config_entries.async_entries.return_value = [
+            "foo"
+        ]
+
         await self.flow_handler.async_oauth_create_entry(
             self.flow_handler.data
         )
@@ -125,6 +134,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
                     "name": "Dummy User",
                     "external_api": self.external_api,
                     "internal_api": self.internal_api,
+                    "is_default": False,
                 }
             )
         except AssertionError:
@@ -146,6 +156,8 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             "id": "foo",
         }
 
+        mock_hass.config_entries.async_entries.return_value = []
+
         await self.flow_handler.async_oauth_create_entry(
             self.flow_handler.data
         )
@@ -157,6 +169,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
                     "name": "foo",
                     "external_api": self.external_api,
                     "internal_api": self.internal_api,
+                    "is_default": True,
                 }
             )
         except AssertionError:
