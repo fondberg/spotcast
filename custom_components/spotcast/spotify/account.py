@@ -275,7 +275,7 @@ class SpotifyAccount:
                 return
             except KeyError:
                 LOGGER.debug("Device `%s` not yet available", device_id)
-                sleep(1)
+                await sleep(1)
 
         raise TimeoutError(
             f"device `{device_id}` still not available after {timeout} sec."

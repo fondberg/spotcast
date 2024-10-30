@@ -19,6 +19,7 @@ TEST_MODULE = "custom_components.spotcast.services.play_media"
 
 class TestMediaPlay(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.async_get_account_entry")
     @patch(f"{TEST_MODULE}.SpotifyController")
     @patch.object(Chromecast, "from_hass")
     @patch.object(
@@ -31,6 +32,7 @@ class TestMediaPlay(IsolatedAsyncioTestCase):
             mock_account_getter: AsyncMock,
             mock_player_getter: MagicMock,
             mock_controller: MagicMock,
+            mock_entry: MagicMock,
     ):
 
         mock_hass = MagicMock(spec=HomeAssistant)

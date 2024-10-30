@@ -21,7 +21,7 @@ class TestTokenIsValid(IsolatedAsyncioTestCase):
         self.session = InternalSession(mock_hass, mock_entry)
         self.session._expires_at = time() + 200_000
 
-    @ patch.object(InternalSession, "async_refresh_token")
+    @patch.object(InternalSession, "async_refresh_token")
     async def test_refresh_token_was_not_called(
             self,
             mock_refresh: MagicMock
@@ -44,7 +44,7 @@ class TestTokenIsNotValid(IsolatedAsyncioTestCase):
         self.session = InternalSession(mock_hass, mock_entry)
         self.session._expires_at = 0
 
-    @ patch.object(InternalSession, "async_refresh_token")
+    @patch.object(InternalSession, "async_refresh_token")
     async def test_refresh_token_was_called(
             self,
             mock_refresh: MagicMock

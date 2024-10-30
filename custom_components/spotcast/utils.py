@@ -4,6 +4,8 @@ Functions:
     - get_account_entry
 """
 
+from logging import getLogger
+
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
@@ -13,8 +15,10 @@ from custom_components.spotcast.services.exceptions import (
 )
 from custom_components.spotcast import DOMAIN
 
+LOGGER = getLogger(__name__)
 
-def get_account_entry(
+
+async def async_get_account_entry(
         hass: HomeAssistant,
         account_id: str = None
 ) -> ConfigEntry:
@@ -27,17 +31,24 @@ def get_account_entry(
     """
 
     if account_id is not None:
-        try:
-            return hass.data[DOMAIN][account_id]
-        except KeyError as exc:
+
+        LOGGER.debug("Getting config entry for id `%s`", account_id)
+
+        entry = await hass.config_entries.async_get_entry(account_id)
+
+        if entry is None:
             raise AccountNotFoundError(
-                f"The account {account_id} could not be found. Known accounts "
-                f"are {hass.data[DOMAIN]}."
-            ) from exc
+                "No entry foind for id `%s`", account_id
+            )
 
-    for entry in hass.data[DOMAIN].values():
+        return entry
 
-        entry: ConfigEntry
+    LOGGER.debug("Searching for default spotcast account")
+
+    entries = await hass.config_entries.async_entries(DOMAIN)
+
+    for entry in entries:
+
         if entry.data["is_default"]:
             return entry
 

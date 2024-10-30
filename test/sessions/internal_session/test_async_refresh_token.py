@@ -8,10 +8,8 @@ from homeassistant.core import HomeAssistant
 from custom_components.spotcast.sessions.internal_session import (
     InternalSession,
     ClientSession,
-    EXPIRED_LOCATION,
     ExpiredSpotifyKeyError,
     TokenError,
-    ClientResponseError,
     ConfigEntry,
     ContentTypeError
 )
@@ -85,7 +83,7 @@ class TestExpirationReply(IsolatedAsyncioTestCase):
     @patch.object(ClientSession, "get")
     async def test_expiration_error_raised(self, mock_get: MagicMock):
         mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": EXPIRED_LOCATION
+            "Location": InternalSession.EXPIRED_LOCATION
         }
         mock_get.return_value.__aenter__.return_value.status = 302
         mock_get.return_value.__aenter__.return_value.json\
@@ -119,9 +117,6 @@ class TestClientErrors(IsolatedAsyncioTestCase):
     async def async_text_reply(self):
         return "Error Message"
 
-    def raise_client_error(self):
-        raise ClientResponseError(MagicMock(), MagicMock())
-
     def raise_content_error(self):
         raise ContentTypeError(MagicMock(), MagicMock())
 
@@ -129,7 +124,7 @@ class TestClientErrors(IsolatedAsyncioTestCase):
     async def test_token_error_raised(self, mock_get: MagicMock):
 
         mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": EXPIRED_LOCATION
+            "Location": InternalSession.EXPIRED_LOCATION
         }
         mock_get.return_value.__aenter__.return_value.status = 403
         mock_get.return_value.__aenter__.return_value.ok = False
@@ -143,7 +138,7 @@ class TestClientErrors(IsolatedAsyncioTestCase):
     async def test_none_json_answer(self, mock_get: MagicMock):
 
         mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": EXPIRED_LOCATION
+            "Location": InternalSession.EXPIRED_LOCATION
         }
         mock_get.return_value.__aenter__.return_value.status = 403
         mock_get.return_value.__aenter__.return_value.ok = False

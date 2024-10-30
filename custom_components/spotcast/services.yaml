@@ -8,9 +8,13 @@ play_media:
       example: media_player.living_room
       required: true
       selector:
-        entity:
-          domain: media_player
-          integration: cast
+        target:
+          entity:
+            - domain: media_player
+              integration: cast
+          device:
+            - domain: media_player
+              integration: cast
     spotify_uri:
       name: URI
       description: Supported Spotify URI as string
@@ -20,10 +24,16 @@ play_media:
         text:
     account:
       name: Spotify Account
-      description: The id of the spotify account to use
+      description: The id of the spotify account to use. Takes the default account otherwise
       example: "pirate_jeanne"
-      required: true
+      required: false
       selector:
-        text:
-
+        config_entry:
+          integration: spotcast
+    data:
+      name: Data
+      description: Additionnal Fields for the play_media service
+      required: false
+      selector:
+        object:
 
