@@ -1,4 +1,7 @@
 """Module containing the Spotify App Controller for chromecast devices
+
+Classes:
+    - SpotifyController
 """
 
 from logging import getLogger
@@ -28,6 +31,8 @@ class SpotifyController(BaseController):
     Attributes:
         - account(SpotifyAccount): The spotify account in charge of the
             spotify controller
+        - waiting(threading.Event): A threading Event loop manager
+        - is_launched(bool): True if the app is currently launched
 
     Constants:
         - APP_ID(str): the chromecast app code for spotify
@@ -40,6 +45,11 @@ class SpotifyController(BaseController):
         - TYPE_ADD_USER_RESPONSE(str): message type for the response to
             add user
         - TYPE_ADD_USER_ERROR(str): message type for add user error
+
+    Methods:
+        - launch_app
+        - stop_app
+        - receive_message
     """
 
     APP_ID = "CC32E753"

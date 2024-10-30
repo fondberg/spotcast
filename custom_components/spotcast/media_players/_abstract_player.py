@@ -1,6 +1,10 @@
-"""Abstract Media Player class for all iot media player type"""
+"""Abstract Media Player class for all iot media player type
 
-from abc import ABC, abstractstaticmethod
+Classes:
+    - MediaPlayer
+"""
+
+from abc import ABC, abstractstaticmethod, abstractmethod
 from logging import getLogger
 
 from homeassistant.core import HomeAssistant
@@ -22,11 +26,20 @@ class MediaPlayer(ABC):
         - DOMAIN(str): the domain of device in HomeAssistant
         - PLATFORM(str): the name of the integration platform in
             HomeAssistant
+
+    Functions:
+        - from_hass
+        - from_network
     """
 
     DOMAIN: str = "media_player"
     PLATFORM: str = None
     DEVICE_TYPE: type = None
+
+    @property
+    @abstractmethod
+    def id(self) -> str:
+        """The spotify device id of the player"""
 
     @abstractstaticmethod
     def from_hass(

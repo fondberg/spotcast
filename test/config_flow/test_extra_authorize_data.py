@@ -20,5 +20,5 @@ class TestScopeValue(TestCase):
     def test_scope_is_set_to_spotcast_spotify_scope(self):
         self.assertEqual(
             self.flow_handler.extra_authorize_data["scope"].split(","),
-            SpotifyAccount.SCOPE
+            list(SpotifyAccount.SCOPE)
         )

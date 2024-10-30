@@ -1,9 +1,12 @@
-"""The SpotifyPlaylistsSensor object"""
+"""The SpotifyPlaylistsSensor object
+
+Classes:
+    - SpotifyPlaylistsSensor
+"""
 
 from logging import getLogger
 import datetime as dt
 
-from homeassistant.core import HomeAssistant
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_UNKNOWN
 
@@ -14,10 +17,37 @@ LOGGER = getLogger(__name__)
 
 
 class SpotifyPlaylistsSensor(SensorEntity):
+    """A Home Assistant sensor reporting available playlists for a
+    Spotify Account
+
+    Attributes:
+        - account: The spotify account linked to the sensor
+
+    Properties:
+        - units_of_measurement(str): the units of mesaurements used
+        - unique_id(str): A unique id for the specific sensor
+        - name(str): The friendly name of the sensor
+        - state(str): The current state of the sensor
+        - state_class(str): The type of state provided by the sensor
+
+    Constants:
+        - CLASS_NAME(str): The generic name for the class
+
+    Methods:
+        - async_update
+    """
 
     CLASS_NAME = "Spotify Playlists Sensor"
 
-    def __init__(self, hass: HomeAssistant, account: SpotifyAccount):
+    def __init__(self, account: SpotifyAccount):
+        """A Home Assistant sensor reporting available playlists for a
+        Spotify Account
+
+        Args:
+            - account(SpotifyAccount): The spotify account probed by
+                the sensor
+        """
+
         self.account = account
 
         LOGGER.debug(

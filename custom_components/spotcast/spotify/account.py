@@ -1,4 +1,8 @@
-"""Module for the spotify account class"""
+"""Module for the spotify account class
+
+Classes:
+    - SpotifyAccount
+"""
 
 from logging import getLogger
 from asyncio import run_coroutine_threadsafe
@@ -17,14 +21,56 @@ from custom_components.spotcast.sessions import (
     async_get_config_entry_implementation,
 )
 
+from custom_components.spotcast.media_players import (
+    Chromecast
+)
+
 from custom_components.spotcast.spotify.exceptions import ProfileNotLoadedError
 
 LOGGER = getLogger(__name__)
 
 
 class SpotifyAccount:
+    """The account of a Spotify user. Able to leverage the public and
+    private API.
 
-    SCOPE = [
+    Attributes:
+        - hass(HomeAssistant): The Home Assistance instance
+        - sessions(dict[str, ConnectionSession]): A dictionary with
+            both the Internal (Private) and External (Public) API
+            access
+        - is_defaults(bool): set to True if the account should be
+            treated as default when calling services
+
+    Properties:
+        - id(str): the identifier of the account
+        - name(str): the dusplay name for the account
+        - profile(dict): the full profile dictionary of the account
+        - country(str): the country code where the account currently
+            is.
+
+    Constants:
+        - SCOPE(tuple): A list of API permissions required for the
+            instance to work properly
+
+    Methods:
+        - get_profile_value
+        - get_token
+        - async_get_token
+        - async_connect
+        - async_ensure_tokens_valid
+        - async_profile
+        - async_devices
+        - async_playlists
+        - async_wait_for_devices
+        - async_register_chromecast_player
+        - async_play_media
+
+    Functions:
+        - async_from_config_entry
+    """
+
+    SCOPE = (
         "user-modify-playback-state",
         "user-read-playback-state",
         "user-read-private",
@@ -35,7 +81,7 @@ class SpotifyAccount:
         "user-read-playback-position",
         "user-read-recently-played",
         "user-follow-read",
-    ]
+    )
 
     def __init__(
             self,
@@ -44,6 +90,18 @@ class SpotifyAccount:
             internal_session: InternalSession,
             is_default: bool = False,
     ):
+        """The account of a Spotify user. Able to leverage the public
+        and private API.
+
+        Args:
+            - hass(HomeAssistant): The Home Assistant Instance
+            - external_session(OAuth2Session): The public api session
+                for the Spotify Account
+            - internal_session(InternalSession): The private api
+                session for the Spotify Account
+            - is_default(bool, optional): True if account is treated as
+                default for service call. Defaults to False.
+        """
         self.hass = hass
         self.sessions: dict[str, ConnectionSession] = {
             "external": external_session,
@@ -113,6 +171,9 @@ class SpotifyAccount:
         Args:
             - api(str): The api to retrieve from. Cann be `internal`
                 or `external`.
+
+        Returns:
+            - str: token for the requested session
         """
         return run_coroutine_threadsafe(
             self.async_get_token(api),
@@ -125,6 +186,9 @@ class SpotifyAccount:
         Args:
             - api(str): The api to retrieve from. Can be `internal` or
                 `external`.
+
+        Returns:
+            - str: token for the requested session
         """
         await self.sessions[api].async_ensure_token_valid()
         return self.sessions[api].token
@@ -218,6 +282,13 @@ class SpotifyAccount:
         )
 
     async def async_play_media(self, device_id: str, context_uri: str):
+        """Play the media linked to the uri provided on the device id
+        requested
+
+        Args:
+            - device_id(str): The spotify device id to play media on
+            - context_uri(str): The uri of the media to play
+        """
 
         await self.async_ensure_tokens_valid()
 

@@ -1,4 +1,11 @@
-"""Module for general media player exceptions"""
+"""Module for general media player exceptions
+
+Classes:
+    - MediaPlayerError
+    - MediaPlayerNotFoundError
+    - InvalidPlatformError
+    - MissingDeviceTypeError
+"""
 
 from homeassistant.exceptions import HomeAssistantError
 

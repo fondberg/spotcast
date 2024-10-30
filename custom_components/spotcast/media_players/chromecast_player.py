@@ -28,6 +28,20 @@ LOGGER = getLogger(__name__)
 
 
 class Chromecast(ParentChromecast, MediaPlayer):
+    """A chromecast media player
+
+    Constants:
+        - PLATFORM(str): the Home Assistant platform hosting the
+            devices
+        - DEVICE_TYPE(type): the type of device searched for
+
+    Properties:
+        - id: the spotify device if for the player
+
+    functions:
+        - from_hass
+        - from_network
+    """
 
     PLATFORM = "cast"
     DEVICE_TYPE = CastDevice
@@ -77,6 +91,7 @@ class Chromecast(ParentChromecast, MediaPlayer):
 
     @property
     def id(self) -> str:
+        """Returns the spotify id of the player"""
         return md5(self.name.encode()).hexdigest()
 
     @staticmethod

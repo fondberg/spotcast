@@ -1,4 +1,8 @@
-"""Platform for sensor integration."""
+"""Platform for sensor integration.
+
+Functions:
+    - async_setup_entry
+"""
 
 from logging import getLogger
 
@@ -43,7 +47,7 @@ async def async_setup_entry(
             account.id
         )
 
-        built_sensors.append(sensor(hass, account))
+        built_sensors.append(sensor(account))
 
     async_add_entities(
         built_sensors,

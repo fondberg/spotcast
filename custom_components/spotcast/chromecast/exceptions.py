@@ -1,4 +1,9 @@
-"""Module containing exceptions for the chromecast protocol"""
+"""Module containing exceptions for the chromecast protocol
+
+Classes:
+    - AppLaunchError
+    - UnknownMessageError
+"""
 
 from homeassistant.exceptions import HomeAssistantError
 
