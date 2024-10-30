@@ -1,9 +1,15 @@
 """Module containing the InternalSession class that manages the
-internal api credentials"""
+internal api credentials
+
+Classes:
+    - InternalSession
+    - ExpiredSpotifyKeyError
+    - TokenError
+"""
 
 from time import time
 from asyncio import Lock
-from aiohttp import ClientSession, ClientResponseError, ContentTypeError
+from aiohttp import ClientSession, ContentTypeError
 from types import MappingProxyType
 from logging import getLogger
 
@@ -20,30 +26,66 @@ from custom_components.spotcast.sessions.connection_session import (
 
 LOGGER = getLogger(__name__)
 
-HEADERS = MappingProxyType({
-    "user-agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 "
-        "Safari/537.36"
-    )
-})
-
-REQUEST_URL = (
-    "https://open.spotify.com/get_access_token?"
-    "reason=transport&productType=web_player"
-)
-
-EXPIRED_LOCATION = (
-    "/get_access_token?reason=transport&productType=web_player&_authfailed=1"
-)
-
-TOKEN_KEY = "accessToken"
-EXPIRATION_KEY = "accessTokenExpirationTimestampMs"
-
 
 class InternalSession(ConnectionSession):
+    """Api session with access to Spotify's private API
+
+    Attributes:
+        - hass(HomeAssistant): The Home Assistant Instance
+        - entry(ConfigEntry): Configuration entry of a Spotify Account
+
+    Properties:
+        - token(str): the current access token of the session
+        - valid_token(bool): True if the token is currently valid
+        - cookies(dict[str,str]): the cookie dictionary to include in
+            the api request
+
+    Constants:
+        - HEADERS(dict): dictionary of headers to include in all API
+            call.
+        - REQUEST_URL(str): the url where to make an authentication
+            request
+        - EXPIRED_LOCATION(str): The location header value when an
+            authentication request fails
+        - TOKEN_KEY(str): the key containing the access token in the
+            api response
+        - EXPIRATION_KEY(str): the key containing the expires_at of
+            the token in the api response
+
+    Methods:
+        - async_ensure_token_valid
+        - async_refresh_tokne
+    """
+
+    HEADERS = MappingProxyType({
+        "user-agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 "
+            "Safari/537.36"
+        )
+    })
+
+    REQUEST_URL = (
+        "https://open.spotify.com/get_access_token?"
+        "reason=transport&productType=web_player"
+    )
+
+    EXPIRED_LOCATION = (
+        "/get_access_token?"
+        "reason=transport&productType=web_player&_authfailed=1"
+    )
+
+    TOKEN_KEY = "accessToken"
+    EXPIRATION_KEY = "accessTokenExpirationTimestampMs"
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
+        """Api session with access to Spotify's private API
+
+        Args:
+            - hass(HomeAssistant): The Home Assistant Instance
+            - entry(ConfigEntry): Configuration entry of a Spotify
+                Account
+        """
         self.hass = hass
         self.entry = entry
         self._access_token = None
@@ -95,14 +137,17 @@ class InternalSession(ConnectionSession):
 
         async with ClientSession(cookies=self.cookies) as session:
             async with session.get(
-                REQUEST_URL,
+                self.REQUEST_URL,
                 allow_redirects=False,
-                headers=HEADERS
+                headers=self.HEADERS
             ) as response:
 
                 location = response.headers.get("Location")
 
-                if response.status == 302 and location == EXPIRED_LOCATION:
+                if (
+                        response.status == 302
+                        and location == self.EXPIRED_LOCATION
+                ):
                     LOGGER.error(
                         "Unsuccessful token request. Location header %s. "
                         "sp_dc and sp_key are likely expired",
@@ -121,8 +166,8 @@ class InternalSession(ConnectionSession):
                         f"{response.status}: {data}"
                     )
 
-            self._access_token = data[TOKEN_KEY]
-            self._expires_at = int(data[EXPIRATION_KEY]) // 1000
+            self._access_token = data[self.TOKEN_KEY]
+            self._expires_at = int(data[self.EXPIRATION_KEY]) // 1000
 
             return {
                 "access_token": self._access_token,

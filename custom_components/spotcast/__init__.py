@@ -1,4 +1,13 @@
-"""Spotcast Integration - Chromecast to Spotify integrator"""
+"""Spotcast Integration - Chromecast to Spotify integrator
+
+Functions:
+    - async_setup_entry
+
+Constants:
+    - PLATFORMS(list): List of platforms implemented in this
+        integration
+    - DOMAIN(str): name of the domain of the integration
+"""
 
 from logging import getLogger
 from aiohttp import ClientError

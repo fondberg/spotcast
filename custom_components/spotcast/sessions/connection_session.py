@@ -1,4 +1,8 @@
-"""Module for the abstract class ConnectionSession"""
+"""Module for the abstract class ConnectionSession
+
+Classes:
+    - ConnectionSession
+"""
 
 from abc import ABC, abstractmethod
 

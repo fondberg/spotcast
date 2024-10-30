@@ -19,7 +19,12 @@ def get_account_entry(
         account_id: str = None
 ) -> ConfigEntry:
     """Returns the config entry of the account. Returns the
-    default account if not specified"""
+    default account if not specified
+
+    Args:
+        - hass(HomeAssistant): The Home Assistant Instance
+        - account_id(str): The id of the spotify account to get
+    """
 
     if account_id is not None:
         try:

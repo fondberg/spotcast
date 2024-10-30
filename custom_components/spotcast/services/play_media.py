@@ -1,4 +1,8 @@
-"""Module for the play media service"""
+"""Module for the play media service
+
+Functions:
+    - async_play_media
+"""
 
 from logging import getLogger
 
@@ -26,7 +30,8 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     """Service to start playing media
 
     Args:
-        - call: the service call data pack
+        - hass(HomeAssistant): the Home Assistant Instance
+        - call(ServiceCall): the service call data pack
     """
 
     uri = call.data.get("spotify_uri")

@@ -1,4 +1,10 @@
-"""Module with exceptions for servivce calls"""
+"""Module with exceptions for servivce calls
+
+Classes:
+    - AccountNotFoundError
+    - NoDefaultAccountError
+    - UnknownServiceError
+"""
 
 from homeassistant.exceptions import HomeAssistantError
 

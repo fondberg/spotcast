@@ -1,4 +1,8 @@
-"""Module to manage the configuration flow for the integration"""
+"""Module to manage the configuration flow for the integration
+
+Classes:
+    - SpotcastFlowHandler
+"""
 
 from logging import getLogger
 from typing import Any

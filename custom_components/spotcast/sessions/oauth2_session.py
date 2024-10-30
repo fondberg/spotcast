@@ -1,5 +1,12 @@
 """Module for a custom implementation of the Oauth2Session due to
-spotcast custom config data format"""
+spotcast custom config data format
+
+Classes:
+    - OAuth2Session
+
+Functions:
+    - async_get_config_entry_implementation
+"""
 
 from typing import cast
 
@@ -21,6 +28,15 @@ from custom_components.spotcast.sessions.connection_session import (
 
 
 class OAuth2Session(ParentOAuth2Session, ConnectionSession):
+    """Custom implementation of the OAuth2Session for Spotcast
+
+    Properties:
+        - token(dict): The current token for the public spotify api
+
+    Methods:
+        - async_ensure_token_valid
+        - async_request
+    """
 
     @property
     def token(self) -> dict:

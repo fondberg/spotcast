@@ -1,4 +1,13 @@
-"""Exceptions for the Spotify Module"""
+"""Exceptions for the Spotify Module
+
+Classes:
+    - TokenError
+    - ExpiredCookiesError
+    - UnknownTokenError
+    - InvalidCookiesError
+    - NoAuthManagerError
+    - ProfileNotLoadedError
+"""
 
 from homeassistant.exceptions import HomeAssistantError
 
