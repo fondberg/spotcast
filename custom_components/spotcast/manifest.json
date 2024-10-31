@@ -10,7 +10,9 @@
         "@fcusson"
     ],
     "dependencies": [
-        "spotify",
+        "spotify"
+    ],
+    "requirements": [
         "spotipy==2.23.0"
     ],
     "documentation": "https://github.com/fondberg/spotcast",
