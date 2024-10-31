@@ -12,11 +12,11 @@
     "dependencies": [
         "spotify"
     ],
-    "requirements": [
-        "spotipy==2.23.0"
-    ],
     "documentation": "https://github.com/fondberg/spotcast",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/fondberg/spotcast/issues",
+    "requirements": [
+        "spotipy==2.23.0"
+    ],
     "version": "v3.9.0"
 }
