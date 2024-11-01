@@ -11,7 +11,10 @@ from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL
 from homeassistant.helpers import config_validation as cv
 from homeassistant.components.spotify.config_flow import SpotifyFlowHandler
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigFlowResult,
+    OptionsFlowWithConfigEntry,
+)
 from spotipy import Spotify
 
 from custom_components.spotcast import DOMAIN
@@ -98,3 +101,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         await self.async_set_unique_id(current_user["id"])
 
         return self.async_create_entry(title=name, data=self.data)
+
+
+class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
+    ...
