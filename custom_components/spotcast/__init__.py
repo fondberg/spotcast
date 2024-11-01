@@ -69,6 +69,7 @@ from .helpers import (
 from .spotcast_controller import SpotcastController
 
 CONFIG_SCHEMA = SPOTCAST_CONFIG_SCHEMA
+DEBUG = True
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -373,6 +374,9 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
                 client.repeat(state=repeat, device_id=spotify_device_id)
 
         except Exception as exc:
+            if DEBUG:
+                raise exc
+
             raise HomeAssistantError(exc) from exc
 
     # Register websocket and service

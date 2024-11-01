@@ -119,13 +119,13 @@ class SpotifyCastDevice:
                 self.hass
             )
             # Look for device to make sure we can start playback
-            if devices := devices_available["devices"]:
-                for device in devices:
-                    if device["id"] == self.spotifyController.device:
-                        _LOGGER.debug(
-                            "Found matching Spotify device: {}".format(device)
-                        )
-                        return device["id"]
+            for device in devices_available:
+                _LOGGER.warn(device)
+                if device.device_id == self.spotifyController.device:
+                    _LOGGER.debug(
+                        "Found matching Spotify device: {}".format(device)
+                    )
+                    return device.device_id
 
             sleep = random.uniform(1.5, 1.8) ** counter
             time.sleep(sleep)
@@ -136,7 +136,7 @@ class SpotifyCastDevice:
                 self.spotifyController.device
             )
         )
-        _LOGGER.error("Known devices: {}".format(devices_available["devices"]))
+        _LOGGER.error("Known devices: {}".format(devices_available))
 
         raise HomeAssistantError("Failed to get device id from Spotify")
 
@@ -274,9 +274,9 @@ class SpotcastController:
         media_player = get_spotify_media_player(
             self.hass, client._get("me")["id"])
         devices_available = get_spotify_devices(media_player, self.hass)
-        for device in devices_available["devices"]:
-            if device["name"] == device_name:
-                return device["id"]
+        for device in devices_available:
+            if device.name == device_name:
+                return device.device_id
         return None
 
     def get_spotify_device_id(self, account, spotify_device_id, device_name, entity_id):
@@ -343,14 +343,16 @@ class SpotcastController:
                     episode_uri,
                 )
                 client.start_playback(
-                    device_id=spotify_device_id, uris=[episode_uri], position_ms = position_ms)
+                    device_id=spotify_device_id, uris=[episode_uri], position_ms=position_ms)
         elif uri.find("episode") > 0:
             _LOGGER.debug("Playing episode using uris= for uri: %s", uri)
-            client.start_playback(device_id=spotify_device_id, uris=[uri], position_ms = position_ms)
+            client.start_playback(device_id=spotify_device_id, uris=[
+                                  uri], position_ms=position_ms)
 
         elif uri.find("track") > 0:
             _LOGGER.debug("Playing track using uris= for uri: %s", uri)
-            client.start_playback(device_id=spotify_device_id, uris=[uri], position_ms = position_ms)
+            client.start_playback(device_id=spotify_device_id, uris=[
+                                  uri], position_ms=position_ms)
         else:
             if uri == "random":
                 _LOGGER.debug(
@@ -360,7 +362,8 @@ class SpotcastController:
                 no_playlists = len(playlists["items"])
                 uri = playlists["items"][random.randint(
                     0, no_playlists - 1)]["uri"]
-            kwargs = {"device_id": spotify_device_id, "context_uri": uri, "position_ms": position_ms}
+            kwargs = {"device_id": spotify_device_id,
+                      "context_uri": uri, "position_ms": position_ms}
 
             if random_song:
                 if uri.find("album") > 0:
