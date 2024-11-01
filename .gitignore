@@ -116,6 +116,3 @@ venv.bak/
 .mypy_cache/
 .vscode/
 
-.config/
-config/
-! config/configuration.yaml

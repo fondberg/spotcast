@@ -18,5 +18,5 @@
     "requirements": [
         "spotipy==2.23.0"
     ],
-    "version": "v4.0.0-beta"
+    "version": "v3.9.0"
 }

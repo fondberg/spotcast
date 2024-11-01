@@ -21,7 +21,7 @@ from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services import ServiceHandler, SERVICE_SCHEMAS
 
-__version__ = "4.0.0-beta"
+__version__ = "3.9.0"
 
 
 LOGGER = getLogger(__name__)
