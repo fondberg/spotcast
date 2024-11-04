@@ -3,7 +3,7 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from custom_components.spotcast.media_players.chromecast_player import (
+from custom_components.spotcast.media_player.chromecast_player import (
     Chromecast,
     CastInfo,
     HostServiceInfo
@@ -13,7 +13,7 @@ from custom_components.spotcast.media_players.chromecast_player import (
 class TestBaseDevice(TestCase):
 
     @patch(
-        "custom_components.spotcast.media_players.chromecast_player."
+        "custom_components.spotcast.media_player.chromecast_player."
         "pychromecast.get_cast_type"
     )
     def setUp(self, mock_cast_type: MagicMock):

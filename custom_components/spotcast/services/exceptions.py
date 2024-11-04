@@ -20,3 +20,7 @@ class NoDefaultAccountError(HomeAssistantError):
 
 class UnknownServiceError(HomeAssistantError):
     """Raised if the service name called is not known to spotcast"""
+
+
+class TooManyMediaPlayersError(HomeAssistantError):
+    """Raised when too many media players are in a service call"""

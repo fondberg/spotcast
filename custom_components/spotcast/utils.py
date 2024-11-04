@@ -34,7 +34,7 @@ async def async_get_account_entry(
 
         LOGGER.debug("Getting config entry for id `%s`", account_id)
 
-        entry = await hass.config_entries.async_get_entry(account_id)
+        entry = hass.config_entries.async_get_entry(account_id)
 
         if entry is None:
             raise AccountNotFoundError(
@@ -45,7 +45,7 @@ async def async_get_account_entry(
 
     LOGGER.debug("Searching for default spotcast account")
 
-    entries = await hass.config_entries.async_entries(DOMAIN)
+    entries = hass.config_entries.async_entries(DOMAIN)
 
     for entry in entries:
 

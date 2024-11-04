@@ -28,3 +28,9 @@ play_media:
       selector:
         config_entry:
           integration: spotcast
+    data:
+      name: Data
+      description: Additional modifiers for the play_media service call.
+      required: false
+      selector:
+        object:

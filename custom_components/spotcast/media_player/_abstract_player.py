@@ -10,7 +10,7 @@ from logging import getLogger
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import async_get_platforms
 
-from custom_components.spotcast.media_players.exceptions import (
+from custom_components.spotcast.media_player.exceptions import (
     InvalidPlatformError,
     MissingDeviceTypeError,
 )

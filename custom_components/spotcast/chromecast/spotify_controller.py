@@ -13,7 +13,7 @@ from pychromecast.controllers import CastMessage
 from requests import post, Response, HTTPError
 
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.media_players.chromecast_player import (
+from custom_components.spotcast.media_player.chromecast_player import (
     Chromecast
 )
 

@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from pychromecast import CastInfo, HostServiceInfo
 
-from custom_components.spotcast.media_players.chromecast_player import (
+from custom_components.spotcast.media_player.chromecast_player import (
     Chromecast,
     md5
 )
@@ -14,7 +14,7 @@ from custom_components.spotcast.media_players.chromecast_player import (
 
 class TestHashCalculation(TestCase):
     @patch(
-        "custom_components.spotcast.media_players.chromecast_player."
+        "custom_components.spotcast.media_player.chromecast_player."
         "pychromecast.get_cast_type"
     )
     def setUp(self, mock_cast_type: MagicMock):
