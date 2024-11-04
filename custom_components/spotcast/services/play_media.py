@@ -8,7 +8,7 @@ from logging import getLogger
 
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
-from homeassistant.const import CONF_ENTITY_ID
+from homeassistant.const import CONF_TARGET
 import voluptuous as vol
 
 
@@ -20,7 +20,7 @@ from custom_components.spotcast.utils import async_get_account_entry
 LOGGER = getLogger(__name__)
 
 PLAY_MEDIA_SCHEMA = vol.Schema({
-    vol.Required(CONF_ENTITY_ID): cv.string,
+    vol.Required(CONF_TARGET): cv.string,
     vol.Required("account"): cv.string,
     vol.Required("spotify_uri"): cv.string,
 })
@@ -33,6 +33,10 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
         - hass(HomeAssistant): the Home Assistant Instance
         - call(ServiceCall): the service call data pack
     """
+
+    LOGGER.warn(call.data)
+
+    return
 
     uri = call.data.get("spotify_uri")
     account_id = call.data.get("account")

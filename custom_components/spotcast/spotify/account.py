@@ -21,10 +21,6 @@ from custom_components.spotcast.sessions import (
     async_get_config_entry_implementation,
 )
 
-from custom_components.spotcast.media_players import (
-    Chromecast
-)
-
 from custom_components.spotcast.spotify.exceptions import ProfileNotLoadedError
 
 LOGGER = getLogger(__name__)
@@ -201,10 +197,9 @@ class SpotifyAccount:
 
     async def async_ensure_tokens_valid(self):
         """Ensures the token are valid"""
+        LOGGER.debug("Refreshing api tokens for Spotify Account")
         for key, session in self.sessions.items():
-            LOGGER.debug("Refreshing %s api token", key)
             await session.async_ensure_token_valid()
-            LOGGER.debug("Done refreshing %s api token", key)
 
     async def async_profile(self) -> dict:
         """Test the connection and returns a user profile"""

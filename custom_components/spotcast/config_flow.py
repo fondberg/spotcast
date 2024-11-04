@@ -83,12 +83,6 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
 
         name = external_api["id"] = current_user["id"]
 
-        if (
-            self.reauth_entry
-            and self.reauth_entry.data["id"] != current_user["id"]
-        ):
-            return self.async_abort(reason="reauth_account_mismatch")
-
         if current_user.get("display_name"):
             name = current_user["display_name"]
 
@@ -101,7 +95,3 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         await self.async_set_unique_id(current_user["id"])
 
         return self.async_create_entry(title=name, data=self.data)
-
-
-class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
-    ...

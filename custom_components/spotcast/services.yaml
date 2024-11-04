@@ -2,10 +2,8 @@ play_media:
   name: Spotcast Play
   description: Play spotify media on chromecast devices
   fields:
-    entity_id:
-      name: Entity ID
-      description: The entity_id of the chromecast media player
-      example: media_player.living_room
+    media_player:
+      name: Media Player
       required: true
       selector:
         target:
@@ -30,10 +28,3 @@ play_media:
       selector:
         config_entry:
           integration: spotcast
-    data:
-      name: Data
-      description: Additionnal Fields for the play_media service
-      required: false
-      selector:
-        object:
-

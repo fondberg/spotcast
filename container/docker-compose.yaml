@@ -4,6 +4,8 @@ services:
     image: ghcr.io/home-assistant/home-assistant:beta
     privileged: true
     network_mode: host
+    environment:
+       PYTHONPATH: /config/deps/
     volumes:
       - ../custom_components/spotcast:/config/custom_components/spotcast
       - ../config/:/config/
