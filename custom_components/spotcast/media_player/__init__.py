@@ -4,10 +4,12 @@ Classes:
     - Chromecast
 """
 from logging import getLogger
+import datetime as dt
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_time_interval
 
 from custom_components.spotcast.media_player.chromecast_player import (
     Chromecast,
@@ -17,6 +19,10 @@ from custom_components.spotcast.media_player._abstract_player import (
 )
 from custom_components.spotcast.media_player.spotify_player import (
     SpotifyDevice
+)
+
+from custom_components.spotcast.media_player.device_manager import (
+    DeviceManager
 )
 
 from custom_components.spotcast.spotify import SpotifyAccount
@@ -31,17 +37,17 @@ async def async_setup_entry(
 ) -> None:
 
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
-
     media_players = []
-
     devices = await account.async_devices()
 
     for device in devices:
         LOGGER.debug("Creating Media Player for %s", device["name"])
-
         media_players.append(SpotifyDevice(account, device))
 
-    async_add_entities(
-        media_players,
-        True,
+    device_manager = DeviceManager(media_players, account, async_add_entities)
+
+    async_track_time_interval(
+        hass,
+        device_manager.async_update,
+        dt.timedelta(seconds=30)
     )

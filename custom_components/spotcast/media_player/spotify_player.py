@@ -30,7 +30,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{self.id}_spotcast_device"
+        return f"{self.id}_{self._account.id}_spotcast_device"
 
     @property
     def id(self) -> str:
@@ -38,7 +38,8 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
 
     @property
     def name(self):
-        return self._device_data["name"]
+        name = self._device_data["name"]
+        return f"Spotcast ({self._account.name}) - {name}"
 
     @property
     def state(self):
@@ -62,9 +63,12 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         for char in removals:
             name = name.replace(char, "")
 
-        return f"media_player.{name}_spotcast"
+        return f"media_player.{name}_{self._account.id}_spotcast"
 
     async def async_update(self):
+
+        if self._is_unavailable:
+            LOGGER.debug("%s is unavailable, skipping update", self.entity_id)
 
         LOGGER.warn("Updating device data for %s", self.entity_id)
 
