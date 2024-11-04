@@ -29,7 +29,9 @@ def get_spotify_media_player(
     """Get the spotify media player entity from hass."""
     platforms = entity_platform.async_get_platforms(hass, "spotify")
     spotify_media_player = None
+
     for platform in platforms:
+
         if platform.domain != "media_player":
             continue
 

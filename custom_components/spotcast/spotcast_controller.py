@@ -120,7 +120,6 @@ class SpotifyCastDevice:
             )
             # Look for device to make sure we can start playback
             for device in devices_available:
-                _LOGGER.warn(device)
                 if device.device_id == self.spotifyController.device:
                     _LOGGER.debug(
                         "Found matching Spotify device: {}".format(device)
