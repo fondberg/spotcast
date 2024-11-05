@@ -27,7 +27,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         """Initialize the spotify device"""
         self._device_data: dict = device_data
         self._account: SpotifyAccount = account
-        self.entity_id = self.define_entity_id()
+        self.entity_id = self._define_entity_id()
         self._is_unavailable = False
         self.device_info = DeviceInfo(
             identifiers={(DOMAIN, self.id)},
@@ -59,7 +59,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
 
         return STATE_ON if is_active else STATE_OFF
 
-    def define_entity_id(self):
+    def _define_entity_id(self):
 
         removals = "()"
 
@@ -78,6 +78,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
 
         if self._is_unavailable:
             LOGGER.debug("%s is unavailable, skipping update", self.entity_id)
+            return
 
         LOGGER.debug("Updating device data for %s", self.entity_id)
 
@@ -86,3 +87,10 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         for device in devices:
             if device["id"] == self.id:
                 self._device_data = device
+                return
+
+        LOGGER.warn(
+            "%s is no longer part of %s's Spotify Devices",
+            self.entity_id,
+            self._account.name
+        )

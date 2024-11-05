@@ -14,7 +14,7 @@ import voluptuous as vol
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.media_player import Chromecast
 from custom_components.spotcast.chromecast import SpotifyController
-from custom_components.spotcast.utils import async_get_account_entry
+from custom_components.spotcast.utils import get_account_entry
 from custom_components.spotcast.services.exceptions import (
     TooManyMediaPlayersError
 )
@@ -50,7 +50,7 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
             "where provided"
         )
 
-    entry = await async_get_account_entry(hass, account_id)
+    entry = get_account_entry(hass, account_id)
 
     LOGGER.debug("Loading Spotify Account for User `%s`", account_id)
     account = await SpotifyAccount.async_from_config_entry(

@@ -18,7 +18,7 @@ from custom_components.spotcast import DOMAIN
 LOGGER = getLogger(__name__)
 
 
-async def async_get_account_entry(
+def get_account_entry(
         hass: HomeAssistant,
         account_id: str = None
 ) -> ConfigEntry:
