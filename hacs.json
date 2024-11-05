@@ -4,7 +4,7 @@
         "media_player",
         "sensor"
     ],
-    "homeassistant": "2024.11.0",
+    "homeassistant": "2022.3.0",
     "iot_class": [
         "Cloud Polling"
     ]
