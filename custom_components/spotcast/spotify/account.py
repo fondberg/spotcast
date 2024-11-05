@@ -192,7 +192,8 @@ class SpotifyAccount:
     async def async_connect(self) -> "SpotifyAccount":
         """Ensure conncetion and return itself"""
         await self.async_ensure_tokens_valid()
-        self._spotify.set_auth(self.get_token("external"))
+        token = await self.async_get_token("external")
+        self._spotify.set_auth(token)
         return self
 
     async def async_ensure_tokens_valid(self):
