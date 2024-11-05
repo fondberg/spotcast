@@ -83,7 +83,8 @@ class DeviceManager:
                     device.name,
                     self._account.name
                 )
-                entity = self.tracked_devices["id"]
+                remove.append(id)
+                entity = self.tracked_devices[id]
                 entity._is_unavailable = True
 
         for id in remove:
