@@ -29,7 +29,10 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 
 ### Minimum Home Assistant version
 
-Spotcast is compatible with any version since 2021.12.0.
+Spotcast is compatible with any version since 2022.2.0.
+
+> [!WARNING] 
+> An iminent change to Home Assistant will require `v3.9.2` when installing Home Assistant `2024.11` or newer. The current target version will be updated once `2024.11` become generally available.
 
 ### Official Spotify Integration
 
