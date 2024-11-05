@@ -4,33 +4,31 @@ ment to be the MD5 hash of the device name"""
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from pychromecast import CastInfo, HostServiceInfo
+from pychromecast import CastInfo
 
 from custom_components.spotcast.media_player.chromecast_player import (
     Chromecast,
-    md5
+    md5,
+    ChromeCastZeroconf
 )
 
 
 class TestHashCalculation(TestCase):
-    @patch(
-        "custom_components.spotcast.media_player.chromecast_player."
-        "pychromecast.get_cast_type"
-    )
-    def setUp(self, mock_cast_type: MagicMock):
-        mock_cast_type.return_value = CastInfo(
-            services={HostServiceInfo("192.168.0.10", 8009)},
-            uuid=None,
-            model_name=None,
-            friendly_name="Mock Player",
-            host="192.168.0.10",
-            port=8009,
-            cast_type="mock_cast",
-            manufacturer="Unknown manufacturer",
+
+    @patch.object(Chromecast, "name")
+    def setUp(self, mock_name: MagicMock):
+
+        mock_name.return_value = "foo"
+        mock_cast_info = MagicMock(spec=CastInfo)
+        mock_cast_info.cast_type = "bar"
+        mock_cast_info.friendly_name = "Dummy Speaker"
+        mock_cast_info.services = ["hello", "world"]
+        self.device = Chromecast(
+            mock_cast_info,
+            zconf=MagicMock(spec=ChromeCastZeroconf)
         )
-        self.device = Chromecast.from_network("192.168.0.10")
+
+        self.expected = md5("Dummy Speaker".encode()).hexdigest()
 
     def test_hash_value(self):
-        expected = md5("Mock Player".encode()).hexdigest()
-
-        self.assertEqual(expected, self.device.id)
+        self.assertEqual(self.device.id, self.expected)

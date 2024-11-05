@@ -10,9 +10,8 @@ play_media:
           entity:
             - domain: media_player
               integration: cast
-          device:
-            - domain: media_player
-              integration: cast
+            - domaine: media_player
+              integration: spotcast
     spotify_uri:
       name: URI
       description: Supported Spotify URI as string

@@ -37,14 +37,9 @@ async def async_setup_entry(
 ) -> None:
 
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    media_players = []
-    devices = await account.async_devices()
+    device_manager = DeviceManager(account, async_add_entities)
 
-    for device in devices:
-        LOGGER.debug("Creating Media Player for %s", device["name"])
-        media_players.append(SpotifyDevice(account, device))
-
-    device_manager = DeviceManager(media_players, account, async_add_entities)
+    await device_manager.async_update()
 
     async_track_time_interval(
         hass,

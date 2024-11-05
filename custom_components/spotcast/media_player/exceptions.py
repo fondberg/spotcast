@@ -24,3 +24,7 @@ class InvalidPlatformError(MediaPlayerError):
 
 class MissingDeviceTypeError(MediaPlayerError):
     """Raised when the device type os not set for the media player"""
+
+
+class UnknownIntegrationError(MediaPlayerError):
+    """The integration specified is not known for spotcast"""

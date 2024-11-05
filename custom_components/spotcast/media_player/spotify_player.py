@@ -3,6 +3,8 @@
 from logging import getLogger
 
 from homeassistant.components.media_player import MediaPlayerEntity
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.const import (
     STATE_ON,
     STATE_OFF,
@@ -11,6 +13,7 @@ from homeassistant.const import (
 
 from custom_components.spotcast.media_player import MediaPlayer
 from custom_components.spotcast.spotify import SpotifyAccount
+from custom_components.spotcast import DOMAIN
 
 LOGGER = getLogger(__name__)
 
@@ -18,15 +21,20 @@ LOGGER = getLogger(__name__)
 class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
     """Representation of a device in spotify"""
 
-    PLATFORM = "spotcast"
+    INTEGRATION = DOMAIN
 
     def __init__(self, account: SpotifyAccount, device_data: dict):
         """Initialize the spotify device"""
         self._device_data: dict = device_data
         self._account: SpotifyAccount = account
-        self.DEVICE_TYPE = type(self)
         self.entity_id = self.define_entity_id()
         self._is_unavailable = False
+        self.device_info = DeviceInfo(
+            identifiers={(DOMAIN, self.id)},
+            manufacturer="Spotify AB",
+            model=f"Spotify Connect {self._device_data['type']}",
+            name=f"Spotcast - {self.name} ({self._account.name})",
+        )
 
     @property
     def unique_id(self) -> str:
@@ -66,23 +74,15 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         return f"media_player.{name}_{self._account.id}_spotcast"
 
     async def async_update(self):
+        """Updates the device information from the account"""
 
         if self._is_unavailable:
             LOGGER.debug("%s is unavailable, skipping update", self.entity_id)
 
-        LOGGER.warn("Updating device data for %s", self.entity_id)
+        LOGGER.debug("Updating device data for %s", self.entity_id)
 
         devices = await self._account.async_devices()
 
         for device in devices:
             if device["id"] == self.id:
                 self._device_data = device
-
-    @staticmethod
-    def from_hass():
-        ...
-
-    def from_network():
-        raise NotImplementedError(
-            "Spotify Device cannot be loaded from the network"
-        )

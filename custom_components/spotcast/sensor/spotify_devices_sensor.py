@@ -5,7 +5,6 @@ Classes:
 """
 
 from logging import getLogger
-import datetime as dt
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_UNKNOWN
@@ -52,7 +51,7 @@ class SpotifyDevicesSensor(SensorEntity):
 
         LOGGER.debug("Loading Spotify Device sensor for %s", self.account.name)
 
-        self._attributes = {"devices": [], "last_update": None}
+        self._attributes = {"devices": []}
         self._attr_device_info = device_from_account(self.account)
 
         self._devices = []
@@ -97,4 +96,3 @@ class SpotifyDevicesSensor(SensorEntity):
 
         self._attr_state = device_count
         self._attributes["devices"] = devices
-        self._attributes["last_update"] = dt.datetime.now().isoformat("T")
