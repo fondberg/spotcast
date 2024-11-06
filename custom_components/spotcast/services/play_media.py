@@ -14,10 +14,11 @@ import voluptuous as vol
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.utils import get_account_entry
 from custom_components.spotcast.media_player.utils import (
-    async_media_player_from_id
+    async_media_player_from_id,
 )
 from custom_components.spotcast.services.utils import (
-    entity_from_target_selector
+    entity_from_target_selector,
+    EXTRAS_SCHEMA,
 )
 
 LOGGER = getLogger(__name__)
@@ -26,7 +27,7 @@ PLAY_MEDIA_SCHEMA = vol.Schema({
     vol.Required("media_player"): cv.ENTITY_SERVICE_FIELDS,
     vol.Required("spotify_uri"): cv.string,
     vol.Optional("account"): cv.string,
-    vol.Optional("data"): dict,
+    vol.Optional("data"): EXTRAS_SCHEMA,
 })
 
 
@@ -41,7 +42,7 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     uri: str = call.data.get("spotify_uri")
     account_id: str = call.data.get("account")
     media_players: dict[str, list] = call.data.get("media_player")
-    extra: dict[str] = call.data.get("data")
+    extras: dict[str] = call.data.get("data")
 
     entry = get_account_entry(hass, account_id)
     entity_id = entity_from_target_selector(hass, media_players)
@@ -55,4 +56,5 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     LOGGER.debug("Getting %s from home assistant", entity_id)
     media_player = await async_media_player_from_id(hass, account, entity_id)
 
-    await account.async_play_media(media_player.id, uri)
+    await account.async_play_media(media_player.id, uri, **extras)
+    await account.async_apply_extras(media_player.id, extras)

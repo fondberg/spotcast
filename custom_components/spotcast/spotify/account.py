@@ -275,7 +275,40 @@ class SpotifyAccount:
             f"device `{device_id}` still not available after {timeout} sec."
         )
 
-    async def async_play_media(self, device_id: str, context_uri: str):
+    async def async_apply_extras(
+            self,
+            device_id: str,
+            extras: dict,
+    ):
+        """Applies extra settings on an account
+
+        Args:
+            - account(SpotifyAccount): the account to apply extras to
+            - device_id(str): the device to set the extras to
+            - extras(dict): the extra settings to apply
+        """
+
+        actions = {
+            "start_volume": self.async_set_volume,
+            "shuffle": self.async_shuffle,
+            "repeat": self.async_repeat,
+        }
+
+        for key, value in extras.items():
+
+            if key not in actions:
+                continue
+
+            await actions[key](value, device_id)
+
+    async def async_play_media(
+        self,
+        device_id: str,
+        context_uri: str,
+        offset: int = None,
+        position_ms: int = None,
+        **_
+    ):
         """Play the media linked to the uri provided on the device id
         requested
 
@@ -296,6 +329,84 @@ class SpotifyAccount:
             self._spotify.start_playback,
             device_id,
             context_uri,
+            offset,
+            position_ms,
+        )
+
+    async def async_shuffle(
+        self,
+        shuffle: bool,
+        device_id: str,
+    ):
+        """Sets the shuffle mode for a device
+
+        Args:
+            - shuffle(bool): Sets the shuffle mode to True or False
+                based on the value provided
+            - device_id(str): the device to set the shuffle mode on
+        """
+        await self.async_ensure_tokens_valid()
+
+        LOGGER.info(
+            "Setting shuffle to %s on device `%s`",
+            str(shuffle),
+            device_id
+        )
+
+        await self.hass.async_add_executor_job(
+            self._spotify.shuffle,
+            shuffle,
+            device_id,
+        )
+
+    async def async_repeat(
+        self,
+        state: str,
+        device_id: str,
+    ):
+        """Sets the repeat mode for a device
+
+        Args:
+            - state(str): Sets the repeat mode for the device
+            - device_id(str): the device to set the repeat mode
+        """
+        await self.async_ensure_tokens_valid()
+
+        LOGGER.info(
+            "Setting repeat state to %s on device `%s`",
+            str(state),
+            device_id
+        )
+
+        await self.hass.async_add_executor_job(
+            self._spotify.repeat,
+            state,
+            device_id,
+        )
+
+    async def async_set_volume(
+        self,
+        volume: int,
+        device_id: str,
+    ):
+        """Sets the volume level for a device
+
+        Args:
+            - volume(int): The percentage of volume to set
+            - device_id(str): the device to set the repeat mode
+        """
+        await self.async_ensure_tokens_valid()
+
+        LOGGER.info(
+            "Setting volume to %d%% for device `%s`",
+            volume,
+            device_id
+        )
+
+        await self.hass.async_add_executor_job(
+            self._spotify.volume,
+            volume,
+            device_id,
         )
 
     @staticmethod

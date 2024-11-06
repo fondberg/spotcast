@@ -1,7 +1,7 @@
 """Module to test the async_play_media function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, AsyncMock
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
@@ -11,7 +11,7 @@ from custom_components.spotcast.spotify.account import (
 )
 
 
-class TestMediaCasting(IsolatedAsyncioTestCase):
+class TestShuffleMode(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
 
@@ -25,16 +25,14 @@ class TestMediaCasting(IsolatedAsyncioTestCase):
             MagicMock(spec=InternalSession),
         )
 
-        await self.account.async_play_media("foo", "uri")
+        await self.account.async_set_volume(80, "uri")
 
     async def test_start_playback_called_in_executor_loop(self):
         try:
             self.mock_hass.async_add_executor_job.assert_called_with(
-                self.account._spotify.start_playback,
-                "foo",
+                self.account._spotify.volume,
+                80,
                 "uri",
-                None,
-                None,
             )
         except AssertionError:
             self.fail()

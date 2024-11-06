@@ -30,7 +30,7 @@ class DeviceNotFoundError(HomeAssistantError):
     """Raised when a device can't be found based on it's id"""
 
 
-class AmbiguousDeviceId(HomeAssistantError):
+class AmbiguousDeviceIdError(HomeAssistantError):
     """Raised when the selection of an entity is ambiguous for a
     device"""
 

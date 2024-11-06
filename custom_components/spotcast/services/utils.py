@@ -6,12 +6,26 @@ Functions:
 
 from homeassistant.helpers import entity_registry as er
 from homeassistant.core import HomeAssistant
+import voluptuous as vol
+from homeassistant.helpers import config_validation as cv
 
 from custom_components.spotcast.services.exceptions import (
     TooManyMediaPlayersError,
-    AmbiguousDeviceId,
+    AmbiguousDeviceIdError,
     UnmanagedSelectionError,
+    DeviceNotFoundError,
 )
+
+EXTRAS_SCHEMA = vol.Schema({
+    vol.Optional("position_ms"): cv.positive_int,
+    vol.Optional("offset"): cv.positive_int,
+    vol.Optional("volume"): vol.All(
+        vol.Coerce(int),
+        vol.Range(min=0, max=100)
+    ),
+    vol.Optional("repeat"): vol.In(["track", "context", "off"]),
+    vol.Optional("shuffle"): cv.boolean,
+})
 
 
 def entity_from_target_selector(
@@ -63,7 +77,7 @@ def entity_from_device_id(
     """
     entity_registry = er.async_get(hass)
 
-    entries = er.async_entries_for_device(entity_registry, device_id)
+    entries = entity_registry.entities.get_entries_for_device_id(device_id)
 
     current_entry = None
     found = False
@@ -72,10 +86,16 @@ def entity_from_device_id(
 
         if entry.domain == domain and not found:
             current_entry = entry
+            found = True
         elif entry.domain == domain and found:
-            raise AmbiguousDeviceId(
+            raise AmbiguousDeviceIdError(
                 f"Device `{device_id}` contains multiple {domain} entities. "
                 "Call desired entity directly"
             )
+
+    if current_entry is None:
+        raise DeviceNotFoundError(
+            f"Could not find a device with valid {domain} for id `{device_id}`"
+        )
 
     return current_entry.entity_id

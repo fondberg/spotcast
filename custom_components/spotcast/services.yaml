@@ -10,7 +10,7 @@ play_media:
           entity:
             - domain: media_player
               integration: cast
-            - domaine: media_player
+            - domain: media_player
               integration: spotcast
     spotify_uri:
       name: URI
