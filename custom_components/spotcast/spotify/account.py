@@ -190,18 +190,15 @@ class SpotifyAccount:
         await self.sessions[api].async_ensure_token_valid()
         return self.sessions[api].token
 
-    async def async_connect(self) -> "SpotifyAccount":
-        """Ensure conncetion and return itself"""
-        await self.async_ensure_tokens_valid()
-        token = await self.async_get_token("external")
-        self._spotify.set_auth(token)
-        return self
-
     async def async_ensure_tokens_valid(self):
         """Ensures the token are valid"""
         LOGGER.debug("Refreshing api tokens for Spotify Account")
         for key, session in self.sessions.items():
             await session.async_ensure_token_valid()
+
+            if key == "external":
+                token = await self.async_get_token(key)
+                self._spotify.set_auth(token["access_token"])
 
     async def async_profile(self) -> dict:
         """Test the connection and returns a user profile"""

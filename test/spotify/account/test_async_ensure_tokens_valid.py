@@ -34,6 +34,6 @@ class TestTokenRefresh(IsolatedAsyncioTestCase):
 
     async def test_external_api_called(self):
         try:
-            self.mock_external.async_ensure_token_valid.assert_called_once()
+            self.mock_external.async_ensure_token_valid.assert_called()
         except AssertionError:
-            self.fail("Internal API token refresh was not called")
+            self.fail("External API token refresh was not called")
