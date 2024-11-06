@@ -8,8 +8,8 @@ from homeassistant.core import HomeAssistant
 from custom_components.spotcast.sessions.internal_session import (
     InternalSession,
     ClientSession,
-    ExpiredSpotifyKeyError,
-    TokenError,
+    ExpiredSpotifyCookiesError,
+    TokenRefreshError,
     ConfigEntry,
     ContentTypeError
 )
@@ -88,7 +88,7 @@ class TestExpirationReply(IsolatedAsyncioTestCase):
         mock_get.return_value.__aenter__.return_value.status = 302
         mock_get.return_value.__aenter__.return_value.json\
             .return_value = await self.async_json_reply()
-        with self.assertRaises(ExpiredSpotifyKeyError):
+        with self.assertRaises(ExpiredSpotifyCookiesError):
             await self.session.async_refresh_token()
 
 
@@ -131,7 +131,7 @@ class TestClientErrors(IsolatedAsyncioTestCase):
         mock_get.return_value.__aenter__.return_value.json\
             .return_value = await self.async_json_reply()
 
-        with self.assertRaises(TokenError):
+        with self.assertRaises(TokenRefreshError):
             await self.session.async_refresh_token()
 
     @patch.object(ClientSession, "get")
@@ -147,5 +147,5 @@ class TestClientErrors(IsolatedAsyncioTestCase):
         mock_get.return_value.__aenter__.return_value.text\
             .return_value = await self.async_text_reply()
 
-        with self.assertRaises(TokenError):
+        with self.assertRaises(TokenRefreshError):
             await self.session.async_refresh_token()

@@ -14,7 +14,6 @@ from types import MappingProxyType
 from logging import getLogger
 
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.config_entry_oauth2_flow import (
     CLOCK_OUT_OF_SYNC_MAX_SEC,
 )
@@ -22,6 +21,10 @@ from homeassistant.config_entries import ConfigEntry
 
 from custom_components.spotcast.sessions.connection_session import (
     ConnectionSession,
+)
+from custom_components.spotcast.sessions.exceptions import (
+    TokenRefreshError,
+    ExpiredSpotifyCookiesError,
 )
 
 LOGGER = getLogger(__name__)
@@ -153,16 +156,16 @@ class InternalSession(ConnectionSession):
                         "sp_dc and sp_key are likely expired",
                         location
                     )
-                    raise ExpiredSpotifyKeyError("Expired sp_dc, sp_key")
+                    raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
 
                 try:
                     data = await response.json()
                 except ContentTypeError as exc:
                     error_message = await response.text()
-                    raise TokenError(error_message) from exc
+                    raise TokenRefreshError(error_message) from exc
 
                 if not response.ok:
-                    raise TokenError(
+                    raise TokenRefreshError(
                         f"{response.status}: {data}"
                     )
 
@@ -173,11 +176,3 @@ class InternalSession(ConnectionSession):
                 "access_token": self._access_token,
                 "expires_at": self._expires_at
             }
-
-
-class ExpiredSpotifyKeyError(HomeAssistantError):
-    """Raised if the sp_dc and sp_key are expired"""
-
-
-class TokenError(HomeAssistantError):
-    """Raised when there is an error getting the token from spotify"""

@@ -20,6 +20,7 @@ from homeassistant.const import Platform
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services import ServiceHandler, SERVICE_SCHEMAS
+from custom_components.spotcast.sessions.exceptions import TokenRefreshError
 
 __version__ = "4.0.0-a0"
 
@@ -48,10 +49,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         await account.async_ensure_tokens_valid()
-    except ClientError as exc:
+    except TokenRefreshError as exc:
         raise ConfigEntryNotReady from exc
-
-    hass.data.setdefault(DOMAIN, {})[account.id] = entry
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

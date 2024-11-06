@@ -9,6 +9,7 @@ Functions:
 """
 
 from typing import cast
+from aiohttp import ClientError
 
 from homeassistant.helpers.config_entry_oauth2_flow import (
     OAuth2Session as ParentOAuth2Session,
@@ -24,6 +25,9 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 
 from custom_components.spotcast.sessions.connection_session import (
     ConnectionSession,
+)
+from custom_components.spotcast.sessions.exceptions import (
+    TokenRefreshError,
 )
 
 
@@ -49,9 +53,14 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
             if self.valid_token:
                 return
 
-            new_token = await self.implementation.async_refresh_token(
-                self.token
-            )
+            try:
+                new_token = await self.implementation.async_refresh_token(
+                    self.token
+                )
+            except ClientError as exc:
+                raise TokenRefreshError(
+                    "Unable to refresh Spotify Public API Token"
+                ) from exc
 
             new_data = self.config_entry.data
             new_data["external_api"]["token"] = new_token
