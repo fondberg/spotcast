@@ -1,23 +1,24 @@
 """Module to test the media_player_from_id function"""
 
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, patch
 
 from custom_components.spotcast.media_player.utils import (
-    media_player_from_id,
+    async_media_player_from_id,
     CastDevice,
     SpotifyDevice,
     HomeAssistant,
     MediaPlayerNotFoundError,
+    SpotifyAccount
 )
 
 TEST_MODULE = "custom_components.spotcast.media_player.utils"
 
 
-class TestDeviceFound(TestCase):
+class TestDeviceFound(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.entities_from_integration")
-    def setUp(self, mock_entities: MagicMock):
+    @patch(f"{TEST_MODULE}.async_entities_from_integration")
+    async def asyncSetUp(self, mock_entities: MagicMock):
 
         self.mock_device = MagicMock(spec=SpotifyDevice)
 
@@ -31,17 +32,22 @@ class TestDeviceFound(TestCase):
         ]
 
         mock_hass = MagicMock(spec=HomeAssistant)
+        mock_account = MagicMock(spec=SpotifyAccount)
 
-        self.result = media_player_from_id(mock_hass, "media_player.bar")
+        self.result = await async_media_player_from_id(
+            mock_hass,
+            mock_account,
+            "media_player.bar"
+        )
 
     def test_test(self):
         self.assertIs(self.result, self.mock_device)
 
 
-class TestDeviceNotFound(TestCase):
+class TestDeviceNotFound(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.entities_from_integration")
-    def test_error_raised(self, mock_entities: MagicMock):
+    @patch(f"{TEST_MODULE}.async_entities_from_integration")
+    async def test_error_raised(self, mock_entities: MagicMock):
 
         self.mock_device = MagicMock(spec=SpotifyDevice)
 
@@ -53,6 +59,11 @@ class TestDeviceNotFound(TestCase):
         ]
 
         mock_hass = MagicMock(spec=HomeAssistant)
+        mock_account = MagicMock(spec=SpotifyAccount)
 
         with self.assertRaises(MediaPlayerNotFoundError):
-            media_player_from_id(mock_hass, "media_player.bar")
+            await async_media_player_from_id(
+                mock_hass,
+                mock_account,
+                "media_player.bar"
+            )

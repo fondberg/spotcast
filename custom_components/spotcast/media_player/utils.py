@@ -1,9 +1,9 @@
 """Module with utility functions for media_players
 
 Functions:
-    - entity_from_id
-    - entities_from_integration
-    - build_from_integration
+    - async_entity_from_id
+    - async_entities_from_integration
+    - async_build_from_integration
 """
 
 from logging import getLogger
@@ -22,7 +22,10 @@ from custom_components.spotcast.media_player import (
     MediaPlayer,
     Chromecast,
     SpotifyDevice,
+    SpotifyAccount,
 )
+
+from custom_components.spotcast.chromecast import SpotifyController
 
 LOGGER = getLogger(__name__)
 
@@ -32,8 +35,9 @@ PLAYER_TYPES = (
 )
 
 
-def media_player_from_id(
+async def async_media_player_from_id(
     hass: HomeAssistant,
+    account: SpotifyAccount,
     entity_id: str,
 ) -> MediaPlayer:
     """Retrives an entity from the entity_id"""
@@ -42,7 +46,7 @@ def media_player_from_id(
 
         integration = player_type.INTEGRATION
 
-        entities = entities_from_integration(
+        entities = await async_entities_from_integration(
             hass,
             integration,
             ["media_player"],
@@ -58,14 +62,14 @@ def media_player_from_id(
             )
             continue
 
-        return build_from_type(entity)
+        return await async_build_from_type(hass, entity, account)
 
     raise MediaPlayerNotFoundError(
         f"Could not find `{entity_id}` in the managed integrations",
     )
 
 
-def entities_from_integration(
+async def async_entities_from_integration(
         hass: HomeAssistant,
         integration: str,
         platform_filter: list[str] = None,
@@ -100,7 +104,11 @@ def entities_from_integration(
     return entities
 
 
-def build_from_type(entity: Entity) -> MediaPlayer:
+async def async_build_from_type(
+        hass: HomeAssistant,
+        entity: Entity,
+        account: SpotifyAccount
+) -> MediaPlayer:
     """Builds the proper media player based on its entity type
 
     Args:
@@ -114,10 +122,20 @@ def build_from_type(entity: Entity) -> MediaPlayer:
 
     if isinstance(entity, CastDevice):
         entity: CastDevice
-        return Chromecast(
+        media_player = Chromecast(
             entity._cast_info.cast_info,
             zconf=ChromeCastZeroconf.get_zeroconf()
         )
+
+        spotify_controller = SpotifyController(account)
+        media_player.register_handler(spotify_controller)
+
+        await hass.async_add_executor_job(
+            spotify_controller.launch_app,
+            media_player,
+        )
+
+        return media_player
 
     if isinstance(entity, SpotifyDevice):
         return entity

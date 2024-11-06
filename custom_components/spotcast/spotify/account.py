@@ -14,6 +14,7 @@ from spotipy import Spotify
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
+from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.sessions import (
     OAuth2Session,
     InternalSession,
@@ -316,6 +317,15 @@ class SpotifyAccount:
             SpotifyAccount: A spotify account from the api config in
                 the config entry
         """
+
+        if DOMAIN not in hass.data:
+            hass.data[DOMAIN] = {}
+
+        account = hass.data[DOMAIN].get(entry.entry_id)
+
+        if account is not None:
+            return account
+
         oauth_implementation = await async_get_config_entry_implementation(
             hass=hass,
             config_entry=entry,
@@ -331,5 +341,11 @@ class SpotifyAccount:
 
         account = SpotifyAccount(hass, external_api, internal_api, is_default)
         await account.async_profile()
+
+        LOGGER.debug(
+            "Adding entry `%s` to spotcast data entries",
+            entry.entry_id,
+        )
+        hass.data[DOMAIN][entry.entry_id] = account
 
         return account

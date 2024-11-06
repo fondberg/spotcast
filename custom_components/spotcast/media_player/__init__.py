@@ -2,6 +2,12 @@
 
 Classes:
     - Chromecast
+    - SpotifyDevice
+    - MediaPlayer
+    - DeviceManager
+
+Functions:
+    - async_setup_entry
 """
 from logging import getLogger
 import datetime as dt

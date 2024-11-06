@@ -55,6 +55,7 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
 
             new_data = self.config_entry.data
             new_data["external_api"]["token"] = new_token
+            self.config_entry.data["external_api"]["token"] = new_token
 
             self.hass.config_entries.async_update_entry(
                 self.config_entry,
