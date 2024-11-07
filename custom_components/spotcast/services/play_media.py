@@ -44,6 +44,9 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     media_players: dict[str, list] = call.data.get("media_player")
     extras: dict[str] = call.data.get("data")
 
+    if extras is None:
+        extras = {}
+
     entry = get_account_entry(hass, account_id)
     entity_id = entity_from_target_selector(hass, media_players)
 
@@ -55,6 +58,13 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
 
     LOGGER.debug("Getting %s from home assistant", entity_id)
     media_player = await async_media_player_from_id(hass, account, entity_id)
+
+    LOGGER.info(
+        "Playing `%s` on `%s` for account `%s`",
+        uri,
+        media_player.name,
+        account.id
+    )
 
     await account.async_play_media(media_player.id, uri, **extras)
     await account.async_apply_extras(media_player.id, extras)

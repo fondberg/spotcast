@@ -31,3 +31,8 @@ class MediaPlayer(ABC):
     @abstractmethod
     def id(self) -> str:
         """The spotify device id of the player"""
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """The name of the device"""

@@ -35,6 +35,7 @@ class TestMediaCasting(IsolatedAsyncioTestCase):
                 "uri",
                 None,
                 None,
+                None,
             )
         except AssertionError:
             self.fail()

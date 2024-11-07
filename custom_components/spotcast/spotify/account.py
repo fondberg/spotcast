@@ -13,6 +13,7 @@ from typing import Any
 from spotipy import Spotify
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.spotify.media_player import SPOTIFY_DJ_PLAYLIST
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.sessions import (
@@ -79,6 +80,8 @@ class SpotifyAccount:
         "user-read-recently-played",
         "user-follow-read",
     )
+
+    DJ_URI = SPOTIFY_DJ_PLAYLIST["uri"]
 
     def __init__(
             self,
@@ -304,7 +307,8 @@ class SpotifyAccount:
     async def async_play_media(
         self,
         device_id: str,
-        context_uri: str,
+        context_uri: str = None,
+        uris: list[str] = None,
         offset: int = None,
         position_ms: int = None,
         **_
@@ -329,6 +333,7 @@ class SpotifyAccount:
             self._spotify.start_playback,
             device_id,
             context_uri,
+            uris,
             offset,
             position_ms,
         )
@@ -358,6 +363,34 @@ class SpotifyAccount:
             shuffle,
             device_id,
         )
+
+    async def async_liked_songs(self) -> list[str]:
+        """Retrieves the list of uris of songs in the user liked songs
+        """
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Getting saved tracks for account `%s`", self.name)
+
+        offset = 0
+        saved_tracks = []
+        total = None
+
+        while total is None or len(saved_tracks) < total:
+
+            current_tracks: dict = await self.hass.async_add_executor_job(
+                self._spotify.current_user_saved_tracks,
+                50,
+                offset
+            )
+
+            if total is None:
+                total = current_tracks["total"]
+
+            uris = [x["track"]["uri"] for x in current_tracks["items"]]
+            saved_tracks.extend(uris)
+
+            offset = len(saved_tracks)
+
+        return saved_tracks
 
     async def async_repeat(
         self,

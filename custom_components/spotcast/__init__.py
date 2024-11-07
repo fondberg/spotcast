@@ -10,7 +10,6 @@ Constants:
 """
 
 from logging import getLogger
-from aiohttp import ClientError
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -19,7 +18,8 @@ from homeassistant.const import Platform
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.services import ServiceHandler, SERVICE_SCHEMAS
+from custom_components.spotcast.services import ServiceHandler
+from custom_components.spotcast.services.const import SERVICE_SCHEMAS
 from custom_components.spotcast.sessions.exceptions import TokenRefreshError
 
 __version__ = "4.0.0-a0"

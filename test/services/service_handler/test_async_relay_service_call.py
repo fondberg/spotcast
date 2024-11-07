@@ -1,13 +1,14 @@
 """Module to test the async_relay_service_call"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from custom_components.spotcast.services.service_handler import (
     ServiceHandler,
     HomeAssistant,
     ServiceCall,
     UnknownServiceError,
+    SERVICE_HANDLERS
 )
 
 TEST_MODULE = "custom_components.spotcast.services.service_handler"
@@ -15,13 +16,16 @@ TEST_MODULE = "custom_components.spotcast.services.service_handler"
 
 class TestServiceCall(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.async_play_media")
-    async def asyncSetUp(self, mock_play_media: MagicMock):
+    @patch(f"{TEST_MODULE}.SERVICE_HANDLERS")
+    async def asyncSetUp(self, mock_handlers: MagicMock):
 
+        self.mock_play_media = AsyncMock()
+
+        self.mock_handlers = mock_handlers
+        self.mock_handlers.__getitem__.return_value = self.mock_play_media
         self.hass = MagicMock(spec=HomeAssistant)
         self.call = MagicMock(spec=ServiceCall)
         self.call.service = "play_media"
-        self.mock_play_media = mock_play_media
 
         handler = ServiceHandler(self.hass)
 
