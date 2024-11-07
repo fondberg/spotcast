@@ -1,6 +1,6 @@
 services:
   homeassistant:
-    container_name: homeassistant-beta
+    container_name: homeassistant-dev
     image: ghcr.io/home-assistant/home-assistant:dev
     privileged: true
     network_mode: host
