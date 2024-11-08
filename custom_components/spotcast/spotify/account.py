@@ -48,6 +48,10 @@ class SpotifyAccount:
         - profile(dict): the full profile dictionary of the account
         - country(str): the country code where the account currently
             is.
+        - image_link(str): the profile image image link
+        - product(str): the current subscription product the user has
+        - type(str): the type of account loaded
+        - liked_songs_uri(str): the uri for the liked_songs playlist
 
     Constants:
         - SCOPE(tuple): A list of API permissions required for the
@@ -65,6 +69,11 @@ class SpotifyAccount:
         - async_wait_for_devices
         - async_register_chromecast_player
         - async_play_media
+        - async_apply_extras
+        - async_shuffle
+        - async_liked_songs
+        - async_repeat
+        - async_set_volume
 
     Functions:
         - async_from_config_entry
@@ -291,7 +300,17 @@ class SpotifyAccount:
         return all_playllists
 
     async def async_wait_for_device(self, device_id: str, timeout: int = 12):
-        """Asycnhronously wait for a device to become available"""
+        """Asycnhronously wait for a device to become available
+
+        Args:
+            - device_id(str): the spotify id of the device to wait for
+            - timeout(int): the timeout delay to wait for before
+                raising an error.
+
+        Raises:
+            - TimeoutError: raised when waiting for the device goes
+                beyond the set delay
+        """
         LOGGER.debug("Waiting for device `%s` to become available", device_id)
 
         end_time = time() + timeout
@@ -353,6 +372,10 @@ class SpotifyAccount:
         Args:
             - device_id(str): The spotify device id to play media on
             - context_uri(str): The uri of the media to play
+
+        Raises:
+            - PlaybackError: raised when spotipy raises an error while
+                trying to start playback
         """
 
         await self.async_ensure_tokens_valid()
