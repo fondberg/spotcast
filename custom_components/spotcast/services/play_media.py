@@ -16,9 +16,10 @@ from custom_components.spotcast.utils import get_account_entry
 from custom_components.spotcast.media_player.utils import (
     async_media_player_from_id,
 )
+
 from custom_components.spotcast.services.utils import (
-    entity_from_target_selector,
     EXTRAS_SCHEMA,
+    entity_from_target_selector
 )
 
 LOGGER = getLogger(__name__)

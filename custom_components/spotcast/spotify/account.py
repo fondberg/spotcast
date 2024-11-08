@@ -10,10 +10,9 @@ from asyncio import sleep
 from time import time
 from typing import Any
 
-from spotipy import Spotify
+from spotipy import Spotify, SpotifyException
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.components.spotify.media_player import SPOTIFY_DJ_PLAYLIST
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.sessions import (
@@ -23,7 +22,10 @@ from custom_components.spotcast.sessions import (
     async_get_config_entry_implementation,
 )
 
-from custom_components.spotcast.spotify.exceptions import ProfileNotLoadedError
+from custom_components.spotcast.spotify.exceptions import (
+    ProfileNotLoadedError,
+    PlaybackError,
+)
 
 LOGGER = getLogger(__name__)
 
@@ -81,7 +83,7 @@ class SpotifyAccount:
         "user-follow-read",
     )
 
-    DJ_URI = SPOTIFY_DJ_PLAYLIST["uri"]
+    DJ_URI = "spotify:playlist:37i9dQZF1EYkqdzj48dyYq"
 
     def __init__(
             self,
@@ -142,6 +144,38 @@ class SpotifyAccount:
     def country(self) -> str:
         """Returns the current country in which the account resides"""
         return self.get_profile_value("country")
+
+    @property
+    def image_link(self) -> str:
+        """Returns the link for the account profile image"""
+        images = self.get_profile_value("images")
+        image_url = None
+        max_area = 0
+
+        for image in images:
+
+            area = image["width"] * image["height"]
+
+            if area > max_area:
+                image_url = image["url"]
+                max_area = area
+
+        return image_url
+
+    @property
+    def product(self) -> str:
+        """Returns the account subscription product"""
+        return self.get_profile_value("product")
+
+    @property
+    def type(self) -> str:
+        """Returns the type of account"""
+        return self.get_profile_value("type")
+
+    @property
+    def liked_songs_uri(self) -> str:
+        """Returns the liked songs uri for the account"""
+        return f"spotify:user:{self.id}:collection"
 
     def get_profile_value(self, attribute: str) -> Any:
         """Returns the value for a profile element. Raises Error if not
@@ -329,14 +363,17 @@ class SpotifyAccount:
             device_id
         )
 
-        await self.hass.async_add_executor_job(
-            self._spotify.start_playback,
-            device_id,
-            context_uri,
-            uris,
-            offset,
-            position_ms,
-        )
+        try:
+            await self.hass.async_add_executor_job(
+                self._spotify.start_playback,
+                device_id,
+                context_uri,
+                uris,
+                offset,
+                position_ms,
+            )
+        except SpotifyException as exc:
+            raise PlaybackError(exc.msg) from exc
 
     async def async_shuffle(
         self,

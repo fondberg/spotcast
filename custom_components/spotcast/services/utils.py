@@ -4,10 +4,12 @@ Functions:
     - entity_from_target_selector
 """
 
-from homeassistant.helpers import entity_registry as er
-from homeassistant.core import HomeAssistant
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
+
+
+from homeassistant.helpers import entity_registry as er
+from homeassistant.core import HomeAssistant
 
 from custom_components.spotcast.services.exceptions import (
     TooManyMediaPlayersError,

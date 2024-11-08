@@ -5,7 +5,7 @@ Classes:
 """
 
 from logging import getLogger
-import datetime as dt
+from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_UNKNOWN
@@ -55,7 +55,7 @@ class SpotifyPlaylistsSensor(SensorEntity):
             self.account.name
         )
 
-        self._attributes = {"playlists": [], "last_update": None}
+        self._attributes = {"first_10_playlists": []}
         self._attr_device_info = device_from_account(self.account)
 
         self._playlists = []
@@ -65,6 +65,10 @@ class SpotifyPlaylistsSensor(SensorEntity):
     @property
     def extra_state_attributes(self) -> dict:
         return self._attributes
+
+    @property
+    def icon(self) -> str:
+        return "mdi:playlist-music"
 
     @property
     def unit_of_measurement(self) -> str:
@@ -92,7 +96,12 @@ class SpotifyPlaylistsSensor(SensorEntity):
             self.account.name
         )
 
-        playlists = await self.account.async_playlists()
+        try:
+            playlists = await self.account.async_playlists()
+        except ReadTimeoutError:
+            self._attr_state = STATE_UNKNOWN
+            self._attributes = {}
+            return
 
         playlist_count = len(playlists)
 
@@ -104,4 +113,3 @@ class SpotifyPlaylistsSensor(SensorEntity):
 
         self._attr_state = playlist_count
         self._attributes["first_10_playlists"] = playlists[:10]
-        self._attributes["last_update"] = dt.datetime.now().isoformat("T")

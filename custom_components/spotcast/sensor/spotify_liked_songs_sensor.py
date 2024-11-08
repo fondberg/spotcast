@@ -1,7 +1,7 @@
-"""Module for the SpotifyDevicesSensor
+"""The SpotifyLikedSongsSensor object
 
 Classes:
-    - SpotifyDevicesSensor
+    - SpotifyLikedSongsSensor
 """
 
 from logging import getLogger
@@ -16,9 +16,9 @@ from custom_components.spotcast.sensor.utils import device_from_account
 LOGGER = getLogger(__name__)
 
 
-class SpotifyDevicesSensor(SensorEntity):
-    """A Home Assistant sensor reporting available devices for a
-    Spotify Account
+class SpotifyLikedSongsSensor(SensorEntity):
+    """A Home Assistant sensor reporting the number of liked songs for
+    an account
 
     Attributes:
         - account: The spotify account linked to the sensor
@@ -37,39 +37,41 @@ class SpotifyDevicesSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Devices Sensor"
+    CLASS_NAME = "Spotify Liked Songs Sensor"
 
     def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting available devices for a
+        """A Home Assistant sensor reporting liked songs for a
         Spotify Account
 
         Args:
-            - account(SpotifyAccount): The spotify account the sensor
-            is probing
+            - account(SpotifyAccount): The spotify account probed by
+                the sensor
         """
 
         self.account = account
 
-        LOGGER.debug("Loading Spotify Device sensor for %s", self.account.name)
+        LOGGER.debug(
+            "Loading Spotify Liked Songs sensor for %s",
+            self.account.name
+        )
 
-        self._attributes = {"devices": []}
         self._attr_device_info = device_from_account(self.account)
 
-        self._devices = []
+        self._playlists = []
         self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_devices"
+        self.entity_id = f"sensor.{self.account.id}_spotify_liked_songs"
 
     @property
-    def unit_of_mesaurement(self) -> str:
-        return "devices"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_devices"
+    def unit_of_measurement(self) -> str:
+        return "songs"
 
     @property
     def name(self) -> str:
-        return f"{self.account.name} Spotify Devices"
+        return f"{self.account.name} Spotify Liked Songs"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self.account.id}_spotify_liked_songs"
 
     @property
     def state(self) -> str:
@@ -81,28 +83,27 @@ class SpotifyDevicesSensor(SensorEntity):
 
     @property
     def icon(self) -> str:
-        return "mdi:speaker"
+        """Sets the icon for the sensor"""
+        return "mdi:music-note"
 
     async def async_update(self):
         LOGGER.debug(
-            "Getting Spotify Device for account %s",
+            "Getting Spotify Liked Songs for account `%s`",
             self.account.name
         )
 
         try:
-            devices = await self.account.async_devices()
+            liked_songs = await self.account.async_liked_songs()
         except ReadTimeoutError:
             self._attr_state = STATE_UNKNOWN
-            self._attributes = {}
             return
 
-        device_count = len(devices)
+        song_count = len(liked_songs)
 
         LOGGER.debug(
-            "Found %d devices linked to spotify account %s",
-            device_count,
+            "Found %d liked songs for spotify account `%s`",
+            song_count,
             self.account.name
         )
 
-        self._attr_state = device_count
-        self._attributes["devices"] = devices
+        self._attr_state = song_count

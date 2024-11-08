@@ -34,3 +34,7 @@ class NoAuthManagerError(TokenError):
 
 class ProfileNotLoadedError(HomeAssistantError):
     """Raised when the profile is not yet loaded"""
+
+
+class PlaybackError(HomeAssistantError):
+    """raised when playback failed due to an exception from Spotify"""

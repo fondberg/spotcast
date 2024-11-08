@@ -8,6 +8,7 @@ from logging import getLogger
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.util.read_only_dict import ReadOnlyDict
 
 from custom_components.spotcast.services.exceptions import (
     AccountNotFoundError,
@@ -53,3 +54,28 @@ def get_account_entry(
             return entry
 
     raise NoDefaultAccountError("No Default account could be found")
+
+
+def read_only_dict_to_standard(items: ReadOnlyDict) -> dict:
+    """Makes a copy of a ReadOnlyDict into a standard dictionary"""
+
+    if isinstance(items, dict):
+
+        new_dict = {}
+
+        for key, value in items.items():
+            new_dict[key] = read_only_dict_to_standard(value)
+
+        return new_dict
+
+    elif isinstance(items, list):
+
+        new_list = []
+
+        for item in items:
+            new_list.append(read_only_dict_to_standard(item))
+
+        return new_list
+
+    else:
+        return items

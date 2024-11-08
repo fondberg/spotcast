@@ -17,9 +17,20 @@ from custom_components.spotcast.sensor.spotify_devices_sensor import (
 from custom_components.spotcast.sensor.spotify_playlists_sensor import (
     SpotifyPlaylistsSensor,
 )
-
 from custom_components.spotcast.sensor.spotify_profile_sensor import (
     SpotifyProfileSensor,
+)
+from custom_components.spotcast.sensor.spotify_liked_songs_sensor import (
+    SpotifyLikedSongsSensor
+)
+from custom_components.spotcast.sensor.spotify_product_sensor import (
+    SpotifyProductSensor
+)
+from custom_components.spotcast.sensor.spotify_followers_sensor import (
+    SpotifyFollowersSensor
+)
+from custom_components.spotcast.sensor.spotify_account_type_sensor import (
+    SpotifyAccountTypeSensor
 )
 
 LOGGER = getLogger(__name__)
@@ -27,6 +38,10 @@ SENSORS = (
     SpotifyDevicesSensor,
     SpotifyPlaylistsSensor,
     SpotifyProfileSensor,
+    SpotifyLikedSongsSensor,
+    SpotifyProductSensor,
+    SpotifyFollowersSensor,
+    SpotifyAccountTypeSensor,
 )
 
 

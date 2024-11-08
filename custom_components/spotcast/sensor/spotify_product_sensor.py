@@ -1,14 +1,14 @@
-"""The SpotifyProfileSensor object
+"""The SpotifyProductSensor object
 
 Classes:
-    - SpotifyProfileSensor
+    - SpotifyProductSensor
 """
 
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import STATE_UNKNOWN, STATE_OK
+from homeassistant.const import STATE_UNKNOWN, STATE_OK, EntityCategory
 
 from custom_components.spotcast import SpotifyAccount
 from custom_components.spotcast.sensor.utils import device_from_account
@@ -16,9 +16,9 @@ from custom_components.spotcast.sensor.utils import device_from_account
 LOGGER = getLogger(__name__)
 
 
-class SpotifyProfileSensor(SensorEntity):
-    """A Home Assistant sensor reporting information about the profile
-    of a Spotify Account
+class SpotifyProductSensor(SensorEntity):
+    """A Home Assistant sensor reporting the subscription type for a
+    Spotify Account
 
     Attributes:
         - account: The spotify account linked to the sensor
@@ -36,11 +36,11 @@ class SpotifyProfileSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Profile Sensor"
+    CLASS_NAME = "Spotify Product Sensor"
 
     def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting the profile for a
-        Spotify Account
+        """A Home Assistant sensor reporting the subscription type for
+        a Spotify Account
 
         Args:
             - account(SpotifyAccount): The spotify account probed by
@@ -49,7 +49,7 @@ class SpotifyProfileSensor(SensorEntity):
         self.account = account
 
         LOGGER.debug(
-            "Loading Spotify Playlists sensor for %s",
+            "Loading Spotify Product sensor for %s",
             self.account.name
         )
 
@@ -58,18 +58,12 @@ class SpotifyProfileSensor(SensorEntity):
 
         self._playlists = []
         self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_profile"
+        self.entity_id = f"sensor.{self.account.id}_spotify_product"
+        self.entity_class = EntityCategory.DIAGNOSTIC
 
     @property
     def icon(self) -> str:
-        return "mdi:account"
-
-    @property
-    def entity_picture(self) -> str:
-        if self.state == STATE_OK:
-            return self.account.image_link
-
-        return None
+        return "mdi:account-card"
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -77,11 +71,11 @@ class SpotifyProfileSensor(SensorEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.account.name} Spotify Profile"
+        return f"{self.account.name} Spotify Product"
 
     @property
     def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_profile"
+        return f"{self.account.id}_spotify_product"
 
     @property
     def state(self) -> str:
@@ -89,7 +83,7 @@ class SpotifyProfileSensor(SensorEntity):
 
     async def async_update(self):
         LOGGER.debug(
-            "Getting Spotify Profile for account `%s`",
+            "Getting Spotify Subscription Type `%s`",
             self.account.name
         )
 
@@ -97,12 +91,12 @@ class SpotifyProfileSensor(SensorEntity):
             self._profile = await self.account.async_profile()
         except ReadTimeoutError:
             self._attr_state = STATE_UNKNOWN
-            self._attributes = {}
             return
 
         LOGGER.debug(
-            "Profile retrieve for account id `%s`", self._profile["id"],
+            "Account `%s` has the `%s` subscription",
+            self._profile["id"],
+            self._profile["product"],
         )
 
-        self._attributes = self._profile
-        self._attr_state = STATE_OK
+        self._attr_state = self._profile["product"]

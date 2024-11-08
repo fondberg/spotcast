@@ -1,0 +1,13 @@
+{
+    "services": {
+        "play_media": {
+            "service": "mdi:music-circle"
+        },
+        "play_dj": {
+            "service": "mdi:disc"
+        },
+        "play_liked_songs": {
+            "service": "mdi:thumb-up"
+        }
+    }
+}

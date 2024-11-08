@@ -50,6 +50,25 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         return f"Spotcast ({self._account.name}) - {name}"
 
     @property
+    def icon(self):
+
+        icon_map = {
+            "Computer": "mdi:laptop",
+            "Smartphone": "mdi:smartphone",
+            "*": "mdi:speaker"
+        }
+
+        try:
+            icon = icon_map[self._device_data["type"]]
+        except KeyError:
+            icon = icon_map["*"]
+
+        if self.state == STATE_OFF:
+            icon += "-off"
+
+        return icon
+
+    @property
     def state(self):
 
         if self._is_unavailable:
