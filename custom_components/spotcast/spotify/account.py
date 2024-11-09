@@ -8,9 +8,7 @@ from logging import getLogger
 from asyncio import (
     run_coroutine_threadsafe,
     sleep,
-    Lock,
     TimeoutError,
-    wait_for,
 )
 from time import time
 from typing import Any
@@ -27,9 +25,9 @@ from custom_components.spotcast.sessions import (
     ConnectionSession,
     async_get_config_entry_implementation,
 )
+from custom_components.spotcast.spotify.dataset import Dataset
 
 from custom_components.spotcast.spotify.exceptions import (
-    ProfileNotLoadedError,
     PlaybackError,
 )
 
@@ -101,7 +99,13 @@ class SpotifyAccount:
     )
 
     DJ_URI = "spotify:playlist:37i9dQZF1EYkqdzj48dyYq"
-    REFRESH_RATE = 15
+    REFRESH_RATE = 30
+    DATASETS = {
+        "devices": REFRESH_RATE,
+        "liked_songs": REFRESH_RATE*2,
+        "playlists": REFRESH_RATE*2,
+        "profile": REFRESH_RATE*4,
+    }
 
     def __init__(
             self,
@@ -133,11 +137,7 @@ class SpotifyAccount:
             auth=self.sessions["external"].token["access_token"]
         )
 
-        self._profile = {
-            "data": {},
-            "last_refresh": 0,
-        }
-        self._lock = Lock()
+        self._datasets = {x: Dataset(x, y) for x, y in self.DATASETS.items()}
 
     @property
     def id(self) -> str:
@@ -159,8 +159,24 @@ class SpotifyAccount:
     @property
     def profile(self) -> dict:
         """Returns the full profile dictionary of the account"""
-        self.get_profile_value("id")
-        return self._profile["data"]
+        return self.get_dataset("profile")
+
+    @property
+    def playlists(self) -> list:
+        """Returns the list of playlists for the account"""
+        return self.get_dataset("playlists")
+
+    @property
+    def liked_songs(self) -> list:
+        """Returns the list of liked songs for the account"""
+        liked_songs = self.get_dataset("liked_songs")
+        liked_songs = [x["track"]["uri"] for x in liked_songs]
+        return liked_songs
+
+    @property
+    def devices(self) -> list:
+        """Returns the list of devices linked to the account"""
+        return self.get_dataset("devices")
 
     @property
     def country(self) -> str:
@@ -213,13 +229,12 @@ class SpotifyAccount:
         Returns:
             - Any: the value at the key in the profile
         """
-        if self._profile["data"] == {}:
-            raise ProfileNotLoadedError(
-                "The profile has not been loaded properly in the account. Call"
-                " `async_profile`"
-            )
+        profile = self._datasets["profile"].data
 
-        return self._profile["data"].get(attribute)
+        return profile.get(attribute)
+
+    def get_dataset(self, name: str) -> list | dict:
+        return self._datasets[name].data
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -285,57 +300,63 @@ class SpotifyAccount:
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Profile from Spotify")
 
-        if (
-            force or
-            time() + self.REFRESH_RATE > self._profile["last_refresh"]
-        ):
-            self._profile["data"]: dict = await wait_for(
-                self.hass.async_add_executor_job(self._spotify.me),
-                timeout=15,
-            )
+        dataset = self._datasets["profile"]
+
+        if force or dataset.is_expired:
+            async with dataset.lock:
+                data = await self.hass.async_add_executor_job(self._spotify.me)
+                dataset.update(data)
 
         return self.profile
 
-    async def async_devices(self) -> list[dict]:
+    async def async_devices(self, force: bool = False) -> list[dict]:
         """Returns the list of devices"""
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Devices for account `%s`", self.name)
-        response = await self.hass.async_add_executor_job(
-            self._spotify.devices
-        )
 
-        devices = response["devices"]
+        dataset = self._datasets["devices"]
 
-        # Log all the devices found
-        for device in devices:
-            LOGGER.debug("Found Device [%s](%s)", device["name"], device["id"])
+        if force or dataset.is_expired:
+            async with dataset.lock:
+                data = await self.hass.async_add_executor_job(
+                    self._spotify.devices
+                )
+                dataset.update(data["devices"])
 
-        return devices
+        return self.devices
 
-    async def async_playlists(self) -> list[dict]:
+    async def async_playlists(self, force: bool = False) -> list[dict]:
         """Returns a list of playlist for the current user"""
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Playlist for account `%s`", self.name)
 
-        offset = 0
-        all_playllists = []
-        total = None
+        dataset = self._datasets["playlists"]
 
-        while total is None or len(all_playllists) < total:
+        if force or dataset.is_expired:
+            async with dataset.lock:
 
-            current_playlist: dict = await self.hass.async_add_executor_job(
-                self._spotify.current_user_playlists,
-                50,
-                offset
-            )
+                offset = 0
+                all_playlists = []
+                total = None
 
-            if total is None:
-                total = current_playlist["total"]
+                while total is None or len(all_playlists) < total:
 
-            all_playllists.extend(current_playlist["items"])
-            offset = len(all_playllists)
+                    current_playlists: dict = await self.hass\
+                        .async_add_executor_job(
+                            self._spotify.current_user_playlists,
+                            50,
+                            offset,
+                        )
 
-        return all_playllists
+                    if total is None:
+                        total = current_playlists["total"]
+
+                    all_playlists.extend(current_playlists["items"])
+                    offset = len(all_playlists)
+
+                dataset.update(all_playlists)
+
+        return self.playlists
 
     async def async_wait_for_device(self, device_id: str, timeout: int = 12):
         """Asycnhronously wait for a device to become available
@@ -355,7 +376,7 @@ class SpotifyAccount:
 
         while (time() <= end_time):
 
-            devices = await self.async_devices()
+            devices = await self.async_devices(force=True)
             devices = {x["id"]: x for x in devices}
 
             try:
@@ -363,7 +384,7 @@ class SpotifyAccount:
                 return
             except KeyError:
                 LOGGER.debug("Device `%s` not yet available", device_id)
-                await sleep(1)
+                await sleep(timeout/4)
 
         raise TimeoutError(
             f"device `{device_id}` still not available after {timeout} sec."
@@ -381,7 +402,6 @@ class SpotifyAccount:
             - device_id(str): the device to set the extras to
             - extras(dict): the extra settings to apply
         """
-
         actions = {
             "start_volume": self.async_set_volume,
             "shuffle": self.async_shuffle,
@@ -415,7 +435,6 @@ class SpotifyAccount:
             - PlaybackError: raised when spotipy raises an error while
                 trying to start playback
         """
-
         await self.async_ensure_tokens_valid()
 
         LOGGER.info(
@@ -462,33 +481,39 @@ class SpotifyAccount:
             device_id,
         )
 
-    async def async_liked_songs(self) -> list[str]:
+    async def async_liked_songs(self, force: bool = False) -> list[str]:
         """Retrieves the list of uris of songs in the user liked songs
         """
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting saved tracks for account `%s`", self.name)
 
-        offset = 0
-        saved_tracks = []
-        total = None
+        dataset = self._datasets["liked_songs"]
 
-        while total is None or len(saved_tracks) < total:
+        if force or dataset.is_expired:
+            async with dataset.lock:
 
-            current_tracks: dict = await self.hass.async_add_executor_job(
-                self._spotify.current_user_saved_tracks,
-                50,
-                offset
-            )
+                offset = 0
+                liked_songs = []
+                total = None
 
-            if total is None:
-                total = current_tracks["total"]
+                while total is None or len(liked_songs) < total:
 
-            uris = [x["track"]["uri"] for x in current_tracks["items"]]
-            saved_tracks.extend(uris)
+                    current_songs: dict = await self.hass\
+                        .async_add_executor_job(
+                            self._spotify.current_user_saved_tracks,
+                            50,
+                            offset,
+                        )
 
-            offset = len(saved_tracks)
+                    if total is None:
+                        total = current_songs["total"]
 
-        return saved_tracks
+                    liked_songs.extend(current_songs["items"])
+                    offset = len(liked_songs)
+
+                dataset.update(liked_songs)
+
+        return self.liked_songs
 
     async def async_repeat(
         self,
@@ -556,7 +581,6 @@ class SpotifyAccount:
             SpotifyAccount: A spotify account from the api config in
                 the config entry
         """
-
         if DOMAIN not in hass.data:
             hass.data[DOMAIN] = {}
 

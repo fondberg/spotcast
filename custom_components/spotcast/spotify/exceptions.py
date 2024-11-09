@@ -38,3 +38,7 @@ class ProfileNotLoadedError(HomeAssistantError):
 
 class PlaybackError(HomeAssistantError):
     """raised when playback failed due to an exception from Spotify"""
+
+
+class ExpiredDatasetError(HomeAssistantError):
+    """Raised when a dataset if retrived while expired"""

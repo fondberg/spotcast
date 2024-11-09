@@ -8,6 +8,7 @@ from custom_components.spotcast.spotify.account import (
     OAuth2Session,
     InternalSession,
     HomeAssistant,
+    Dataset
 )
 
 
@@ -50,11 +51,12 @@ class TestDataRetention(TestCase):
         except AssertionError:
             self.fail("Spotify object didn't receive proper token'")
 
-    def test_is_ddefault_saved(self):
+    def test_is_default_saved(self):
         self.assertTrue(self.account.is_default)
 
-    def test_profile_is_declared(self):
-        self.assertEqual(
-            self.account._profile,
-            {"data": {}, "last_refresh": 0}
-        )
+    def test_datasets_created(self):
+        self.assertIsInstance(self.account._datasets, dict)
+
+    def test_datasets_are_dataset_objects(self):
+        for item in self.account._datasets.values():
+            self.assertIsInstance(item, Dataset)
