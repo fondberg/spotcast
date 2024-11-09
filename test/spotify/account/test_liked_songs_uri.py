@@ -27,7 +27,7 @@ class TestLikedSongUriValue(TestCase):
             internal_session=self.mocks["external"],
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "id": "dummy_user"
         }
 

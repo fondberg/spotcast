@@ -8,12 +8,16 @@ from logging import getLogger
 
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
+from homeassistant.util.read_only_dict import ReadOnlyDict
 import voluptuous as vol
 
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services.play_media import async_play_media
-from custom_components.spotcast.utils import get_account_entry
+from custom_components.spotcast.utils import (
+    get_account_entry,
+    read_only_dict_to_standard
+)
 from custom_components.spotcast.services.utils import (
     EXTRAS_SCHEMA,
 )
@@ -39,6 +43,8 @@ async def async_play_liked_songs(hass: HomeAssistant, call: ServiceCall):
     entry = get_account_entry(hass, account_id)
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
 
-    call.data["spotify_uri"] = account.liked_songs_uri
+    call_data = read_only_dict_to_standard(call.data)
+    call_data["spotify_uri"] = account.liked_songs_uri
+    call.data = ReadOnlyDict(call_data)
 
     await async_play_media(hass, call)

@@ -23,7 +23,7 @@ class TestPlaylistRetrieval(IsolatedAsyncioTestCase):
             MagicMock(spec=InternalSession),
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "id": "dummy",
             "name": "Dummy Profile"
         }

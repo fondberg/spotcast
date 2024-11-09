@@ -27,7 +27,7 @@ class TestTypeValue(TestCase):
             internal_session=self.mocks["internal"],
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "type": "user"
         }
 

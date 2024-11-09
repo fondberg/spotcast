@@ -25,8 +25,11 @@ class TestGettingDevices(IsolatedAsyncioTestCase):
         )
 
         self.account._profile = {
-            "id": "dummy",
-            "display_name": "Dummy Account"
+            "data": {
+                "id": "dummy",
+                "display_name": "Dummy Account"
+            },
+            "last_update": 0,
         }
 
         self.dummy_devices = {

@@ -21,7 +21,7 @@ class TestPropertyValue(TestCase):
             MagicMock(spec=InternalSession)
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "id": "dummy",
             "country": "CA",
         }

@@ -27,7 +27,7 @@ class TestImageLink(TestCase):
             internal_session=self.mocks["internal"],
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "country": "CA",
             "display_name": "Dummy User",
             "email": "dummyemail@gmail.com",

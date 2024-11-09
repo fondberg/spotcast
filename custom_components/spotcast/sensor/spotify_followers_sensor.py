@@ -9,9 +9,9 @@ from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_UNKNOWN
+from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast import SpotifyAccount
-from custom_components.spotcast.sensor.utils import device_from_account
 
 LOGGER = getLogger(__name__)
 
@@ -55,7 +55,7 @@ class SpotifyFollowersSensor(SensorEntity):
             self.account.name
         )
 
-        self._attr_device_info = device_from_account(self.account)
+        self._attr_device_info = self.account.device_info
 
         self._playlists = []
         self._attr_state = STATE_UNKNOWN
@@ -95,7 +95,7 @@ class SpotifyFollowersSensor(SensorEntity):
 
         try:
             self._profile = await self.account.async_profile()
-        except ReadTimeoutError:
+        except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
             return
 

@@ -54,4 +54,7 @@ class TestDataRetention(TestCase):
         self.assertTrue(self.account.is_default)
 
     def test_profile_is_declared(self):
-        self.assertEqual(self.account._profile, {})
+        self.assertEqual(
+            self.account._profile,
+            {"data": {}, "last_refresh": 0}
+        )

@@ -5,14 +5,20 @@ Classes:
 """
 
 from logging import getLogger
-from asyncio import run_coroutine_threadsafe
-from asyncio import sleep
+from asyncio import (
+    run_coroutine_threadsafe,
+    sleep,
+    Lock,
+    TimeoutError,
+    wait_for,
+)
 from time import time
 from typing import Any
 
 from spotipy import Spotify, SpotifyException
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers.device_registry import DeviceInfo, DeviceEntryType
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.sessions import (
@@ -56,6 +62,8 @@ class SpotifyAccount:
     Constants:
         - SCOPE(tuple): A list of API permissions required for the
             instance to work properly
+        - DJ_URI(str): the uri for the DJ playlist
+        - REFRESH_RATE(int): rate at which to deem the cache deprecated
 
     Methods:
         - get_profile_value
@@ -93,6 +101,7 @@ class SpotifyAccount:
     )
 
     DJ_URI = "spotify:playlist:37i9dQZF1EYkqdzj48dyYq"
+    REFRESH_RATE = 15
 
     def __init__(
             self,
@@ -124,7 +133,11 @@ class SpotifyAccount:
             auth=self.sessions["external"].token["access_token"]
         )
 
-        self._profile = {}
+        self._profile = {
+            "data": {},
+            "last_refresh": 0,
+        }
+        self._lock = Lock()
 
     @property
     def id(self) -> str:
@@ -147,7 +160,7 @@ class SpotifyAccount:
     def profile(self) -> dict:
         """Returns the full profile dictionary of the account"""
         self.get_profile_value("id")
-        return self._profile
+        return self._profile["data"]
 
     @property
     def country(self) -> str:
@@ -200,13 +213,26 @@ class SpotifyAccount:
         Returns:
             - Any: the value at the key in the profile
         """
-        if self._profile == {}:
+        if self._profile["data"] == {}:
             raise ProfileNotLoadedError(
                 "The profile has not been loaded properly in the account. Call"
                 " `async_profile`"
             )
 
-        return self._profile.get(attribute)
+        return self._profile["data"].get(attribute)
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Returns the Home Assistant device info of the Account
+        Service"""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id)},
+            manufacturer="Spotify AB",
+            model=f"Spotify {self.profile['product']}",
+            name=f"Spotcast {self.name}",
+            entry_type=DeviceEntryType.SERVICE,
+            configuration_url="https://open.spotify.com",
+        )
 
     def get_token(self, api: str) -> str:
         """Retrives a token from the requested session.
@@ -246,15 +272,27 @@ class SpotifyAccount:
                 token = await self.async_get_token(key)
                 self._spotify.set_auth(token["access_token"])
 
-    async def async_profile(self) -> dict:
-        """Test the connection and returns a user profile"""
+    async def async_profile(self, force: bool = False) -> dict:
+        """Test the connection and returns a user profile
+
+        Args:
+            - force(bool, optional): Forces the profile update if True.
+                Defaults to False
+
+        Returns:
+            - dict: the raw profile dictionary from the Spotify API
+        """
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Profile from Spotify")
-        self._profile: dict = await self.hass.async_add_executor_job(
-            self._spotify.me
-        )
 
-        self.name
+        if (
+            force or
+            time() + self.REFRESH_RATE > self._profile["last_refresh"]
+        ):
+            self._profile["data"]: dict = await wait_for(
+                self.hass.async_add_executor_job(self._spotify.me),
+                timeout=15,
+            )
 
         return self.profile
 

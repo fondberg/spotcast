@@ -16,16 +16,15 @@ TEST_MODULE = "custom_components.spotcast.sensor.spotify_account_type_sensor"
 
 class TestDataRetention(TestCase):
 
-    @patch(f"{TEST_MODULE}.device_from_account")
-    def setUp(self, mock_device: MagicMock):
+    def setUp(self):
 
         self.mocks = {
             "account": MagicMock(spec=SpotifyAccount),
             "device_info": MagicMock(spec=DeviceInfo),
         }
 
-        mock_device.return_value = self.mocks["device_info"]
         self.mocks["account"].id = "dummy_account"
+        self.mocks["account"].device_info = self.mocks["device_info"]
 
         self.sensor = SpotifyAccountTypeSensor(self.mocks["account"])
 

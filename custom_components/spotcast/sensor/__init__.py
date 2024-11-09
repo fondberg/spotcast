@@ -64,7 +64,4 @@ async def async_setup_entry(
 
         built_sensors.append(sensor(account))
 
-    async_add_entities(
-        built_sensors,
-        True
-    )
+    async_add_entities(built_sensors, True)

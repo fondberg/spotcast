@@ -22,7 +22,7 @@ class TestProfileLoaded(TestCase):
             MagicMock(spec=InternalSession),
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "foo": "bar",
             "hello": "world"
         }

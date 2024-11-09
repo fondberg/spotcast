@@ -44,7 +44,7 @@ class TestMediaCasting(IsolatedAsyncioTestCase):
             MagicMock(spec=InternalSession),
         )
 
-        self.account._profile = {
+        self.account._profile["data"] = {
             "name": "dummy user"
         }
 

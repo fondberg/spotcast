@@ -28,6 +28,7 @@ __version__ = "4.0.0-a0"
 LOGGER = getLogger(__name__)
 PLATFORMS = [
     Platform.SENSOR,
+    Platform.BINARY_SENSOR,
     Platform.MEDIA_PLAYER,
 ]
 
@@ -38,7 +39,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     Returns:
         - bool: returns `True` if the integration setup was successfull
     """
-
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
 
     LOGGER.info(

@@ -1,7 +1,7 @@
 """Module to test the async_update functio"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, AsyncMock
 from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -17,8 +17,7 @@ TEST_MODULE = "custom_components.spotcast.sensor.spotify_account_type_sensor"
 
 class TestIconValue(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.device_from_account")
-    async def asyncSetUp(self, mock_device: MagicMock):
+    async def asyncSetUp(self):
 
         self.mocks = {
             "account": MagicMock(spec=SpotifyAccount),
@@ -31,12 +30,12 @@ class TestIconValue(IsolatedAsyncioTestCase):
 
         }
 
-        mock_device.return_value = self.mocks["device_info"]
         self.mocks["account"].id = "dummy_account"
         self.mocks["account"].async_profile = AsyncMock()
         self.mocks["account"].async_profile.return_value = self.mocks[
             "profile_data"
         ]
+        self.mocks["account"].device_info = self.mocks["device_info"]
 
         self.sensor = SpotifyAccountTypeSensor(self.mocks["account"])
 
@@ -57,8 +56,7 @@ class TestIconValue(IsolatedAsyncioTestCase):
 
 class TestFailedUpdate(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.device_from_account")
-    async def asyncSetUp(self, mock_device: MagicMock):
+    async def asyncSetUp(self):
 
         self.mocks = {
             "account": MagicMock(spec=SpotifyAccount),
@@ -71,7 +69,6 @@ class TestFailedUpdate(IsolatedAsyncioTestCase):
 
         }
 
-        mock_device.return_value = self.mocks["device_info"]
         self.mocks["account"].id = "dummy_account"
         self.mocks["account"].async_profile = AsyncMock()
         self.mocks["account"].async_profile.side_effect = ReadTimeoutError(
@@ -80,6 +77,7 @@ class TestFailedUpdate(IsolatedAsyncioTestCase):
             MagicMock(),
         )
         self.sensor = SpotifyAccountTypeSensor(self.mocks["account"])
+        self.mocks["account"].device_info = self.mocks["device_info"]
 
         await self.sensor.async_update()
 
