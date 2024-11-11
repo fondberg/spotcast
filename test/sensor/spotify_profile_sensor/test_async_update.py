@@ -22,7 +22,25 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
         self.account.name = "Dummy Account"
 
         self.account.async_profile.return_value = {
-            "id": "dummy_id"
+            "id": "dummy_id",
+            "explicit_content": {
+                "filter_enabled": False,
+                "filter_locked": False,
+            },
+            "followers": {
+                "total": 10
+            },
+            "href": "http://locahost",
+            "external_urls": {
+                "spotify": "http://locahost"
+            },
+            "images": [
+                {
+                    "url": "http://locahost",
+                    "height": 640,
+                    "width": 640,
+                }
+            ]
         }
         await self.sensor.async_update()
 
@@ -38,7 +56,12 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
     def test_extra_attributes_saved(self):
         self.assertEqual(
             self.sensor.extra_state_attributes,
-            {"id": "dummy_id"},
+            {
+                "id": "dummy_id",
+                "filter_explicit_enabled": False,
+                "filter_explicit_locked": False,
+                "followers_count": 10,
+            },
         )
 
 

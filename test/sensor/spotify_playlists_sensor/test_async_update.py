@@ -21,18 +21,20 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
         self.account.name = "Dummy Account"
 
         self.account.async_playlists.return_value = [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-        ]
+            {
+                "uri": "foo",
+                "owner": {
+                    "id": "dummy_id"
+                },
+                "images": [
+                    {
+                        "url": "https://localhost.com/2",
+                        "height": 640,
+                        "width": 640,
+                    }
+                ]
+            }
+        ]*11
         await self.sensor.async_update()
 
     def test_profile_was_retrieved(self):
@@ -41,13 +43,13 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail()
 
-    def test_attribute_state_was_set_to_account_type(self):
+    def test_attribute_state__was_set_to_11(self):
         self.assertEqual(self.sensor.state, 11)
 
-    def test_extra_attributes_saved(self):
+    def test_attribute_only_holds_top_10_playlist(self):
         self.assertEqual(
-            self.sensor.extra_state_attributes,
-            {"first_10_playlists": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+            len(self.sensor.extra_state_attributes["first_10_playlists"]),
+            10
         )
 
 

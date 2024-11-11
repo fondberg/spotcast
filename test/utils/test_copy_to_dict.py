@@ -1,10 +1,9 @@
 """Module to test the read_only_dict_to_standard"""
 
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 
 from custom_components.spotcast.utils import (
-    read_only_dict_to_standard,
+    copy_to_dict,
     ReadOnlyDict,
 )
 
@@ -22,7 +21,7 @@ class TestDictionaryConversion(TestCase):
         }
 
         self.readonly = ReadOnlyDict(self.expected)
-        self.result = read_only_dict_to_standard(self.readonly)
+        self.result = copy_to_dict(self.readonly)
 
     def test_dictionary_properly_converted(self):
         self.assertEqual(self.result, self.expected)

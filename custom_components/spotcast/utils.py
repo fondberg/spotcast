@@ -56,15 +56,15 @@ def get_account_entry(
     raise NoDefaultAccountError("No Default account could be found")
 
 
-def read_only_dict_to_standard(items: ReadOnlyDict) -> dict:
-    """Makes a copy of a ReadOnlyDict into a standard dictionary"""
+def copy_to_dict(items: dict) -> dict:
+    """Makes a deep copy of a dictionary"""
 
     if isinstance(items, dict):
 
         new_dict = {}
 
         for key, value in items.items():
-            new_dict[key] = read_only_dict_to_standard(value)
+            new_dict[key] = copy_to_dict(value)
 
         return new_dict
 
@@ -73,7 +73,7 @@ def read_only_dict_to_standard(items: ReadOnlyDict) -> dict:
         new_list = []
 
         for item in items:
-            new_list.append(read_only_dict_to_standard(item))
+            new_list.append(copy_to_dict(item))
 
         return new_list
 

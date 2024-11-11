@@ -22,18 +22,6 @@ class SpotifyProductSensor(SpotcastSensor):
     """A Home Assistant sensor reporting the subscription type for a
     Spotify Account
 
-    Attributes:
-        - account: The spotify account linked to the sensor
-
-    Properties:
-        - units_of_measurement(str): the units of mesaurements used
-        - unique_id(str): A unique id for the specific sensor
-        - name(str): The friendly name of the sensor
-        - state(str): The current state of the sensor
-
-    Constants:
-        - CLASS_NAME(str): The generic name for the class
-
     Methods:
         - async_update
     """
@@ -42,8 +30,10 @@ class SpotifyProductSensor(SpotcastSensor):
     ICON = "mdi:account-card"
     ICON_OFF = ICON
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
+    STATE_CLASS = None
 
     async def async_update(self):
+        """Updates the substription product asynchornously"""
 
         try:
             profile = await self.account.async_profile()

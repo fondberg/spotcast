@@ -10,10 +10,7 @@ from urllib3.exceptions import ReadTimeoutError
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast.sensor.abstract_sensor import (
-    SpotcastSensor,
-    SensorStateClass,
-)
+from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
 
 LOGGER = getLogger(__name__)
 
@@ -22,18 +19,8 @@ class SpotifyFollowersSensor(SpotcastSensor):
     """A Home Assistant sensor reporting the number of followers for
     an account
 
-    Attributes:
-        - account: The spotify account linked to the sensor
-
-    Properties:
-        - units_of_measurement(str): the units of mesaurements used
-        - unique_id(str): A unique id for the specific sensor
-        - name(str): The friendly name of the sensor
-        - state(str): The current state of the sensor
-        - state_class(str): The type of state provided by the sensor
-
-    Constants:
-        - CLASS_NAME(str): The generic name for the class
+    properties:
+        - state_class(str): the state class of the sensor
 
     Methods:
         - async_update
@@ -44,11 +31,8 @@ class SpotifyFollowersSensor(SpotcastSensor):
     ICON_OFF = ICON
     UNITS_OF_MEASURE = "followers"
 
-    @property
-    def state_class(self) -> str:
-        return SensorStateClass.MEASUREMENT
-
     async def async_update(self):
+        """Updates the number of followers asynchornously"""
         try:
             self._profile = await self.account.async_profile()
         except (ReadTimeoutError, ReadTimeout):

@@ -24,18 +24,6 @@ class SpotifyProfileMalfunctionBinarySensor(SpotcastBinarySensor):
     """A Home Assistant sensor reporting information about the profile
     of a Spotify Account
 
-    Attributes:
-        - account: The spotify account linked to the sensor
-
-    Properties:
-        - units_of_measurement(str): the units of mesaurements used
-        - unique_id(str): A unique id for the specific sensor
-        - name(str): The friendly name of the sensor
-        - state(str): The current state of the sensor
-
-    Constants:
-        - CLASS_NAME(str): The generic name for the class
-
     Methods:
         - async_update
     """
@@ -47,6 +35,8 @@ class SpotifyProfileMalfunctionBinarySensor(SpotcastBinarySensor):
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 
     async def async_update(self):
+        """Updates the profile and mark a problem if failing
+        asynchornously"""
 
         try:
             profile = await self.account.async_profile()

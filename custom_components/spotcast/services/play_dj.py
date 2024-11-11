@@ -1,7 +1,7 @@
-"""Module for the play media service
+"""Module for the play dj service
 
 Functions:
-    - async_play_media
+    - async_play_dj
 """
 
 from logging import getLogger
@@ -15,7 +15,7 @@ import voluptuous as vol
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services.play_media import async_play_media
 from custom_components.spotcast.services.utils import EXTRAS_SCHEMA
-from custom_components.spotcast.utils import read_only_dict_to_standard
+from custom_components.spotcast.utils import copy_to_dict
 
 LOGGER = getLogger(__name__)
 
@@ -39,7 +39,7 @@ async def async_play_dj(hass: HomeAssistant, call: ServiceCall):
     if extras is not None:
         extras = _clean_extras(extras)
 
-    call_data = read_only_dict_to_standard(call.data)
+    call_data = copy_to_dict(call.data)
     call_data["spotify_uri"] = SpotifyAccount.DJ_URI
     call_data["data"] = extras
     call.data = ReadOnlyDict(call_data)

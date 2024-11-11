@@ -7,9 +7,6 @@ Classes:
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import (
-    SensorStateClass,
-)
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
@@ -22,18 +19,8 @@ class SpotifyDevicesSensor(SpotcastSensor):
     """A Home Assistant sensor reporting available devices for a
     Spotify Account
 
-    Attributes:
-        - account: The spotify account linked to the sensor
-
     Properties:
-        - units_of_measurement(str): the units of mesaurements used
-        - unique_id(str): A unique id for the specific sensor
-        - name(str): The friendly name of the sensor
-        - state(str): The current state of the sensor
-        - state_class(str): The type of state provided by the sensor
-
-    Constants:
-        - CLASS_NAME(str): The generic name for the class
+        - state_class(self): the state class of the sensor
 
     Methods:
         - async_update
@@ -44,11 +31,8 @@ class SpotifyDevicesSensor(SpotcastSensor):
     DEFAULT_ATTRIBUTES = {"devices": []}
     UNITS_OF_MEASURE = "devices"
 
-    @property
-    def state_class(self) -> str:
-        return SensorStateClass.MEASUREMENT
-
     async def async_update(self):
+        """Updates the available devices asynchronously"""
         try:
             devices = await self.account.async_devices()
         except (ReadTimeoutError, ReadTimeout):

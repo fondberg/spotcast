@@ -21,6 +21,9 @@ LOGGER = getLogger(__name__)
 class IsDefaultBinarySensor(SpotcastBinarySensor):
     """Diagnostic binary sensor that confirms if the account is the
     default Spotcast account
+
+    Methods:
+        - async_update
     """
 
     GENERIC_NAME = "Spotcast Default"
@@ -30,6 +33,8 @@ class IsDefaultBinarySensor(SpotcastBinarySensor):
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 
     async def async_update(self):
+        """Updates based on the is_default proerty of account
+        asynchornously"""
         await self.account.async_profile()
         LOGGER.debug(
             "Updating default state sensor for `%s`",

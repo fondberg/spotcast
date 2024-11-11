@@ -10,10 +10,8 @@ from urllib3.exceptions import ReadTimeoutError
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast.sensor.abstract_sensor import (
-    SensorStateClass,
-    SpotcastSensor,
-)
+from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
+from custom_components.spotcast.utils import copy_to_dict
 
 LOGGER = getLogger(__name__)
 
@@ -22,18 +20,8 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
     """A Home Assistant sensor reporting available playlists for a
     Spotify Account
 
-    Attributes:
-        - account: The spotify account linked to the sensor
-
     Properties:
-        - units_of_measurement(str): the units of mesaurements used
-        - unique_id(str): A unique id for the specific sensor
-        - name(str): The friendly name of the sensor
-        - state(str): The current state of the sensor
-        - state_class(str): The type of state provided by the sensor
-
-    Constants:
-        - CLASS_NAME(str): The generic name for the class
+        - state_class(str): the state class of the entity
 
     Methods:
         - async_update
@@ -45,11 +33,8 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
     DEFAULT_ATTRIBUTES = {"first_10_playlists": []}
     UNITS_OF_MEASURE = "playlists"
 
-    @property
-    def state_class(self) -> str:
-        return SensorStateClass.MEASUREMENT
-
     async def async_update(self):
+        """Updates the playlist count asynchornously"""
 
         try:
             playlists = await self.account.async_playlists()
@@ -72,4 +57,42 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
         )
 
         self._attr_state = playlist_count
-        self._attributes["first_10_playlists"] = playlists[:10]
+        top_10 = [self._clean_playlist(x) for x in playlists[:10]]
+        self._attributes["first_10_playlists"] = top_10
+
+    @staticmethod
+    def _clean_playlist(playlist: dict) -> dict:
+        """Cleans a playlist for attributes in Home Assistant"""
+        keep = (
+            "description",
+            "name",
+            "owner",
+            "collaborative",
+            "uri",
+            "image",
+        )
+
+        playlist = copy_to_dict(playlist)
+
+        playlist["owner"] = playlist["owner"]["id"]
+
+        max_area = -1
+
+        for image in playlist["images"]:
+
+            try:
+                area = image["height"] * image["width"]
+            except TypeError:
+                area = 0
+
+            if area > max_area:
+                playlist["image"] = image["url"]
+                max_area = area
+
+        result = {}
+
+        for key, value in playlist.items():
+            if key in keep:
+                result[key] = value
+
+        return result

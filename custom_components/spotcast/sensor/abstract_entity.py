@@ -16,38 +16,45 @@ LOGGER = getLogger(__name__)
 
 class SpotcastEntity(ABC, Entity):
     """A generic abstract Spotcast sensor for Home Assistant. can be
-    customized through its list of constants for the class
-
-    Attributes:
-        - account(SpotifyAccount): the spotify account linked to the
-            sensor.
-        - entity_id(str): The entity_id of the sensor in Home Assistant
+    customized through its list of constants for the class. A child
+    instance must implement the `icon` property and the `async_update`
+    method
 
     Constants:
-        - GENERIC_NAME(str): the generic name of the sensor used in
-            Home Assistant frontend
-        - GENERIC_ID(str): the generic id to add to the entity id and
-            unique id for identification in Home Assistant
-        - ICON(str): the mdi icon to use for the entity.
-        - ICON_OFF(str, optional): the icon to use for off state. If
-            None, uses the `-off` variant of the ICON constant. Defaults
-            to None.
-        - DEFAULT_ATTRIBUTES(dict[str, str], optional): the default
-            extra attributes for the entity. None if the sensor doesn't
-            report extra attributes
-        - INACTIVE_STATE(str): the state use to signify an OFF state.
-            Ignored in the case of numeric state.
+        - GENERIC_NAME(str): The base name of the entity to use in the
+            name and id of instance. Ids based on the name converts
+            the name to lowercase with `_` to replace spaces.
+        - GENERIC_ID(str, optional): Overwrites the default base id if
+            oresents. Defaults to None,
+        - PLATFORM(str): the platform of the entity
+        - DEVICE_SOURCE(str, optional): Indicates where to how to load
+            the device information. Options are `account` and `None`.
+            Defaults to None
+        - ICON(str): the icon shown with the entity. Uses a `-off`
+            version of the icon for inactive state
+        - ICON_OFF(str, optional): Overwrites the icon for inactive
+            state. Defaults to None.
+        - DEFAULT_ATTRIBUTES(dict, optional): The state of extra
+            attributes at initialisation. Defaults to None.
+        - INACTIVE_STATE(str, optional): Indicate the state indicating
+            the entity is inactive. Defaults to `STATE_OFF`
+        - ENTITY_CATEGORY(str, optional): The category of entity
+            the instance is of. Defaults to None.
+
+    Attributes:
+        - entity_id(str): the the entity id used by the entity
+        - entity_category(str): entity_category based on the
+            `ENTITY_CATEGORY` constant
 
     Properties:
-        - name(str): the name of the device based on the account name
-            and generic_name
-        - unique_id(str): the unique_id of the sensor based on the
-            account id and generic_id
-        - icon(str): the icon to use for the device. Based on ICON
-            and ICON_OFF
+        - extra_state_attributes(dict): the extra attributes of the
+            entity
+        - name(str): the name of the entity
+        - unique_id(str): the unique id of the entity
+        - icon(str, abstract): the icon of the entity
 
     Methods:
-        - async_update
+        - async_update(abstract)
     """
 
     GENERIC_NAME: str = "Abstract Spotcast"

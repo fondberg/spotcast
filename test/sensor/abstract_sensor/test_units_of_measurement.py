@@ -21,4 +21,4 @@ class TestUnitsMeasurement(TestCase):
         self.sensor = DummySensor(self.account)
 
     def test_units_of_measurements_from_contstants(self):
-        self.assertEqual(self.sensor.units_of_measurement, "foos")
+        self.assertEqual(self.sensor.unit_of_measurement, "foos")

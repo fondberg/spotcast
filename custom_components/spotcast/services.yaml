@@ -61,6 +61,34 @@ play_dj:
       required: false
       selector:
         object:
+transfer_playback:
+  name: Transfer Playback
+  description: Transfers the spotify playback to the targetted device
+  fields:
+    media_player:
+      name: Media Player
+      required: true
+      selector:
+        target:
+          entity:
+            - domain: media_player
+              integration: cast
+            - domain: media_player
+              integration: spotcast
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      example: "pirate_jeanne"
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast
+    data:
+      name: Data
+      description: Additional modifiers for the play_media service call.
+      required: false
+      selector:
+        object:
 play_liked_songs:
   name: Spotcast Liked Songs
   description: Play User's Liked Songs'

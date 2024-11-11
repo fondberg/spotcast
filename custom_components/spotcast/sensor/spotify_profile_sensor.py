@@ -10,6 +10,7 @@ from urllib3.exceptions import ReadTimeoutError
 from homeassistant.const import STATE_UNKNOWN, STATE_OK
 from requests.exceptions import ReadTimeout
 
+from custom_components.spotcast.utils import copy_to_dict
 from custom_components.spotcast.sensor.abstract_sensor import (
     SpotcastSensor
 )
@@ -21,17 +22,9 @@ class SpotifyProfileSensor(SpotcastSensor):
     """A Home Assistant sensor reporting information about the profile
     of a Spotify Account
 
-    Attributes:
-        - account: The spotify account linked to the sensor
-
     Properties:
-        - units_of_measurement(str): the units of mesaurements used
-        - unique_id(str): A unique id for the specific sensor
-        - name(str): The friendly name of the sensor
-        - state(str): The current state of the sensor
-
-    Constants:
-        - CLASS_NAME(str): The generic name for the class
+        - entity_picture(str): the link to the entity picture for the
+            sensor
 
     Methods:
         - async_update
@@ -40,21 +33,26 @@ class SpotifyProfileSensor(SpotcastSensor):
     GENERIC_NAME = "Spotify Profile"
     ICON = "mdi:account"
     DEFAULT_ATTRIBUTES = {}
+    STATE_CLASS = None
 
     @property
     def entity_picture(self) -> str:
+        """Link to the entity picture for the sensor"""
         if self.state == STATE_OK:
             return self.account.image_link
 
         return None
 
     async def async_update(self):
+        """Updates the profile asynchornously"""
         try:
             profile = await self.account.async_profile()
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
             self._attributes = {}
             return
+
+        profile = copy_to_dict(profile)
 
         LOGGER.debug(
             "Getting Spotify Profile for account `%s`",
@@ -65,7 +63,7 @@ class SpotifyProfileSensor(SpotcastSensor):
             "Profile retrieve for account id `%s`", profile["id"],
         )
 
-        self._attributes = profile
+        self._attributes = self._clean_profile(profile)
         self._attr_state = STATE_OK
 
     @staticmethod
@@ -77,4 +75,21 @@ class SpotifyProfileSensor(SpotcastSensor):
             - profile(dict): the raw profile from Spotify API
 
         Returns:
-            - dict:a clean profile for better """
+            - dict: a clean profile for better
+        """
+
+        profile["filter_explicit_enabled"] = profile["explicit_content"][
+            "filter_enabled"
+        ]
+        profile["filter_explicit_locked"] = profile["explicit_content"][
+            "filter_locked"
+        ]
+        profile.pop("explicit_content")
+
+        profile["followers_count"] = profile["followers"]["total"]
+        profile.pop("followers")
+        profile.pop("href")
+        profile.pop("external_urls")
+        profile.pop("images")
+
+        return profile
