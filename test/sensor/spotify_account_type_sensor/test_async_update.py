@@ -1,85 +1,63 @@
-"""Module to test the async_update functio"""
+"""Module to test the async_update function"""
 
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, AsyncMock
-from urllib3.exceptions import ReadTimeoutError
-
-from homeassistant.helpers.device_registry import DeviceInfo
 
 from custom_components.spotcast.sensor.spotify_account_type_sensor import (
     SpotifyAccountTypeSensor,
-    SpotifyAccount,
-    STATE_UNKNOWN,
+    ReadTimeoutError,
+    STATE_UNKNOWN
 )
+from custom_components.spotcast import SpotifyAccount
 
-TEST_MODULE = "custom_components.spotcast.sensor.spotify_account_type_sensor"
 
-
-class TestIconValue(IsolatedAsyncioTestCase):
+class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
 
-        self.mocks = {
-            "account": MagicMock(spec=SpotifyAccount),
-            "device_info": MagicMock(spec=DeviceInfo),
-            "profile_data": {
-                "id": "dummy_account",
-                "name": "Dummy Account",
-                "type": "user",
-            }
+        self.account = AsyncMock(spec=SpotifyAccount)
+        self.sensor = SpotifyAccountTypeSensor(self.account)
 
+        self.account.name = "Dummy Account"
+
+        self.account.async_profile.return_value = {
+            "id": "dummy_id",
+            "type": "user",
         }
-
-        self.mocks["account"].id = "dummy_account"
-        self.mocks["account"].async_profile = AsyncMock()
-        self.mocks["account"].async_profile.return_value = self.mocks[
-            "profile_data"
-        ]
-        self.mocks["account"].device_info = self.mocks["device_info"]
-
-        self.sensor = SpotifyAccountTypeSensor(self.mocks["account"])
 
         await self.sensor.async_update()
 
-    def test_profile_was_saved(self):
-        self.assertEqual(self.sensor._profile, self.mocks["profile_data"])
-
-    def test_profile_method_was_called(self):
+    def test_profile_was_retrieved(self):
         try:
-            self.mocks["account"].async_profile.assert_called()
+            self.account.async_profile.assert_called()
         except AssertionError:
             self.fail()
 
-    def test_state_was_set_to_profile_type(self):
+    def test_attribute_state_was_set_to_account_type(self):
         self.assertEqual(self.sensor.state, "user")
 
 
-class TestFailedUpdate(IsolatedAsyncioTestCase):
+class TestUnsuccessfulUpdate(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
 
-        self.mocks = {
-            "account": MagicMock(spec=SpotifyAccount),
-            "device_info": MagicMock(spec=DeviceInfo),
-            "profile_data": {
-                "id": "dummy_account",
-                "name": "Dummy Account",
-                "type": "user",
-            }
+        self.account = AsyncMock(spec=SpotifyAccount)
+        self.sensor = SpotifyAccountTypeSensor(self.account)
 
-        }
+        self.account.name = "Dummy Account"
 
-        self.mocks["account"].id = "dummy_account"
-        self.mocks["account"].async_profile = AsyncMock()
-        self.mocks["account"].async_profile.side_effect = ReadTimeoutError(
+        self.account.async_profile.side_effect = ReadTimeoutError(
             MagicMock(),
             MagicMock(),
             MagicMock(),
         )
-        self.sensor = SpotifyAccountTypeSensor(self.mocks["account"])
-        self.mocks["account"].device_info = self.mocks["device_info"]
-
         await self.sensor.async_update()
 
-    def test_attribute_set_to_unknown(self):
+    def test_profile_was_retrieved(self):
+        try:
+            self.account.async_profile.assert_called()
+        except AssertionError:
+            self.fail()
+
+    def test_attribute_state_was_set_to_account_type(self):
         self.assertEqual(self.sensor.state, STATE_UNKNOWN)

@@ -55,6 +55,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         self._account: SpotifyAccount = account
         self.entity_id = self._define_entity_id()
         self._is_unavailable = False
+
         self.device_info = DeviceInfo(
             identifiers={(DOMAIN, self.id)},
             manufacturer="Spotify AB",
@@ -123,25 +124,3 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
             name = name.replace(char, "")
 
         return f"media_player.{name}_{self._account.id}_spotcast"
-
-    async def async_update(self):
-        """Updates the device information from the account"""
-
-        if self._is_unavailable:
-            LOGGER.debug("%s is unavailable, skipping update", self.entity_id)
-            return
-
-        LOGGER.debug("Updating device data for %s", self.entity_id)
-
-        devices = await self._account.async_devices()
-
-        for device in devices:
-            if device["id"] == self.id:
-                self._device_data = device
-                return
-
-        LOGGER.warn(
-            "%s is no longer part of %s's Spotify Devices",
-            self.entity_id,
-            self._account.name
-        )

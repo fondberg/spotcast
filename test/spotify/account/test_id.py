@@ -34,7 +34,7 @@ class TestDataRetention(TestCase):
             is_default=True
         )
 
-        self.account._datasets["profile"].last_refresh = time() + 999
+        self.account._datasets["profile"].expires_at = time() + 999
         self.account._datasets["profile"]._data = {
             "id": "dummy_id"
         }

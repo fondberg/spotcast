@@ -101,10 +101,22 @@ class SpotifyAccount:
     DJ_URI = "spotify:playlist:37i9dQZF1EYkqdzj48dyYq"
     REFRESH_RATE = 30
     DATASETS = {
-        "devices": REFRESH_RATE,
-        "liked_songs": REFRESH_RATE*2,
-        "playlists": REFRESH_RATE*2,
-        "profile": REFRESH_RATE*4,
+        "devices": {
+            "refresh_rate": REFRESH_RATE,
+            "can_expire": False,
+        },
+        "liked_songs": {
+            "refresh_rate": REFRESH_RATE*2,
+            "can_expire": False,
+        },
+        "playlists": {
+            "refresh_rate": REFRESH_RATE*2,
+            "can_expire": False,
+        },
+        "profile": {
+            "refresh_rate": REFRESH_RATE*10,
+            "can_expire": True,
+        },
     }
 
     def __init__(
@@ -137,7 +149,7 @@ class SpotifyAccount:
             auth=self.sessions["external"].token["access_token"]
         )
 
-        self._datasets = {x: Dataset(x, y) for x, y in self.DATASETS.items()}
+        self._datasets = {x: Dataset(x, **y) for x, y in self.DATASETS.items()}
 
     @property
     def id(self) -> str:
@@ -152,7 +164,7 @@ class SpotifyAccount:
         name = self.get_profile_value("display_name")
 
         if name is None:
-            name = self.get_profile_value("id")
+            name = self.id
 
         return name
 
@@ -215,6 +227,19 @@ class SpotifyAccount:
         """Returns the liked songs uri for the account"""
         return f"spotify:user:{self.id}:collection"
 
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Returns the Home Assistant device info of the Account
+        Service"""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id)},
+            manufacturer="Spotify AB",
+            model=f"Spotify {self.profile['product']}",
+            name=f"Spotcast {self.name}",
+            entry_type=DeviceEntryType.SERVICE,
+            configuration_url="https://open.spotify.com",
+        )
+
     def get_profile_value(self, attribute: str) -> Any:
         """Returns the value for a profile element. Raises Error if not
         yet loaded.
@@ -235,19 +260,6 @@ class SpotifyAccount:
 
     def get_dataset(self, name: str) -> list | dict:
         return self._datasets[name].data
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Returns the Home Assistant device info of the Account
-        Service"""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.id)},
-            manufacturer="Spotify AB",
-            model=f"Spotify {self.profile['product']}",
-            name=f"Spotcast {self.name}",
-            entry_type=DeviceEntryType.SERVICE,
-            configuration_url="https://open.spotify.com",
-        )
 
     def get_token(self, api: str) -> str:
         """Retrives a token from the requested session.
@@ -277,9 +289,20 @@ class SpotifyAccount:
         await self.sessions[api].async_ensure_token_valid()
         return self.sessions[api].token
 
-    async def async_ensure_tokens_valid(self):
-        """Ensures the token are valid"""
-        LOGGER.debug("Refreshing api tokens for Spotify Account")
+    async def async_ensure_tokens_valid(self, skip_profile: bool = False):
+        """Ensures the token are valid
+
+        Args:
+            - skip_profile(bool, optional): set True to skip the
+                profile update. Defaults to False
+        """
+
+        if not skip_profile:
+            await self.async_profile()
+
+        LOGGER.debug(
+            "Refreshing api tokens for Spotify Account"
+        )
         for key, session in self.sessions.items():
             await session.async_ensure_token_valid()
 
@@ -297,15 +320,18 @@ class SpotifyAccount:
         Returns:
             - dict: the raw profile dictionary from the Spotify API
         """
-        await self.async_ensure_tokens_valid()
+        await self.async_ensure_tokens_valid(skip_profile=True)
         LOGGER.debug("Getting Profile from Spotify")
 
         dataset = self._datasets["profile"]
 
         if force or dataset.is_expired:
+            LOGGER.debug("Refreshing profile dataset")
             async with dataset.lock:
                 data = await self.hass.async_add_executor_job(self._spotify.me)
                 dataset.update(data)
+        else:
+            LOGGER.debug("Using cached profile dataset")
 
         return self.profile
 
@@ -317,11 +343,14 @@ class SpotifyAccount:
         dataset = self._datasets["devices"]
 
         if force or dataset.is_expired:
+            LOGGER.debug("Refreshing devices dataset")
             async with dataset.lock:
                 data = await self.hass.async_add_executor_job(
                     self._spotify.devices
                 )
                 dataset.update(data["devices"])
+        else:
+            LOGGER.debug("Using Cached devices dataset")
 
         return self.devices
 
@@ -333,6 +362,7 @@ class SpotifyAccount:
         dataset = self._datasets["playlists"]
 
         if force or dataset.is_expired:
+            LOGGER.debug("Refreshing playlists dataset")
             async with dataset.lock:
 
                 offset = 0
@@ -355,6 +385,8 @@ class SpotifyAccount:
                     offset = len(all_playlists)
 
                 dataset.update(all_playlists)
+        else:
+            LOGGER.debug("Using cached playlists dataset")
 
         return self.playlists
 
@@ -490,6 +522,7 @@ class SpotifyAccount:
         dataset = self._datasets["liked_songs"]
 
         if force or dataset.is_expired:
+            LOGGER.debug("Refreshing liked songs dataset")
             async with dataset.lock:
 
                 offset = 0
@@ -512,6 +545,8 @@ class SpotifyAccount:
                     offset = len(liked_songs)
 
                 dataset.update(liked_songs)
+        else:
+            LOGGER.debug("Using cached liked songs dataset")
 
         return self.liked_songs
 
@@ -587,6 +622,10 @@ class SpotifyAccount:
         account = hass.data[DOMAIN].get(entry.entry_id)
 
         if account is not None:
+            LOGGER.debug(
+                "Providing preexisting account for entry `%s`",
+                entry.entry_id
+            )
             return account
 
         oauth_implementation = await async_get_config_entry_implementation(

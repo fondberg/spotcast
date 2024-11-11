@@ -40,7 +40,7 @@ async def async_setup_entry(
     for sensor in BINARY_SENSORS:
         LOGGER.debug(
             "Creating Sensor %s for `%s`",
-            sensor.CLASS_NAME,
+            sensor.GENERIC_NAME,
             account.id
         )
 

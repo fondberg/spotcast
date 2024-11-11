@@ -22,8 +22,8 @@ class TestDataretention(TestCase):
     def test_data_is_initialised_to_none(self):
         self.assertIsNone(self.dataset._data)
 
-    def test_last_refresh_is_set_to_zero(self):
-        self.assertEqual(self.dataset.last_refresh, 0)
+    def test_expires_at_is_set_to_zero(self):
+        self.assertEqual(self.dataset.expires_at, 0)
 
     def test_lock_is_created(self):
         self.assertIsInstance(self.dataset.lock, Lock)

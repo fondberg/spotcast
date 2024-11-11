@@ -8,20 +8,19 @@ from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.components.binary_sensor import (
-    BinarySensorEntity,
-    BinarySensorEntityDescription,
     EntityCategory,
-    BinarySensorDeviceClass,
 )
-from homeassistant.const import STATE_UNKNOWN, STATE_OK, STATE_PROBLEM
+from homeassistant.const import STATE_OK, STATE_PROBLEM
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.binary_sensor.abstract_binary_sensor import (
+    SpotcastBinarySensor
+)
 
 LOGGER = getLogger(__name__)
 
 
-class SpotifyProfileMalfunctionBinarySensor(BinarySensorEntity):
+class SpotifyProfileMalfunctionBinarySensor(SpotcastBinarySensor):
     """A Home Assistant sensor reporting information about the profile
     of a Spotify Account
 
@@ -41,76 +40,28 @@ class SpotifyProfileMalfunctionBinarySensor(BinarySensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Profile Malfunction Binary Sensor"
-
-    def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting the profile for a
-        Spotify Account
-
-        Args:
-            - account(SpotifyAccount): The spotify account probed by
-                the sensor
-        """
-        self.account = account
-
-        LOGGER.debug(
-            "Loading Spotify Playlists sensor for %s",
-            self.account.name
-        )
-
-        self._attr_device_info = self.account.device_info
-
-        self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"binary_sensor.{self.account.id}_spotify_profile"
-        self.entity_description = BinarySensorEntityDescription(
-            key=self.entity_id,
-            name=self.name,
-            entity_category=EntityCategory.DIAGNOSTIC,
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            has_entity_name=True,
-        )
-
-    @property
-    def icon(self) -> str:
-        if self._attr_state == STATE_OK:
-            return "mdi:bug-check"
-
-        return "mdi:bug"
-
-    @property
-    def name(self) -> str:
-        return f"{self.account.name} Spotify Profile Malfunction"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_profile_malfunction"
-
-    @property
-    def available(self) -> bool:
-        return self._attr_state != STATE_UNKNOWN
-
-    @property
-    def is_on(self) -> bool | None:
-        if self._attr_state == STATE_UNKNOWN:
-            return None
-
-        return self._attr_state == STATE_PROBLEM
+    GENERIC_NAME = "Spotify Profile Malfunction"
+    ICON = "mdi:bug"
+    ICON_OFF = "mdi:bug-check"
+    INACTIVE_STATE = STATE_OK
+    ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 
     async def async_update(self):
-        LOGGER.debug(
-            "Getting Spotify Profile for account `%s`",
-            self.account.name
-        )
 
         try:
-            self._profile = await self.account.async_profile()
+            profile = await self.account.async_profile()
         except (ReadTimeoutError, ReadTimeout) as exc:
             LOGGER.error(exc)
             self._attr_state = STATE_PROBLEM
             return
 
         LOGGER.debug(
-            "Profile retrieve for account id `%s`", self._profile["id"],
+            "Getting Spotify Profile for account `%s`",
+            self.account.name
+        )
+
+        LOGGER.debug(
+            "Profile retrieve for account id `%s`", profile["id"],
         )
 
         self._attr_state = STATE_OK

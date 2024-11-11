@@ -7,16 +7,18 @@ Classes:
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.sensor.abstract_sensor import (
+    SpotcastSensor,
+    SensorStateClass,
+)
 
 LOGGER = getLogger(__name__)
 
 
-class SpotifyFollowersSensor(SensorEntity):
+class SpotifyFollowersSensor(SpotcastSensor):
     """A Home Assistant sensor reporting the number of followers for
     an account
 
@@ -37,67 +39,26 @@ class SpotifyFollowersSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Followers Sensor"
-
-    def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting followers for a
-        Spotify Account
-
-        Args:
-            - account(SpotifyAccount): The spotify account probed by
-                the sensor
-        """
-
-        self.account = account
-
-        LOGGER.debug(
-            "Loading Spotify Followers sensor for %s",
-            self.account.name
-        )
-
-        self._attr_device_info = self.account.device_info
-
-        self._playlists = []
-        self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_followers"
-        self._profile = {}
-
-    @property
-    def unit_of_measurement(self) -> str:
-        return "followers"
-
-    @property
-    def name(self) -> str:
-        return f"{self.account.name} Spotify Followers"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_followers"
-
-    @property
-    def state(self) -> str:
-        return self._attr_state
+    GENERIC_NAME = "Spotify Followers"
+    ICON = "mdi:account-multiple"
+    ICON_OFF = ICON
+    UNITS_OF_MEASURE = "followers"
 
     @property
     def state_class(self) -> str:
-        return "measurement"
-
-    @property
-    def icon(self) -> str:
-        """Sets the icon for the sensor"""
-        return "mdi:account-multiple"
+        return SensorStateClass.MEASUREMENT
 
     async def async_update(self):
-        LOGGER.debug(
-            "Getting Spotify followers for account `%s`",
-            self.account.name
-        )
-
         try:
             self._profile = await self.account.async_profile()
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
             return
+
+        LOGGER.debug(
+            "Getting Spotify followers for account `%s`",
+            self.account.name
+        )
 
         follower_count = self._profile["followers"]["total"]
 

@@ -7,16 +7,18 @@ Classes:
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import STATE_UNKNOWN, EntityCategory
+from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.sensor.abstract_sensor import (
+    SpotcastSensor,
+    EntityCategory,
+)
 
 LOGGER = getLogger(__name__)
 
 
-class SpotifyProductSensor(SensorEntity):
+class SpotifyProductSensor(SpotcastSensor):
     """A Home Assistant sensor reporting the subscription type for a
     Spotify Account
 
@@ -36,67 +38,32 @@ class SpotifyProductSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Product Sensor"
-
-    def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting the subscription type for
-        a Spotify Account
-
-        Args:
-            - account(SpotifyAccount): The spotify account probed by
-                the sensor
-        """
-        self.account = account
-
-        LOGGER.debug(
-            "Loading Spotify Product sensor for %s",
-            self.account.name
-        )
-
-        self._attributes = {}
-        self._attr_device_info = self.account.device_info
-
-        self._playlists = []
-        self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_product"
-        self.entity_class = EntityCategory.DIAGNOSTIC
-
-    @property
-    def icon(self) -> str:
-        return "mdi:account-card"
-
-    @property
-    def extra_state_attributes(self) -> dict:
-        return self._attributes
-
-    @property
-    def name(self) -> str:
-        return f"{self.account.name} Spotify Product"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_product"
-
-    @property
-    def state(self) -> str:
-        return self._attr_state
+    GENERIC_NAME = "Spotify Product"
+    ICON = "mdi:account-card"
+    ICON_OFF = ICON
+    ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 
     async def async_update(self):
+
+        try:
+            profile = await self.account.async_profile()
+        except (ReadTimeoutError, ReadTimeout):
+            LOGGER.warn(
+                "Failed to update Spotify Product sensor. Sensor know "
+                "unavailable"
+            )
+            self._attr_state = STATE_UNKNOWN
+            return
+
         LOGGER.debug(
             "Getting Spotify Subscription Type `%s`",
             self.account.name
         )
 
-        try:
-            self._profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout):
-            self._attr_state = STATE_UNKNOWN
-            return
-
         LOGGER.debug(
             "Account `%s` has the `%s` subscription",
-            self._profile["id"],
-            self._profile["product"],
+            profile["id"],
+            profile["product"],
         )
 
-        self._attr_state = self._profile["product"]
+        self._attr_state = profile["product"]

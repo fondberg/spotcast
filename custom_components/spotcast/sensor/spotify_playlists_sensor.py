@@ -7,16 +7,18 @@ Classes:
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.sensor.abstract_sensor import (
+    SensorStateClass,
+    SpotcastSensor,
+)
 
 LOGGER = getLogger(__name__)
 
 
-class SpotifyPlaylistsSensor(SensorEntity):
+class SpotifyPlaylistsSensor(SpotcastSensor):
     """A Home Assistant sensor reporting available playlists for a
     Spotify Account
 
@@ -37,71 +39,29 @@ class SpotifyPlaylistsSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Playlists Sensor"
-
-    def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting available playlists for a
-        Spotify Account
-
-        Args:
-            - account(SpotifyAccount): The spotify account probed by
-                the sensor
-        """
-
-        self.account = account
-
-        LOGGER.debug(
-            "Loading Spotify Playlists sensor for %s",
-            self.account.name
-        )
-
-        self._attributes = {"first_10_playlists": []}
-        self._attr_device_info = self.account.device_info
-
-        self._playlists = []
-        self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_playlists"
-
-    @property
-    def extra_state_attributes(self) -> dict:
-        return self._attributes
-
-    @property
-    def icon(self) -> str:
-        return "mdi:playlist-music"
-
-    @property
-    def unit_of_measurement(self) -> str:
-        return "playlists"
-
-    @property
-    def name(self) -> str:
-        return f"{self.account.name} Spotify Playlists"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_playlists"
-
-    @property
-    def state(self) -> str:
-        return self._attr_state
+    GENERIC_NAME = "Spotify Playlists"
+    ICON = "mdi:playlist-music"
+    ICON_OFF = ICON
+    DEFAULT_ATTRIBUTES = {"first_10_playlists": []}
+    UNITS_OF_MEASURE = "playlists"
 
     @property
     def state_class(self) -> str:
-        return "measurement"
+        return SensorStateClass.MEASUREMENT
 
     async def async_update(self):
-        LOGGER.debug(
-            "Getting Spotify Playlist for account `%s`",
-            self.account.name
-        )
 
         try:
             playlists = await self.account.async_playlists()
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
-            self._attributes = {}
+            self._attributes["first_10_playlists"] = []
             return
+
+        LOGGER.debug(
+            "Getting Spotify Playlist for account `%s`",
+            self.account.name
+        )
 
         playlist_count = len(playlists)
 

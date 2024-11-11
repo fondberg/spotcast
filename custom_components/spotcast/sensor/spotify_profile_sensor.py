@@ -7,20 +7,17 @@ Classes:
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import (
-    SensorEntity,
-    SensorEntityDescription,
-    EntityCategory,
-)
 from homeassistant.const import STATE_UNKNOWN, STATE_OK
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.sensor.abstract_sensor import (
+    SpotcastSensor
+)
 
 LOGGER = getLogger(__name__)
 
 
-class SpotifyProfileSensor(SensorEntity):
+class SpotifyProfileSensor(SpotcastSensor):
     """A Home Assistant sensor reporting information about the profile
     of a Spotify Account
 
@@ -40,32 +37,9 @@ class SpotifyProfileSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Profile Sensor"
-
-    def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting the profile for a
-        Spotify Account
-
-        Args:
-            - account(SpotifyAccount): The spotify account probed by
-                the sensor
-        """
-        self.account = account
-
-        LOGGER.debug(
-            "Loading Spotify Playlists sensor for %s",
-            self.account.name
-        )
-
-        self._attributes = {}
-        self._attr_device_info = self.account.device_info
-
-        self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_profile"
-
-    @property
-    def icon(self) -> str:
-        return "mdi:account"
+    GENERIC_NAME = "Spotify Profile"
+    ICON = "mdi:account"
+    DEFAULT_ATTRIBUTES = {}
 
     @property
     def entity_picture(self) -> str:
@@ -74,40 +48,24 @@ class SpotifyProfileSensor(SensorEntity):
 
         return None
 
-    @property
-    def extra_state_attributes(self) -> dict:
-        return self._attributes
-
-    @property
-    def name(self) -> str:
-        return f"{self.account.name} Spotify Profile"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_profile"
-
-    @property
-    def state(self) -> str:
-        return self._attr_state
-
     async def async_update(self):
-        LOGGER.debug(
-            "Getting Spotify Profile for account `%s`",
-            self.account.name
-        )
-
         try:
-            self._profile = await self.account.async_profile()
+            profile = await self.account.async_profile()
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
             self._attributes = {}
             return
 
         LOGGER.debug(
-            "Profile retrieve for account id `%s`", self._profile["id"],
+            "Getting Spotify Profile for account `%s`",
+            self.account.name
         )
 
-        self._attributes = self._profile
+        LOGGER.debug(
+            "Profile retrieve for account id `%s`", profile["id"],
+        )
+
+        self._attributes = profile
         self._attr_state = STATE_OK
 
     @staticmethod

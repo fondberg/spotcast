@@ -7,16 +7,18 @@ Classes:
 from logging import getLogger
 from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import (
+    SensorStateClass,
+)
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
 
 LOGGER = getLogger(__name__)
 
 
-class SpotifyDevicesSensor(SensorEntity):
+class SpotifyDevicesSensor(SpotcastSensor):
     """A Home Assistant sensor reporting available devices for a
     Spotify Account
 
@@ -37,64 +39,27 @@ class SpotifyDevicesSensor(SensorEntity):
         - async_update
     """
 
-    CLASS_NAME = "Spotify Devices Sensor"
-
-    def __init__(self, account: SpotifyAccount):
-        """A Home Assistant sensor reporting available devices for a
-        Spotify Account
-
-        Args:
-            - account(SpotifyAccount): The spotify account the sensor
-            is probing
-        """
-
-        self.account = account
-
-        LOGGER.debug("Loading Spotify Device sensor for %s", self.account.name)
-
-        self._attributes = {"devices": []}
-        self._attr_device_info = self.account.device_info
-
-        self._devices = []
-        self._attr_state = STATE_UNKNOWN
-        self.entity_id = f"sensor.{self.account.id}_spotify_devices"
-
-    @property
-    def unit_of_mesaurement(self) -> str:
-        return "devices"
-
-    @property
-    def unique_id(self) -> str:
-        return f"{self.account.id}_spotify_devices"
-
-    @property
-    def name(self) -> str:
-        return f"{self.account.name} Spotify Devices"
-
-    @property
-    def state(self) -> str:
-        return self._attr_state
+    GENERIC_NAME = "Spotify Devices"
+    ICON = "mdi:speaker"
+    DEFAULT_ATTRIBUTES = {"devices": []}
+    UNITS_OF_MEASURE = "devices"
 
     @property
     def state_class(self) -> str:
-        return "measurement"
-
-    @property
-    def icon(self) -> str:
-        return "mdi:speaker"
+        return SensorStateClass.MEASUREMENT
 
     async def async_update(self):
-        LOGGER.debug(
-            "Getting Spotify Device for account %s",
-            self.account.name
-        )
-
         try:
             devices = await self.account.async_devices()
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
-            self._attributes = {}
+            self._attributes["devices"] = []
             return
+
+        LOGGER.debug(
+            "Getting Spotify Device for account %s",
+            self.account.name
+        )
 
         device_count = len(devices)
 

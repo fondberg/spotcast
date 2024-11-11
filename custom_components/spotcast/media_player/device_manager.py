@@ -86,6 +86,9 @@ class DeviceManager:
                 remove.append(id)
                 entity = self.tracked_devices[id]
                 entity._is_unavailable = True
+            else:
+                LOGGER.debug("Updating device info for `%s`", device.name)
+                device._device_data = current_devices[id]
 
         for id in remove:
             self.tracked_devices.pop(id)
