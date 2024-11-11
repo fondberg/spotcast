@@ -3,7 +3,9 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, patch
 
-from custom_components.spotcast.config_flow import SpotcastFlowHandler
+from custom_components.spotcast.config_flow.config_flow_handler import (
+    SpotcastFlowHandler
+)
 
 
 class TestInternalApiSetup(IsolatedAsyncioTestCase):

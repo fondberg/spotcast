@@ -32,7 +32,7 @@ class TestBaseMediaPlayback(IsolatedAsyncioTestCase):
             "hass": MagicMock(spec=HomeAssistant),
             "call": MagicMock(spec=ServiceCall),
             "entry": mock_entry(),
-            "account": mock_account,
+            "account": mock_account.return_value,
             "player": mock_player(),
         }
 
@@ -53,14 +53,14 @@ class TestBaseMediaPlayback(IsolatedAsyncioTestCase):
 
     def test_account_play_media_called_with_expected_arguments(self):
         try:
-            self.mocks["account"].return_value.async_play_media\
+            self.mocks["account"].async_play_media\
                 .assert_called_with("12345", "dummy_uri", volume=80)
         except AssertionError:
             self.fail()
 
     def test_account_apply_extra_called(self):
         try:
-            self.mocks["account"].return_value.async_apply_extras\
+            self.mocks["account"].async_apply_extras\
                 .assert_called()
         except AssertionError:
             self.fail()

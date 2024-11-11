@@ -5,9 +5,13 @@ from unittest.mock import patch, MagicMock
 
 from spotipy import Spotify
 
-from custom_components.spotcast.config_flow import SpotcastFlowHandler
+from custom_components.spotcast.config_flow.config_flow_handler import (
+    SpotcastFlowHandler
+)
 
 from test.unit_utils import AsyncMock
+
+TEST_MODULE = "custom_components.spotcast.config_flow.config_flow_handler"
 
 
 class TestExternalApiEntry(IsolatedAsyncioTestCase):
@@ -76,7 +80,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
 
     @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
     @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
-    @patch("custom_components.spotcast.config_flow.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
     async def test_spotify_object_created_with_proper_access_token(
             self,
             mock_spotify: MagicMock,
@@ -107,7 +111,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
     @patch.object(SpotcastFlowHandler, "async_create_entry")
     @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
     @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
-    @patch("custom_components.spotcast.config_flow.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
     async def test_entry_setup_with_expected_data(
             self,
             mock_spotify: MagicMock,
@@ -147,7 +151,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
     @patch.object(SpotcastFlowHandler, "async_create_entry")
     @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
     @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
-    @patch("custom_components.spotcast.config_flow.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
     async def test_name_is_id_when_missing_display_name(
             self,
             mock_spotify: MagicMock,

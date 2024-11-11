@@ -1,0 +1,3 @@
+import tracemalloc
+
+tracemalloc.start()

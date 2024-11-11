@@ -4,6 +4,8 @@ Functions:
     - entity_from_target_selector
 """
 
+from typing import Iterable
+
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 
@@ -101,3 +103,26 @@ def entity_from_device_id(
         )
 
     return current_entry.entity_id
+
+
+def clean_extras(extras: dict, keep: Iterable) -> dict:
+    """Cleans the extras dictionary before calling the async_play_media
+
+    Args:
+        - extras(dict): the dictionary of extras to apply on the
+            service call
+        - keep(Iterable): a list of extras to keep
+
+    Returns:
+        - dict: only the extras request4e
+    """
+    result = {}
+
+    for key, value in extras.items():
+
+        if key not in keep:
+            continue
+
+        result[key] = value
+
+    return result

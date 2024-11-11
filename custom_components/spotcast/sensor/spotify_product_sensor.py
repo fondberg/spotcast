@@ -38,7 +38,7 @@ class SpotifyProductSensor(SpotcastSensor):
         try:
             profile = await self.account.async_profile()
         except (ReadTimeoutError, ReadTimeout):
-            LOGGER.warn(
+            LOGGER.warning(
                 "Failed to update Spotify Product sensor. Sensor know "
                 "unavailable"
             )
