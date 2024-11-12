@@ -1,5 +1,5 @@
 play_media:
-  name: Spotcast Play
+  name: Play Media
   description: Play spotify media on chromecast devices
   fields:
     media_player:
@@ -34,7 +34,7 @@ play_media:
       selector:
         object:
 play_dj:
-  name: Spotcast DJ
+  name: Spotify DJ Playlist
   description: Play spotify DJ playlist on a Chromecast device
   fields:
     media_player:
@@ -90,7 +90,7 @@ transfer_playback:
       selector:
         object:
 play_liked_songs:
-  name: Spotcast Liked Songs
+  name: Liked Songs Playlist
   description: Play User's Liked Songs'
   fields:
     media_player:
@@ -103,6 +103,81 @@ play_liked_songs:
               integration: cast
             - domain: media_player
               integration: spotcast
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      example: "pirate_jeanne"
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast
+    data:
+      name: Data
+      description: Additional modifiers for the play_media service call.
+      required: false
+      selector:
+        object:
+play_category:
+  name: Playlist from Category
+  description: Play a random playlist from a browse category
+  fields:
+    media_player:
+      name: Media Player
+      required: true
+      selector:
+        target:
+          entity:
+            - domain: media_player
+              integration: cast
+            - domain: media_player
+              integration: spotcast
+    category:
+      name: Category
+      description: A Category name or ID. A fuzzy match is applied on the name, but an ID must be an exact match.
+      example: Made For You
+      required: true
+      selector:
+        text:
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      example: "pirate_jeanne"
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast
+    data:
+      name: Data
+      description: Additional modifiers for the play_media service call.
+      required: false
+      selector:
+        object:
+play_custom_context:
+  name: Play Custom Context
+  description: Play media from a custom list of tracks URIs
+  fields:
+    media_player:
+      name: Media Player
+      required: true
+      selector:
+        target:
+          entity:
+            - domain: media_player
+              integration: cast
+            - domain: media_player
+              integration: spotcast
+    tracks:
+      name: Tracks
+      description: A list of track URIs
+      example: spotify:track:55mJleti2WfWEFNFcBduhc
+      required: true
+      selector:
+        object:
+          tracks:
+            - name: Track
+              selector:
+                text:
+                  multiline: false
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise

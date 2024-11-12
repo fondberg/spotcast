@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.sensor.spotify_devices_sensor import (
     SpotifyDevicesSensor,
 )

@@ -58,15 +58,15 @@ class TestSmartphoneDevice(TestCase):
         )
 
     def test_device_active(self):
-        self.assertEqual(self.device.icon, "mdi:smartphone")
+        self.assertEqual(self.device.icon, "mdi:cellphone")
 
     def test_device_inactive(self):
         self.device._device_data["is_active"] = False
-        self.assertEqual(self.device.icon, "mdi:smartphone-off")
+        self.assertEqual(self.device.icon, "mdi:cellphone-off")
 
     def test_device_unavailable(self):
         self.device._is_unavailable = True
-        self.assertEqual(self.device.icon, "mdi:smartphone")
+        self.assertEqual(self.device.icon, "mdi:cellphone")
 
 
 class TestUnknownDevice(TestCase):

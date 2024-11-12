@@ -29,6 +29,7 @@ EXTRAS_SCHEMA = vol.Schema({
     ),
     vol.Optional("repeat"): vol.In(["track", "context", "off"]),
     vol.Optional("shuffle"): cv.boolean,
+    vol.Optional("limit"): cv.positive_int,
 })
 
 

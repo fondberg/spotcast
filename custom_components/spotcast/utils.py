@@ -8,13 +8,14 @@ from logging import getLogger
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.util.read_only_dict import ReadOnlyDict
+from Levenshtein import ratio
 
 from custom_components.spotcast.services.exceptions import (
     AccountNotFoundError,
     NoDefaultAccountError,
 )
 from custom_components.spotcast import DOMAIN
+from custom_components.spotcast.exceptions import LowRatioError
 
 LOGGER = getLogger(__name__)
 
@@ -79,3 +80,57 @@ def copy_to_dict(items: dict) -> dict:
 
     else:
         return items
+
+
+def fuzzy_match(
+    items: list[dict[str]] | str,
+    search: str,
+    key: str = None,
+    threshold: float = 0.5
+) -> dict:
+    """Finds the best matched string based on a search term
+
+    Args:
+        - items(list[dict]): a list of dictionaries to match to a
+            search term
+        - search(str): the search term used for matching
+        - key(str): the key item in the dictionary used to compare
+            with the search term)
+        - value(str): the key item in the dictionary to used as a
+            return value
+        - threshhold(float, optional): the minimum ratio to return a
+            value. Defaults to 0.5
+
+    Returns:
+        - dict: the best match result
+
+    Raises:
+        - LowRatioError: raised if the best ratio is lower then the
+            treshhold
+    """
+
+    best_ratio = -1
+    best_item = None
+    best_compared = None
+
+    for item in items:
+
+        compared = item
+
+        if key is not None:
+            compared = compared[key]
+
+        current_ratio = ratio(search, compared)
+
+        if current_ratio > best_ratio:
+            best_ratio = current_ratio
+            best_item = item
+            best_compared = compared
+
+    if best_ratio < threshold:
+        raise LowRatioError(
+            f"Best match for search term `{search}` is `{best_compared}` with "
+            f"a ratio of {best_ratio:.3f}"
+        )
+
+    return best_item

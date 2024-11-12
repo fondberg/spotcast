@@ -8,6 +8,7 @@ from asyncio import Lock
 from time import time
 
 from custom_components.spotcast.spotify.exceptions import ExpiredDatasetError
+from custom_components.spotcast.utils import copy_to_dict
 
 
 class Dataset:
@@ -37,7 +38,7 @@ class Dataset:
         if self.is_expired and not self.can_expire:
             raise ExpiredDatasetError(f"The {self.name} dataset is expired")
 
-        return self._data
+        return copy_to_dict(self._data)
 
     def update(self, data: list | dict):
         self._data = data

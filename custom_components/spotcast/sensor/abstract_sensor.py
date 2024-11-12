@@ -9,7 +9,7 @@ from homeassistant.components.sensor import (
     SensorEntity
 )
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.sensor.abstract_entity import SpotcastEntity
 
 LOGGER = getLogger(__name__)

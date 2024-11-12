@@ -1,12 +1,12 @@
 """Module to test the async_step_apply_default function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, patch
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.config_flow.option_flow_handler import (
     SpotcastOptionsFlowHandler
 )

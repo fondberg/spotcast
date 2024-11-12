@@ -17,7 +17,6 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.const import Platform
 
 from custom_components.spotcast.const import DOMAIN
-from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services import ServiceHandler
 from custom_components.spotcast.services.const import SERVICE_SCHEMAS
 from custom_components.spotcast.sessions.exceptions import TokenRefreshError
@@ -39,6 +38,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     Returns:
         - bool: returns `True` if the integration setup was successfull
     """
+    # because of circular depoendency
+    from custom_components.spotcast.spotify.account import SpotifyAccount
+
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
 
     LOGGER.info(

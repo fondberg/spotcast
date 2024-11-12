@@ -38,3 +38,7 @@ class AmbiguousDeviceIdError(HomeAssistantError):
 class UnmanagedSelectionError(HomeAssistantError):
     """Raised when a target selector provides a target selection
     that spotcast can't manage"""
+
+
+class InvalidCategoryError(HomeAssistantError):
+    """Raised when an invalid category id is provided"""

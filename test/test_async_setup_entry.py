@@ -6,12 +6,11 @@ from unittest.mock import MagicMock, patch, AsyncMock
 from custom_components.spotcast import (
     async_setup_entry,
     HomeAssistant,
-    SpotifyAccount,
-    SERVICE_SCHEMAS,
     ConfigEntry,
     TokenRefreshError,
     ConfigEntryNotReady,
 )
+from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class TestEntryRegistration(IsolatedAsyncioTestCase):

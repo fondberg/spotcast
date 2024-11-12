@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class DummySensor(SpotcastSensor):

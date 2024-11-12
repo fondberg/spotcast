@@ -3,7 +3,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock
 
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.binary_sensor.is_default_binary_sensor import (
     IsDefaultBinarySensor
 )

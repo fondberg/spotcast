@@ -67,16 +67,19 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
 
 class TestDatasetExpired(IsolatedAsyncioTestCase):
 
+    @patch.object(SpotifyAccount, "_async_pager")
     @patch(f"{TEST_MODULE}.Spotify")
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_pager: MagicMock,
     ):
 
         self.mocks = {
             "internal": MagicMock(spec=InternalSession),
             "external": MagicMock(spec=OAuth2Session),
             "hass": MagicMock(spec=HomeAssistant),
+            "pager": mock_pager,
         }
         self.mocks["hass"].loop = MagicMock()
 
@@ -103,29 +106,19 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
             {"track": {"uri": "foo"}},
             {"track": {"uri": "bar"}},
         ]
-        self.mocks["hass"].async_add_executor_job = AsyncMock()
-        self.mocks["hass"].async_add_executor_job.side_effect = [
-            {
-                "total": 3,
-                "items": [
-                    {"track": {"uri": "foo"}},
-                    {"track": {"uri": "bar"}},
-                ]
-            },
-            {
-                "total": 3,
-                "items": [
-                    {"track": {"uri": "baz"}},
-                ]
-
-            },
+        self.mocks["pager"].return_value = [
+            {"track": {"uri": "foo"}},
+            {"track": {"uri": "bar"}},
+            {"track": {"uri": "baz"}},
         ]
 
         self.result = await self.account.async_liked_songs()
 
     def test_new_profile_was_fetched(self):
         try:
-            self.mocks["hass"].async_add_executor_job.assert_called()
+            self.mocks["pager"].assert_called_with(
+                self.account._spotify.current_user_saved_tracks
+            )
         except AssertionError:
             self.fail()
 
@@ -135,16 +128,19 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
 
 class TestForcerefresh(IsolatedAsyncioTestCase):
 
+    @patch.object(SpotifyAccount, "_async_pager")
     @patch(f"{TEST_MODULE}.Spotify")
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_pager: MagicMock,
     ):
 
         self.mocks = {
             "internal": MagicMock(spec=InternalSession),
             "external": MagicMock(spec=OAuth2Session),
             "hass": MagicMock(spec=HomeAssistant),
+            "pager": mock_pager,
         }
         self.mocks["hass"].loop = MagicMock()
 
@@ -171,29 +167,19 @@ class TestForcerefresh(IsolatedAsyncioTestCase):
             {"track": {"uri": "foo"}},
             {"track": {"uri": "bar"}},
         ]
-        self.mocks["hass"].async_add_executor_job = AsyncMock()
-        self.mocks["hass"].async_add_executor_job.side_effect = [
-            {
-                "total": 3,
-                "items": [
-                    {"track": {"uri": "foo"}},
-                    {"track": {"uri": "bar"}},
-                ]
-            },
-            {
-                "total": 3,
-                "items": [
-                    {"track": {"uri": "baz"}},
-                ]
-
-            },
+        self.mocks["pager"].return_value = [
+            {"track": {"uri": "foo"}},
+            {"track": {"uri": "bar"}},
+            {"track": {"uri": "baz"}},
         ]
 
         self.result = await self.account.async_liked_songs(force=True)
 
     def test_new_profile_was_fetched(self):
         try:
-            self.mocks["hass"].async_add_executor_job.assert_called()
+            self.mocks["pager"].assert_called_with(
+                self.account._spotify.current_user_saved_tracks
+            )
         except AssertionError:
             self.fail()
 

@@ -85,7 +85,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
 
         icon_map = {
             "Computer": "mdi:laptop",
-            "Smartphone": "mdi:smartphone",
+            "Smartphone": "mdi:cellphone",
             "*": "mdi:speaker"
         }
 

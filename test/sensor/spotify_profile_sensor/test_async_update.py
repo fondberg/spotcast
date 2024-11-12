@@ -9,7 +9,7 @@ from custom_components.spotcast.sensor.spotify_profile_sensor import (
     STATE_UNKNOWN,
     STATE_OK,
 )
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class TestSuccessfulUpdate(IsolatedAsyncioTestCase):

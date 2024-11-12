@@ -1,7 +1,7 @@
 """Module to test the utility function get_account_entry"""
 
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from custom_components.spotcast.utils import (
     get_account_entry,

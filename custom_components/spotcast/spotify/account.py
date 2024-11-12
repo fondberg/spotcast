@@ -106,7 +106,7 @@ class SpotifyAccount:
             "can_expire": False,
         },
         "liked_songs": {
-            "refresh_rate": REFRESH_RATE*2,
+            "refresh_rate": REFRESH_RATE*4,
             "can_expire": False,
         },
         "playlists": {
@@ -116,6 +116,10 @@ class SpotifyAccount:
         "profile": {
             "refresh_rate": REFRESH_RATE*10,
             "can_expire": True,
+        },
+        "categories": {
+            "refresh_rate": REFRESH_RATE*10,
+            "can_expire": False,
         },
     }
 
@@ -177,6 +181,11 @@ class SpotifyAccount:
     def playlists(self) -> list:
         """Returns the list of playlists for the account"""
         return self.get_dataset("playlists")
+
+    @property
+    def categories(self) -> list:
+        """Returns the list of Browse categories for the account"""
+        return self.get_dataset("categories")
 
     @property
     def liked_songs(self) -> list:
@@ -365,26 +374,12 @@ class SpotifyAccount:
             LOGGER.debug("Refreshing playlists dataset")
             async with dataset.lock:
 
-                offset = 0
-                all_playlists = []
-                total = None
+                playlists = await self._async_pager(
+                    self._spotify.current_user_playlists,
+                )
 
-                while total is None or len(all_playlists) < total:
+                dataset.update(playlists)
 
-                    current_playlists: dict = await self.hass\
-                        .async_add_executor_job(
-                            self._spotify.current_user_playlists,
-                            50,
-                            offset,
-                        )
-
-                    if total is None:
-                        total = current_playlists["total"]
-
-                    all_playlists.extend(current_playlists["items"])
-                    offset = len(all_playlists)
-
-                dataset.update(all_playlists)
         else:
             LOGGER.debug("Using cached playlists dataset")
 
@@ -525,24 +520,9 @@ class SpotifyAccount:
             LOGGER.debug("Refreshing liked songs dataset")
             async with dataset.lock:
 
-                offset = 0
-                liked_songs = []
-                total = None
-
-                while total is None or len(liked_songs) < total:
-
-                    current_songs: dict = await self.hass\
-                        .async_add_executor_job(
-                            self._spotify.current_user_saved_tracks,
-                            50,
-                            offset,
-                        )
-
-                    if total is None:
-                        total = current_songs["total"]
-
-                    liked_songs.extend(current_songs["items"])
-                    offset = len(liked_songs)
+                liked_songs = await self._async_pager(
+                    self._spotify.current_user_saved_tracks,
+                )
 
                 dataset.update(liked_songs)
         else:
@@ -599,6 +579,109 @@ class SpotifyAccount:
             volume,
             device_id,
         )
+
+    async def async_categories(
+            self,
+            force: bool = False
+    ) -> dict[str, str]:
+        """Fetches the categories available for the account"""
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Getting Browse Categories for account `%s`", self.name)
+
+        dataset = self._datasets["categories"]
+
+        if force or dataset.is_expired:
+            LOGGER.debug("Refreshing Browse Categories dataset")
+            async with dataset.lock:
+
+                categories = await self._async_pager(
+                    self._spotify.categories,
+                    self.country,
+                    None,
+                    sub_layer="categories"
+                )
+
+                dataset.update(categories)
+        else:
+            LOGGER.debug("Using cached Browse Categories dataset")
+
+        return self.categories
+
+    async def async_category_playlists(
+            self,
+            category_id: str,
+    ) -> list[str]:
+        """Fetches the playlist associated with a browse category
+
+        Args:
+            - category_id(str): the id of of the category to retreive
+                playlists from
+
+        Returns:
+            - list[str]: list of playlists linked to the category id
+                provided
+        """
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug(
+            "Retrieving playlist linked to category id `%s`",
+            category_id,
+        )
+
+        playlists = await self._async_pager(
+            self._spotify.category_playlists,
+            category_id,
+            self.country,
+            sub_layer="playlists",
+        )
+
+        return playlists
+
+    async def _async_pager(
+            self,
+            function: callable,
+            *args,
+            limit: int = 50,
+            sub_layer: str = None,
+    ) -> list[dict]:
+        """Retrieves data from an api endpoint using a paging
+        generator logic
+
+        Args:
+            - function(callable): the function to call to retrieve
+                content. Must be able to take a `limit` and `offset`
+                arguments.
+            - limit(int, optional): the maximum number of items to
+                retrieve in a single call, defaults to 50
+            - *args: arguments to pass to the function on
+                each call
+
+        Returns:
+            - Generator[list[dict], None, None]
+        """
+        offset = 0
+        items = []
+        total = None
+        args = [] if args is None else args
+
+        while total is None or len(items) < total:
+
+            arguments = [*args, limit, offset]
+
+            result = await self.hass.async_add_executor_job(
+                function,
+                *arguments
+            )
+
+            if sub_layer is not None:
+                result = result[sub_layer]
+
+            if total is None:
+                total = result["total"]
+
+            items.extend(result["items"])
+            offset = len(items)
+
+        return items
 
     @staticmethod
     async def async_from_config_entry(

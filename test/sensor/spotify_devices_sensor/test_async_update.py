@@ -8,7 +8,7 @@ from custom_components.spotcast.sensor.spotify_devices_sensor import (
     ReadTimeoutError,
     STATE_UNKNOWN
 )
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class TestSuccessfulUpdate(IsolatedAsyncioTestCase):

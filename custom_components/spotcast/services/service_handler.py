@@ -49,9 +49,13 @@ class ServiceHandler:
         service_name = call.service
 
         try:
-            return await SERVICE_HANDLERS[service_name](self.hass, call)
+            handler = SERVICE_HANDLERS[service_name]
         except KeyError as exc:
             raise UnknownServiceError(
                 f"`{call.domain}.{service_name}` is not a known service to "
                 "spotcast"
             ) from exc
+
+        LOGGER.warning("here")
+
+        await handler(self.hass, call)

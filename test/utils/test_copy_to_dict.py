@@ -2,10 +2,7 @@
 
 from unittest import TestCase
 
-from custom_components.spotcast.utils import (
-    copy_to_dict,
-    ReadOnlyDict,
-)
+from custom_components.spotcast.utils import (copy_to_dict)
 
 
 class TestDictionaryConversion(TestCase):
@@ -20,12 +17,11 @@ class TestDictionaryConversion(TestCase):
             "g": True,
         }
 
-        self.readonly = ReadOnlyDict(self.expected)
-        self.result = copy_to_dict(self.readonly)
+        self.result = copy_to_dict(self.expected)
 
     def test_dictionary_properly_converted(self):
         self.assertEqual(self.result, self.expected)
 
-    def test_main_dictionary_is_no_longer_read_only(self):
+    def test_main_dictionary_is_a_copy(self):
         self.assertIsInstance(self.result, dict)
-        self.assertNotIsInstance(self.result, ReadOnlyDict)
+        self.assertIsNot(self.result, self.expected)

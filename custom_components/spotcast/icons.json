@@ -1,7 +1,7 @@
 {
     "services": {
         "play_media": {
-            "service": "mdi:music-circle"
+            "service": "mdi:spotify"
         },
         "play_dj": {
             "service": "mdi:disc"
@@ -11,6 +11,12 @@
         },
         "transfer_playback": {
             "service": "mdi:transfer"
+        },
+        "play_category": {
+            "service": "mdi:dice-multiple"
+        },
+        "play_custom_context": {
+            "service": "mdi:playlist-music"
         }
     }
 }

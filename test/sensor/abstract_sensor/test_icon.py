@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from homeassistant.const import STATE_UNKNOWN, STATE_ON, STATE_OFF
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
-from custom_components.spotcast import SpotifyAccount
+from custom_components.spotcast.spotify import SpotifyAccount
 
 
 class DummySensor(SpotcastSensor):
