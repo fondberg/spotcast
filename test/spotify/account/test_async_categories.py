@@ -106,8 +106,7 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
         try:
             self.account._async_pager.assert_called_with(
                 self.account._spotify.categories,
-                None,
-                None,
+                prepends=[None, None],
                 sub_layer="categories"
             )
         except AssertionError:

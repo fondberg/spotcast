@@ -42,3 +42,20 @@ class PlaybackError(HomeAssistantError):
 
 class ExpiredDatasetError(HomeAssistantError):
     """Raised when a dataset if retrived while expired"""
+
+
+class SearchQueryError(HomeAssistantError):
+    """Abstract exception for the Search Query Object"""
+
+
+class InvalidFilterError(SearchQueryError):
+    """Raised when a search query is built with invalid filters"""
+
+
+class InvalidTagsError(SearchQueryError):
+    """Raised when a search query is built with invalid filters"""
+
+
+class InvalidItemTypeError(SearchQueryError):
+    """Raised when a search query is built with an invalid item type
+    """

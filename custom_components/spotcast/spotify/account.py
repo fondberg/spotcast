@@ -26,6 +26,7 @@ from custom_components.spotcast.sessions import (
     async_get_config_entry_implementation,
 )
 from custom_components.spotcast.spotify.dataset import Dataset
+from custom_components.spotcast.spotify.search_query import SearchQuery
 
 from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
@@ -385,6 +386,29 @@ class SpotifyAccount:
 
         return self.playlists
 
+    async def async_search(
+            self,
+            query: SearchQuery,
+            limit: int = 20
+    ) -> list[dict]:
+        """Makes a search query and returns the result"""
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug(
+            "Getting Search Result `%s` for account `%s`",
+            query.search,
+            self.name,
+        )
+
+        search_result = await self._async_pager(
+            function=self._spotify.search,
+            prepends=[query.query_string],
+            appends=[query.item_type, self.country],
+            limit=limit,
+            sub_layer=f"{query.item_type}s"
+        )
+
+        return search_result
+
     async def async_wait_for_device(self, device_id: str, timeout: int = 12):
         """Asycnhronously wait for a device to become available
 
@@ -596,8 +620,7 @@ class SpotifyAccount:
 
                 categories = await self._async_pager(
                     self._spotify.categories,
-                    self.country,
-                    None,
+                    prepends=[self.country, None],
                     sub_layer="categories"
                 )
 
@@ -629,8 +652,7 @@ class SpotifyAccount:
 
         playlists = await self._async_pager(
             self._spotify.category_playlists,
-            category_id,
-            self.country,
+            prepends=[category_id, self.country],
             sub_layer="playlists",
         )
 
@@ -639,9 +661,11 @@ class SpotifyAccount:
     async def _async_pager(
             self,
             function: callable,
-            *args,
+            prepends: list = None,
+            appends: list = None,
             limit: int = 50,
             sub_layer: str = None,
+            max_items: int = None,
     ) -> list[dict]:
         """Retrieves data from an api endpoint using a paging
         generator logic
@@ -650,22 +674,30 @@ class SpotifyAccount:
             - function(callable): the function to call to retrieve
                 content. Must be able to take a `limit` and `offset`
                 arguments.
+            - preppends: arguments to pass to the function on
+                each call before the limit and offset
+            - appends: arguments to pass to the function on
+                each call after the limit and offset
             - limit(int, optional): the maximum number of items to
                 retrieve in a single call, defaults to 50
-            - *args: arguments to pass to the function on
-                each call
+            - sub_layer(str, optional): sub key in the response
+                containing the pagination. Use the response as a
+                pagination if None. Defaults to None.
+            - max_items(int, optional): the maximum number of items to
+                retrieve. Retrieve all items if None. Defaults to None.
 
         Returns:
             - Generator[list[dict], None, None]
         """
         offset = 0
         items = []
-        total = None
-        args = [] if args is None else args
+        total = max_items
+        prepends = [] if prepends is None else prepends
+        appends = [] if appends is None else appends
 
         while total is None or len(items) < total:
 
-            arguments = [*args, limit, offset]
+            arguments = [*prepends, limit, offset, *appends]
 
             result = await self.hass.async_add_executor_job(
                 function,
@@ -678,7 +710,12 @@ class SpotifyAccount:
             if total is None:
                 total = result["total"]
 
-            items.extend(result["items"])
+            current_items = result["items"]
+
+            if (delta := total - (len(items) + len(result["items"]))) < 0:
+                current_items = current_items[:delta]
+
+            items.extend(current_items)
             offset = len(items)
 
         return items

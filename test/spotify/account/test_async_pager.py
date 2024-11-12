@@ -61,6 +61,60 @@ class TestPagingApiEndpoint(IsolatedAsyncioTestCase):
         )
 
 
+class TestPagingWithLimit(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    async def asyncSetUp(self, mock_spotify: MagicMock):
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=InternalSession),
+            "spotify": mock_spotify,
+        }
+
+        self.mocks["hass"].async_add_executor_job = AsyncMock()
+        self.mocks["hass"].async_add_executor_job.side_effect = [
+            {
+                "total": 5,
+                "offset": 0,
+                "items": ["foo", "bar"]
+            },
+            {
+                "total": 5,
+                "offset": 2,
+                "items": ["baz", "boo"]
+            },
+            {
+                "total": 5,
+                "offset": 2,
+                "items": ["far"]
+
+            },
+        ]
+
+        self.account = SpotifyAccount(
+            hass=self.mocks["hass"],
+            internal_session=self.mocks["internal"],
+            external_session=self.mocks["external"],
+        )
+        self.account._spotify.dummy_endpoint = MagicMock()
+
+        self.result = await self.account._async_pager(
+            self.account._spotify.dummy_endpoint,
+            max_items=3,
+        )
+
+    def test_proper_result_retrieved(self):
+        self.assertEqual(self.result, ["foo", "bar", "baz"])
+
+    def test_endpoint_called_2_times(self):
+        self.assertEqual(
+            self.mocks["hass"].async_add_executor_job.call_count,
+            2,
+        )
+
+
 class TestSubLayeredPager(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
