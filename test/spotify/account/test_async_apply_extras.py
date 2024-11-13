@@ -54,7 +54,7 @@ class TestAppliedExtras(IsolatedAsyncioTestCase):
 
         await self.account.async_apply_extras(
             "foo",
-            {"start_volume": 80, "shuffle": True, "repeat": "context"}
+            {"volume": 80, "shuffle": True, "repeat": "context"}
         )
 
     def test_set_volume_was_called(self):

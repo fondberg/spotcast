@@ -52,7 +52,9 @@ class TestSensorCreation(IsolatedAsyncioTestCase):
 
         self.mocks["hass"].data = {
             "spotcast": {
-                "12345": self.mocks["account"]
+                "12345": {
+                    "account": self.mocks["account"]
+                }
             }
         }
 

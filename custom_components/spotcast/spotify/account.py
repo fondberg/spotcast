@@ -25,6 +25,7 @@ from custom_components.spotcast.sessions import (
     ConnectionSession,
     async_get_config_entry_implementation,
 )
+from custom_components.spotcast.utils import ensure_default_data
 from custom_components.spotcast.spotify.dataset import Dataset
 from custom_components.spotcast.spotify.search_query import SearchQuery
 
@@ -389,7 +390,7 @@ class SpotifyAccount:
     async def async_search(
             self,
             query: SearchQuery,
-            limit: int = 20
+            max_items: int = 20
     ) -> list[dict]:
         """Makes a search query and returns the result"""
         await self.async_ensure_tokens_valid()
@@ -399,12 +400,18 @@ class SpotifyAccount:
             self.name,
         )
 
+        limit = 50
+
+        if max_items < limit:
+            limit = max_items
+
         search_result = await self._async_pager(
             function=self._spotify.search,
             prepends=[query.query_string],
             appends=[query.item_type, self.country],
             limit=limit,
-            sub_layer=f"{query.item_type}s"
+            sub_layer=f"{query.item_type}s",
+            max_items=max_items,
         )
 
         return search_result
@@ -454,7 +461,7 @@ class SpotifyAccount:
             - extras(dict): the extra settings to apply
         """
         actions = {
-            "start_volume": self.async_set_volume,
+            "volume": self.async_set_volume,
             "shuffle": self.async_shuffle,
             "repeat": self.async_repeat,
         }
@@ -472,7 +479,7 @@ class SpotifyAccount:
         context_uri: str = None,
         uris: list[str] = None,
         offset: int = None,
-        position_ms: int = None,
+        position: int = None,
         **_
     ):
         """Play the media linked to the uri provided on the device id
@@ -494,6 +501,12 @@ class SpotifyAccount:
             device_id
         )
 
+        if offset is not None:
+            offset = {"position": offset}
+
+        if position is not None:
+            position = int(position * 1000)
+
         try:
             await self.hass.async_add_executor_job(
                 self._spotify.start_playback,
@@ -501,7 +514,7 @@ class SpotifyAccount:
                 context_uri,
                 uris,
                 offset,
-                position_ms,
+                position,
             )
         except SpotifyException as exc:
             raise PlaybackError(exc.msg) from exc
@@ -736,10 +749,11 @@ class SpotifyAccount:
             SpotifyAccount: A spotify account from the api config in
                 the config entry
         """
-        if DOMAIN not in hass.data:
-            hass.data[DOMAIN] = {}
 
-        account = hass.data[DOMAIN].get(entry.entry_id)
+        hass = ensure_default_data(hass, entry.entry_id)
+        domain_data = hass.data[DOMAIN]
+
+        account = domain_data[entry.entry_id].get("account")
 
         if account is not None:
             LOGGER.debug(
@@ -768,6 +782,6 @@ class SpotifyAccount:
             "Adding entry `%s` to spotcast data entries",
             entry.entry_id,
         )
-        hass.data[DOMAIN][entry.entry_id] = account
+        hass.data[DOMAIN][entry.entry_id]["account"] = account
 
         return account

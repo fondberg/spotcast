@@ -115,9 +115,15 @@ class TestSettingDefault(IsolatedAsyncioTestCase):
 
         self.mocks["hass"].data = {
             "spotcast": {
-                "67890": self.mocks["additional_account"],
-                "12345": self.mocks["account"],
-                "1465": self.mocks["non_default_account"],
+                "67890": {
+                    "account": self.mocks["additional_account"]
+                },
+                "12345": {
+                    "account": self.mocks["account"]
+                },
+                "1465": {
+                    "account": self.mocks["non_default_account"]
+                },
             }
         }
 

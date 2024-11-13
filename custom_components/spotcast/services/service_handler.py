@@ -56,6 +56,4 @@ class ServiceHandler:
                 "spotcast"
             ) from exc
 
-        LOGGER.warning("here")
-
         await handler(self.hass, call)

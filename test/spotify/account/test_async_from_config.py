@@ -126,12 +126,14 @@ class TestPreexistingAccount(IsolatedAsyncioTestCase):
         }
 
         self.mocks["hass"].data = {"spotcast": {
-            "12345": SpotifyAccount(
-                self.mocks["hass"],
-                MagicMock(spec=OAuth2Session),
-                MagicMock(spec=InternalSession),
-                is_default=True,
-            )
+            "12345": {
+                "account": SpotifyAccount(
+                    self.mocks["hass"],
+                    MagicMock(spec=OAuth2Session),
+                    MagicMock(spec=InternalSession),
+                    is_default=True,
+                )
+            }
         }}
         self.mocks["entry"].entry_id = "12345"
         self.mocks["entry"].data = {

@@ -38,6 +38,9 @@ class TestMediaPlayerSetup(IsolatedAsyncioTestCase):
         self.mock_hass = MagicMock(spec=HomeAssistant)
         self.mock_entry = MagicMock(spec=ConfigEntry)
         self.mock_callback = MagicMock(spec=AddEntitiesCallback)
+        self.mock_entry.entry_id = "12345"
+        self.mock_hass.data = {}
+        self.mock_track_time.return_value = "foo"
 
         await async_setup_entry(
             self.mock_hass,
@@ -56,3 +59,9 @@ class TestMediaPlayerSetup(IsolatedAsyncioTestCase):
             self.mock_track_time.assert_called()
         except AssertionError:
             self.fail()
+
+    async def test_listener_saved_in_data(self):
+        self.assertEqual(
+            self.mock_hass.data["spotcast"]["12345"]["device_listener"],
+            "foo",
+        )

@@ -71,7 +71,8 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
 
             if is_default:
                 old_default = entry.title
-                self.hass.data[DOMAIN][entry.entry_id].is_default = False
+                self.hass.data[DOMAIN][entry.entry_id]["account"]\
+                    .is_default = False
 
             self.hass.config_entries.async_update_entry(entry, entry_data)
 
@@ -83,6 +84,7 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
 
         new_data = dict(self.config_entry.data)
         new_data["is_default"] = True
-        self.hass.data[DOMAIN][self.config_entry.entry_id].is_default = True
+        self.hass.data[DOMAIN][self.config_entry.entry_id]["account"]\
+            .is_default = True
 
         self.async_create_entry(title=self.config_entry.title, data=new_data)

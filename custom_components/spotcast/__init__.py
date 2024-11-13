@@ -11,7 +11,7 @@ Constants:
 
 from logging import getLogger
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, CALLBACK_TYPE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.const import Platform
@@ -68,5 +68,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             service_func=service_handler.async_relay_service_call,
             schema=schema,
         )
+
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unloads the Spotcast config entry"""
+    LOGGER.info("Unloading Spotcast entry `%s`", entry.entry_id)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry,
+        PLATFORMS,
+    )
+
+    if not unload_ok:
+        return False
+
+    entry_data = hass.data[DOMAIN].get(entry.entry_id)
+    listener = entry_data.get("device_listener")
+
+    if listener is not None:
+        listener()
+
+    hass.data[DOMAIN].pop(entry.entry_id)
 
     return True

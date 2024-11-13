@@ -134,3 +134,26 @@ def fuzzy_match(
         )
 
     return best_item
+
+
+def ensure_default_data(hass: HomeAssistant, entry_id: str) -> HomeAssistant:
+    """Ensure the default dictionary is setup for the entry_id
+
+    Args:
+        - hass(HomeAssistant): the Home Assistant Instance
+        - entry_id(str): the id -f the entry being setup
+    """
+
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+
+    domain_data = hass.data[DOMAIN]
+
+    if entry_id not in domain_data:
+        domain_data[entry_id] = {}
+
+    for key in ("account", "device_listener"):
+        if key not in domain_data[entry_id]:
+            domain_data[entry_id][key] = None
+
+    return hass

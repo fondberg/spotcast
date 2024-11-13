@@ -192,3 +192,78 @@ play_custom_context:
       required: false
       selector:
         object:
+play_from_search:
+  name: Play From Search
+  description: Play media from a search result
+  fields:
+    media_player:
+      name: Media Player
+      required: true
+      selector:
+        target:
+          entity:
+            - domain: media_player
+              integration: cast
+            - domain: media_player
+              integration: spotcast
+    search_term:
+      name: Search Term
+      description: The term to search in Spotify Catalog
+      example: Joy as an Act of Resistance.
+      selector:
+        text:
+          multiline: false
+    item_type:
+      name: Item Type
+      description: The type of item to return from the search result
+      example: album
+      selector:
+        select:
+          options:
+            - label: Album
+              value: album
+            - label: Artist
+              value: artist
+            - label: Playlist
+              value: playlist
+            - label: Track
+              value: track
+            - label: Show
+              value: show
+            - label: Episode
+              value: episode
+            - label: Audiobook
+              value: audiobook
+          mode: list
+    tags:
+      name: Tags
+      description: Tags to add to the search query filters
+      example: hipster
+      selector:
+        select:
+          options:
+            - label: Hipster
+              value: hipster
+            - label: New
+              value: new
+          multiple: true
+          mode: list
+    filters:
+      name: Filters
+      description: Filters to apply to the search query. See [Spotify API Documentation](https://developer.spotify.com/documentation/web-api/reference/search)
+      selector:
+        object:
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      example: "pirate_jeanne"
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast
+    data:
+      name: Data
+      description: Additional modifiers for the play_media service call.
+      required: false
+      selector:
+        object:
