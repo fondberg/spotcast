@@ -10,6 +10,7 @@ Functions:
 
 from typing import cast
 from aiohttp import ClientError
+from asyncio import Lock
 
 from homeassistant.helpers.config_entry_oauth2_flow import (
     OAuth2Session as ParentOAuth2Session,
@@ -42,6 +43,19 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
         - async_request
     """
 
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        implementation: AbstractOAuth2Implementation,
+    ) -> None:
+        """Initialize an OAuth2 session."""
+        self.hass = hass
+        self.config_entry = config_entry
+        self.implementation = implementation
+        self._is_healthy = False
+        self._token_lock = Lock()
+
     @property
     def token(self) -> dict:
         """Return the token"""
@@ -58,6 +72,7 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
                     self.token
                 )
             except ClientError as exc:
+                self._is_healthy = False
                 raise TokenRefreshError(
                     "Unable to refresh Spotify Public API Token"
                 ) from exc
@@ -70,6 +85,7 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
                 self.config_entry,
                 data=new_data,
             )
+            self._is_healthy = True
 
     async def async_request(
             self,

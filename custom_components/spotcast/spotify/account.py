@@ -63,7 +63,10 @@ class SpotifyAccount:
         - SCOPE(tuple): A list of API permissions required for the
             instance to work properly
         - DJ_URI(str): the uri for the DJ playlist
-        - REFRESH_RATE(int): rate at which to deem the cache deprecated
+        - REFRESH_RATE(int): default rate at which to deem the cache
+            deprecated
+       - DATASETS(dict[str, dict]): Default configuration for datasets
+            used by the account
 
     Methods:
         - get_profile_value
@@ -250,6 +253,17 @@ class SpotifyAccount:
             entry_type=DeviceEntryType.SERVICE,
             configuration_url="https://open.spotify.com",
         )
+
+    @property
+    def health_status(self) -> dict[str, bool]:
+        """Returns the health status of the underlying sessions"""
+
+        health = {}
+
+        for key, session in self.sessions.items():
+            health[key] = session.is_healthy
+
+        return health
 
     def get_profile_value(self, attribute: str) -> Any:
         """Returns the value for a profile element. Raises Error if not

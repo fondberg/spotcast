@@ -94,6 +94,7 @@ class InternalSession(ConnectionSession):
         self._access_token = None
         self._expires_at = 0
         self._token_lock = Lock()
+        self._is_healthy = False
 
     @property
     def token(self) -> str:
@@ -161,16 +162,19 @@ class InternalSession(ConnectionSession):
                 try:
                     data = await response.json()
                 except ContentTypeError as exc:
+                    self._is_healthy = False
                     error_message = await response.text()
                     raise TokenRefreshError(error_message) from exc
 
                 if not response.ok:
+                    self._is_healthy = False
                     raise TokenRefreshError(
                         f"{response.status}: {data}"
                     )
 
             self._access_token = data[self.TOKEN_KEY]
             self._expires_at = int(data[self.EXPIRATION_KEY]) // 1000
+            self._is_healthy = True
 
             return {
                 "access_token": self._access_token,
