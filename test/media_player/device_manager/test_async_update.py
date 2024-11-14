@@ -112,6 +112,55 @@ class TestAlreadyTrackedDevice(IsolatedAsyncioTestCase):
             self.fail()
 
 
+class TestCurrentlyPlayingDevice(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mock_account = MagicMock(spec=SpotifyAccount)
+        self.mock_callack = MagicMock(spec=AddEntitiesCallback)
+
+        self.mock_account.async_devices = AsyncMock(
+            return_value=[
+                {
+                    "id": "1234",
+                    "name": "dummy device",
+                    "type": "Computer",
+                }
+            ]
+        )
+
+        self.mock_account.async_playback_state = AsyncMock(return_value={
+            "device": {
+                "id": "1234"
+            },
+            "foo": {
+                "bar": "baz"
+            }
+        })
+
+        self.device_manager = DeviceManager(
+            self.mock_account,
+            self.mock_callack,
+        )
+
+        self.device_manager.tracked_devices = {
+            "1234": MagicMock(spec=SpotifyDevice)
+        }
+        self.device_manager.tracked_devices["1234"].id = "1234"
+
+        await self.device_manager.async_update()
+
+    async def test_device_playback_updated(self):
+        self.device_manager.tracked_devices["1234"]._playback_state = {
+            "device": {
+                "id": "1234",
+            },
+            "foo": {
+                "bar": "baz",
+            }
+        }
+
+
 class TestRemovedDevice(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
@@ -120,6 +169,8 @@ class TestRemovedDevice(IsolatedAsyncioTestCase):
         self.mock_callack = MagicMock(spec=AddEntitiesCallback)
 
         self.mock_account.async_devices = AsyncMock(return_value=[])
+        self.mock_account.async_playback_state = AsyncMock()
+        self.mock_account.async_playback_state.return_value = {}
 
         self.device_manager = DeviceManager(
             self.mock_account,

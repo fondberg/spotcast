@@ -126,6 +126,10 @@ class SpotifyAccount:
             "refresh_rate": REFRESH_RATE*10,
             "can_expire": False,
         },
+        "playback_state": {
+            "refresh_rate": REFRESH_RATE/2,
+            "can_expire": False,
+        }
     }
 
     def __init__(
@@ -203,6 +207,11 @@ class SpotifyAccount:
     def devices(self) -> list:
         """Returns the list of devices linked to the account"""
         return self.get_dataset("devices")
+
+    @property
+    def playback_state(self) -> list:
+        """Returns the list of devices linked to the account"""
+        return self.get_dataset("playback_state")
 
     @property
     def country(self) -> str:
@@ -378,6 +387,30 @@ class SpotifyAccount:
             LOGGER.debug("Using Cached devices dataset")
 
         return self.devices
+
+    async def async_playback_state(self, force: bool = False) -> dict:
+        """Returns the current playback state"""
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Getting Playback Sate for account `%s`", self.name)
+
+        dataset = self._datasets["playback_state"]
+
+        if force or dataset.is_expired:
+            LOGGER.debug("Refreshing playback state dataset")
+            async with dataset.lock:
+                data = await self.hass.async_add_executor_job(
+                    self._spotify.current_playback,
+                    self.country,
+                )
+
+                if data is None:
+                    data = {}
+
+                dataset.update(data)
+        else:
+            LOGGER.debug("Using Cached playback state dataset")
+
+        return self.playback_state
 
     async def async_playlists(self, force: bool = False) -> list[dict]:
         """Returns a list of playlist for the current user"""
@@ -746,6 +779,26 @@ class SpotifyAccount:
             offset = len(items)
 
         return items
+
+    async def async_add_to_queue(self, device_id: str, uri: str):
+        """Adds an item to the playback queue
+
+        Args:
+            - device_id(str): the device playing the media
+            - uri(str): the spotify item to add to the queue
+        """
+        await self.async_ensure_tokens_valid()
+
+        try:
+            await self.hass.async_add_executor_job(
+                self._spotify.add_to_queue,
+                uri,
+                device_id,
+            )
+        except SpotifyException as exc:
+            raise PlaybackError(
+                f"Could not add `{uri}` to device `{device_id}`"
+            ) from exc
 
     @staticmethod
     async def async_from_config_entry(

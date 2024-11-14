@@ -75,6 +75,11 @@ class DeviceManager:
                 self.async_add_entities([new_device])
 
         remove = []
+        playback_state = await self._account.async_playback_state()
+        playing_id = None
+
+        if "device" in playback_state:
+            playing_id = playback_state["device"]["id"]
 
         for id, device in self.tracked_devices.items():
             if id not in current_devices:
@@ -89,6 +94,11 @@ class DeviceManager:
             else:
                 LOGGER.debug("Updating device info for `%s`", device.name)
                 device._device_data = current_devices[id]
+
+                if device.id == playing_id:
+                    device._playback_state = playback_state
+                else:
+                    device._playback_state = {}
 
         for id in remove:
             self.tracked_devices.pop(id)

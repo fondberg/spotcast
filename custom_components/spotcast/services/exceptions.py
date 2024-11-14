@@ -6,10 +6,10 @@ Classes:
     - UnknownServiceError
 """
 
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 
 
-class AccountNotFoundError(HomeAssistantError):
+class AccountNotFoundError(ServiceValidationError):
     """Raised when the account id provided could not be found in
     currently set accounts"""
 
@@ -18,27 +18,27 @@ class NoDefaultAccountError(HomeAssistantError):
     """Raised if there are no default account to be found"""
 
 
-class UnknownServiceError(HomeAssistantError):
+class UnknownServiceError(ServiceValidationError):
     """Raised if the service name called is not known to spotcast"""
 
 
-class TooManyMediaPlayersError(HomeAssistantError):
+class TooManyMediaPlayersError(ServiceValidationError):
     """Raised when too many media players are in a service call"""
 
 
-class DeviceNotFoundError(HomeAssistantError):
+class DeviceNotFoundError(ServiceValidationError):
     """Raised when a device can't be found based on it's id"""
 
 
-class AmbiguousDeviceIdError(HomeAssistantError):
+class AmbiguousDeviceIdError(ServiceValidationError):
     """Raised when the selection of an entity is ambiguous for a
     device"""
 
 
-class UnmanagedSelectionError(HomeAssistantError):
+class UnmanagedSelectionError(ServiceValidationError):
     """Raised when a target selector provides a target selection
     that spotcast can't manage"""
 
 
-class InvalidCategoryError(HomeAssistantError):
+class InvalidCategoryError(ServiceValidationError):
     """Raised when an invalid category id is provided"""

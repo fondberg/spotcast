@@ -55,6 +55,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         self._account: SpotifyAccount = account
         self.entity_id = self._define_entity_id()
         self._is_unavailable = False
+        self._playback_state: dict = {}
 
         self.device_info = DeviceInfo(
             identifiers={(DOMAIN, self.id)},
