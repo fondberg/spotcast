@@ -96,6 +96,7 @@ class DeviceManager:
                 device._device_data = current_devices[id]
 
                 if device.id == playing_id:
+                    LOGGER.debug("Feeding playback state to `%s`", device.name)
                     device._playback_state = playback_state
                 else:
                     device._playback_state = {}

@@ -20,6 +20,9 @@
         },
         "play_from_search": {
             "service": "mdi:file-search"
+        },
+        "add_to_queue": {
+            "service": "mdi:plus-box-multiple"
         }
     }
 }

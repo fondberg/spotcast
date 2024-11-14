@@ -30,6 +30,10 @@ from custom_components.spotcast.services.play_from_search import (
     PLAY_FROM_SEARCH_SCHEMA,
     async_play_from_search,
 )
+from custom_components.spotcast.services.add_to_queue import (
+    ADD_TO_QUEUE_SCHEMA,
+    async_add_to_queue,
+)
 
 SERVICE_SCHEMAS = MappingProxyType({
     "play_media": PLAY_MEDIA_SCHEMA,
@@ -39,6 +43,7 @@ SERVICE_SCHEMAS = MappingProxyType({
     "play_category": PLAY_CATEGORY_SCHEMA,
     "play_custom_context": PLAY_CUSTOM_CONTEXT_SCHEMA,
     "play_from_search": PLAY_FROM_SEARCH_SCHEMA,
+    "add_to_queue": ADD_TO_QUEUE_SCHEMA,
 })
 
 SERVICE_HANDLERS = MappingProxyType({
@@ -49,4 +54,5 @@ SERVICE_HANDLERS = MappingProxyType({
     "play_category": async_play_category,
     "play_custom_context": async_play_custom_context,
     "play_from_search": async_play_from_search,
+    "add_to_queue": async_add_to_queue,
 })

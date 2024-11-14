@@ -14,6 +14,11 @@ class AccountNotFoundError(ServiceValidationError):
     currently set accounts"""
 
 
+class NoActivePlaybackError(ServiceValidationError):
+    """Raised when there is no active playback for an account, while
+    trying to call a service that requires active playback"""
+
+
 class NoDefaultAccountError(HomeAssistantError):
     """Raised if there are no default account to be found"""
 

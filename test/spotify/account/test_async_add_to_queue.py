@@ -53,7 +53,6 @@ class TestAddToQueueJob(IsolatedAsyncioTestCase):
         self.mocks["hass"].async_add_executor_job = AsyncMock()
 
         await self.account.async_add_to_queue(
-            "foo",
             "spotify:dummy:uri"
         )
 
@@ -62,7 +61,7 @@ class TestAddToQueueJob(IsolatedAsyncioTestCase):
             self.mocks["hass"].async_add_executor_job.assert_called_with(
                 self.account._spotify.add_to_queue,
                 "spotify:dummy:uri",
-                "foo",
+                None,
             )
         except AssertionError:
             self.fail()
@@ -112,6 +111,6 @@ class TestAddToQueueFails(IsolatedAsyncioTestCase):
 
         with self.assertRaises(PlaybackError):
             await self.account.async_add_to_queue(
-                "foo",
                 "spotify:dummy:uri"
+                "foo",
             )

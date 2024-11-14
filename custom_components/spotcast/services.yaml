@@ -22,7 +22,6 @@ play_media:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -50,7 +49,6 @@ play_dj:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -78,7 +76,6 @@ transfer_playback:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -106,7 +103,6 @@ play_liked_songs:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -141,7 +137,6 @@ play_category:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -167,8 +162,8 @@ play_custom_context:
             - domain: media_player
               integration: spotcast
     tracks:
-      name: Tracks
-      description: A list of track URIs
+      name: Items
+      description: A list of Spotify URIs
       example: spotify:track:55mJleti2WfWEFNFcBduhc
       required: true
       selector:
@@ -181,7 +176,6 @@ play_custom_context:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -256,7 +250,6 @@ play_from_search:
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
-      example: "pirate_jeanne"
       required: false
       selector:
         config_entry:
@@ -267,3 +260,25 @@ play_from_search:
       required: false
       selector:
         object:
+add_to_queue:
+  name: Add To Queue
+  description: Add Items to Spotify Queue
+  fields:
+    spotify_uris:
+      name: Spotify URIs
+      description: A list of spotify URIs
+      required: true
+      selector:
+        object:
+          uris:
+            - name: URIs
+              selector:
+                text:
+                  multiline: false
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast

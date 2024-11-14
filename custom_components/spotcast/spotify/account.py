@@ -780,12 +780,14 @@ class SpotifyAccount:
 
         return items
 
-    async def async_add_to_queue(self, device_id: str, uri: str):
+    async def async_add_to_queue(self,  uri: str, device_id: str = None):
         """Adds an item to the playback queue
 
         Args:
-            - device_id(str): the device playing the media
             - uri(str): the spotify item to add to the queue
+            - device_id(str, optional): The id of the device this
+                command is targeting. If None, the account's currently
+                active device is the target. Defaults to None.
         """
         await self.async_ensure_tokens_valid()
 
