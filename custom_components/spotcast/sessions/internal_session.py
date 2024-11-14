@@ -80,6 +80,7 @@ class InternalSession(ConnectionSession):
 
     TOKEN_KEY = "accessToken"
     EXPIRATION_KEY = "accessTokenExpirationTimestampMs"
+    API_ENDPOINT = "https://spclient.wg.spotify.com"
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
         """Api session with access to Spotify's private API

@@ -9,6 +9,8 @@ from abc import ABC, abstractmethod
 
 class ConnectionSession(ABC):
 
+    API_ENDPOINT = None
+
     def __init__(self):
         self._is_healthy = False
 

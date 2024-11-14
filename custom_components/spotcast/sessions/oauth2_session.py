@@ -43,6 +43,8 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
         - async_request
     """
 
+    API_ENDPOINT = "https://api.spotify.com"
+
     def __init__(
         self,
         hass: HomeAssistant,
