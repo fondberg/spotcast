@@ -42,7 +42,7 @@ async def system_health_info(hass: HomeAssistant) -> dict[str]:
             if status:
                 health_status[key] = "healthy"
             else:
-                status = {"type": "failed", "error": "unhealthy"}
+                health_status[key] = {"type": "failed", "error": "unhealthy"}
 
         health_info[f"{base_key} Is Default"] = account.is_default
         health_info[f"{base_key} Public Endpoint"] = \
