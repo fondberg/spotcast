@@ -1,7 +1,7 @@
 """Module to test the async_play_category function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, patch
 
 from homeassistant.config_entries import ConfigEntry
 
@@ -10,8 +10,8 @@ from custom_components.spotcast.services.play_category import (
     SpotifyAccount,
     HomeAssistant,
     ServiceCall,
-    InvalidCategoryError,
 )
+from custom_components.spotcast.services.exceptions import InvalidCategoryError
 
 TEST_MODULE = "custom_components.spotcast.services.play_category"
 

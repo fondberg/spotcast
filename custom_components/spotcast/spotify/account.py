@@ -412,7 +412,11 @@ class SpotifyAccount:
 
         return self.playback_state
 
-    async def async_playlists(self, force: bool = False) -> list[dict]:
+    async def async_playlists(
+            self,
+            force: bool = False,
+            max_items: int = None
+    ) -> list[dict]:
         """Returns a list of playlist for the current user"""
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Playlist for account `%s`", self.name)
@@ -425,6 +429,7 @@ class SpotifyAccount:
 
                 playlists = await self._async_pager(
                     self._spotify.current_user_playlists,
+                    max_items=max_items,
                 )
 
                 dataset.update(playlists)
@@ -693,12 +698,15 @@ class SpotifyAccount:
     async def async_category_playlists(
             self,
             category_id: str,
+            limit: int = None,
     ) -> list[str]:
         """Fetches the playlist associated with a browse category
 
         Args:
             - category_id(str): the id of of the category to retreive
                 playlists from
+            - limit(int, optional): the maxmimum number of item to
+                retrieve. Retrieves all if None. Defaults to None.
 
         Returns:
             - list[str]: list of playlists linked to the category id
@@ -714,6 +722,7 @@ class SpotifyAccount:
             self._spotify.category_playlists,
             prepends=[category_id, self.country],
             sub_layer="playlists",
+            max_items=limit,
         )
 
         return playlists

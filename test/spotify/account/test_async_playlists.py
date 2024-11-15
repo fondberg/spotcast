@@ -111,6 +111,7 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
         try:
             self.mocks["pager"].assert_called_with(
                 self.account._spotify.current_user_playlists,
+                max_items=None
             )
         except AssertionError:
             self.fail()
@@ -165,6 +166,7 @@ class TestForceRefresh(IsolatedAsyncioTestCase):
         try:
             self.mocks["pager"].assert_called_with(
                 self.account._spotify.current_user_playlists,
+                max_items=None,
             )
         except AssertionError:
             self.fail()

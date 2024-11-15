@@ -45,7 +45,8 @@ class TestPlaylistRetrieval(IsolatedAsyncioTestCase):
             self.mocks["pager"].assert_called_with(
                 self.account._spotify.category_playlists,
                 prepends=["12345", "CA"],
-                sub_layer="playlists"
+                sub_layer="playlists",
+                max_items=None,
             )
         except AssertionError:
             self.fail()

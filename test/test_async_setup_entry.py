@@ -12,11 +12,18 @@ from custom_components.spotcast import (
 )
 from custom_components.spotcast.spotify import SpotifyAccount
 
+TEST_MODULE = "custom_components.spotcast"
+
 
 class TestEntryRegistration(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.async_setup_websocket")
     @patch.object(SpotifyAccount, "async_from_config_entry", new_callable=AsyncMock)
-    async def asyncSetUp(self, mock_account: MagicMock):
+    async def asyncSetUp(
+        self,
+        mock_account: MagicMock,
+        mock_websocket: AsyncMock,
+    ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
 

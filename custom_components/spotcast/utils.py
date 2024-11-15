@@ -5,6 +5,7 @@ Functions:
 """
 
 from logging import getLogger
+from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -30,6 +31,12 @@ def get_account_entry(
     Args:
         - hass(HomeAssistant): The Home Assistant Instance
         - account_id(str): The id of the spotify account to get
+
+    Raises:
+        - AccountNotFoundError: raised if No account can be found for
+            entry_id provided
+        - NoDefaultAccountError: raised if no default account exists
+            for Spotcast
     """
 
     if account_id is not None:
@@ -55,6 +62,39 @@ def get_account_entry(
             return entry
 
     raise NoDefaultAccountError("No Default account could be found")
+
+
+def search_account(hass: HomeAssistant, search_term: str) -> "SpotifyAccount":
+    """Searches for an account based on entry_id, account_id or name.
+    Search is made in that order.
+
+    Args:
+        - hass(HomeAssistant): the Home Assistant Instance
+        - search_term(str): the search_term used to find the account.
+            Either an entry id, account id or account name.
+
+    Returns:
+        - SpotifyAccount: the spotify account linked to the search term
+    """
+
+    accounts = {x: y["account"] for x, y in hass.data[DOMAIN].items()}
+
+    search_lists = [
+        accounts,
+        {x.id: x for x in accounts.values()},
+        {x.name: x for x in accounts.values()},
+    ]
+
+    for search_list in search_lists:
+        account = search_list.get(search_term)
+
+        if account is not None:
+            return account
+
+    raise AccountNotFoundError(
+        f"Could not find an account that fits `{search_term}`. Ensure you use "
+        "a valid entry id, account id or account name"
+    )
 
 
 def copy_to_dict(items: dict) -> dict:

@@ -11,7 +11,7 @@ Constants:
 
 from logging import getLogger
 
-from homeassistant.core import HomeAssistant, CALLBACK_TYPE
+from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.const import Platform
@@ -20,6 +20,7 @@ from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.services import ServiceHandler
 from custom_components.spotcast.services.const import SERVICE_SCHEMAS
 from custom_components.spotcast.sessions.exceptions import TokenRefreshError
+from custom_components.spotcast.websocket import async_setup_websocket
 
 __version__ = "4.0.0-a0"
 
@@ -68,6 +69,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             service_func=service_handler.async_relay_service_call,
             schema=schema,
         )
+
+    await async_setup_websocket(hass)
 
     return True
 

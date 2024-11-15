@@ -13,12 +13,17 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.core import HomeAssistant
 
+from custom_components.spotcast.utils import fuzzy_match
 from custom_components.spotcast.services.exceptions import (
     TooManyMediaPlayersError,
     AmbiguousDeviceIdError,
     UnmanagedSelectionError,
     DeviceNotFoundError,
 )
+from custom_components.spotcast.services.exceptions import (
+    InvalidCategoryError,
+)
+from custom_components.spotcast.utils import LowRatioError
 
 EXTRAS_SCHEMA = vol.Schema({
     vol.Optional("position_ms"): cv.positive_int,
@@ -127,3 +132,18 @@ def clean_extras(extras: dict, keep: Iterable) -> dict:
         result[key] = value
 
     return result
+
+
+def find_category(categories: dict, category_str: str) -> dict:
+
+    try:
+        return fuzzy_match(categories, category_str, "name")
+    except LowRatioError:
+        try:
+            return {x["id"]: x for x in categories}[category_str]
+        except KeyError as exc:
+            raise InvalidCategoryError(
+                "Incapable of finding a proper match for category "
+                f"`{category_str}`. No category name match found and not a "
+                "valid ID."
+            ) from exc

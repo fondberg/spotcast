@@ -15,17 +15,13 @@ from random import choice
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services.play_media import async_play_media
-from custom_components.spotcast.services.exceptions import (
-    InvalidCategoryError,
-)
 from custom_components.spotcast.utils import (
     get_account_entry,
     copy_to_dict,
-    fuzzy_match,
-    LowRatioError,
 )
 from custom_components.spotcast.services.utils import (
     EXTRAS_SCHEMA,
+    find_category,
 )
 
 LOGGER = getLogger(__name__)
@@ -57,17 +53,7 @@ async def async_play_category(hass: HomeAssistant, call: ServiceCall):
 
     categories = await account.async_categories()
 
-    try:
-        category = fuzzy_match(categories, category_str, "name")
-    except LowRatioError:
-        try:
-            category = [x for x in categories if x["id"] == category_str][0]
-        except (IndexError) as exc:
-            raise InvalidCategoryError(
-                "Incapable of finding a proper match for category "
-                f"`{category_str}`. No category name match found and not a "
-                "valid ID."
-            ) from exc
+    category = find_category(categories, category_str)
 
     playlists = await account.async_category_playlists(category["id"])
 
