@@ -107,27 +107,27 @@ class SpotifyAccount:
     REFRESH_RATE = 30
     DATASETS = {
         "devices": {
-            "refresh_rate": REFRESH_RATE,
+            "refresh_factor": 1,
             "can_expire": False,
         },
         "liked_songs": {
-            "refresh_rate": REFRESH_RATE*4,
+            "refresh_factor": 4,
             "can_expire": False,
         },
         "playlists": {
-            "refresh_rate": REFRESH_RATE*2,
+            "refresh_factor": 2,
             "can_expire": False,
         },
         "profile": {
-            "refresh_rate": REFRESH_RATE*10,
+            "refresh_factor": 10,
             "can_expire": True,
         },
         "categories": {
-            "refresh_rate": REFRESH_RATE*10,
+            "refresh_factor": 10,
             "can_expire": False,
         },
         "playback_state": {
-            "refresh_rate": REFRESH_RATE/2,
+            "refresh_factor": 1/2,
             "can_expire": False,
         }
     }
@@ -138,6 +138,7 @@ class SpotifyAccount:
             external_session: OAuth2Session,
             internal_session: InternalSession,
             is_default: bool = False,
+            base_refresh_rate: int = 30
     ):
         """The account of a Spotify user. Able to leverage the public
         and private API.
@@ -150,6 +151,8 @@ class SpotifyAccount:
                 session for the Spotify Account
             - is_default(bool, optional): True if account is treated as
                 default for service call. Defaults to False.
+            - base_refresh_rate(int, optional): The base refresh rate
+                used to update dateset
         """
         self.hass = hass
         self.sessions: dict[str, ConnectionSession] = {
@@ -157,12 +160,38 @@ class SpotifyAccount:
             "internal": internal_session,
         }
         self.is_default = is_default
+        self._base_refresh_rate = 30
 
         self._spotify = Spotify(
             auth=self.sessions["external"].token["access_token"]
         )
 
-        self._datasets = {x: Dataset(x, **y) for x, y in self.DATASETS.items()}
+        self._datasets = {}
+
+        for name, dataset in self.DATASETS.items():
+            refresh_rate = dataset["refresh_factor"] * self._base_refresh_rate
+            can_expire = dataset["can_expire"]
+            self._datasets[name] = Dataset(name, refresh_rate, can_expire)
+
+    @property
+    def base_refresh_rate(self) -> int:
+        """Returns the current base refresh rate """
+        return self._base_refresh_rate
+
+    @base_refresh_rate.setter
+    def base_refresh_rate(self, value: int):
+        """Sets the base refresh rate and updates the dataset
+        accordingly
+
+        Args:
+            - value(int): the new base refresh_rate
+        """
+        self._base_refresh_rate = value
+
+        for name, dataset in self._datasets.items():
+            dataset.refresh_rate = value * self.DATASETS[name][
+                "refresh_factor"
+            ]
 
     @property
     def id(self) -> str:
