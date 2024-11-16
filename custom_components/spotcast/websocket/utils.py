@@ -15,7 +15,7 @@ def websocket_wrapper(func: callable):
         msg: dict
     ):
         try:
-            await func(hass, connection, msg)
+            return await func(hass, connection, msg)
         except HANDLED_EXCEPTIONS as exc:
             connection.send_error(msg["id"], type(exc).__name__, str(exc))
 

@@ -5,7 +5,6 @@ Functions:
 """
 
 from logging import getLogger
-from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -15,7 +14,7 @@ from custom_components.spotcast.services.exceptions import (
     AccountNotFoundError,
     NoDefaultAccountError,
 )
-from custom_components.spotcast import DOMAIN
+from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.exceptions import LowRatioError
 
 LOGGER = getLogger(__name__)

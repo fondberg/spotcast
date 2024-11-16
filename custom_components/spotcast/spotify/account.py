@@ -700,7 +700,8 @@ class SpotifyAccount:
 
     async def async_categories(
             self,
-            force: bool = False
+            force: bool = False,
+            limit: int = None,
     ) -> dict[str, str]:
         """Fetches the categories available for the account"""
         await self.async_ensure_tokens_valid()
@@ -715,7 +716,8 @@ class SpotifyAccount:
                 categories = await self._async_pager(
                     self._spotify.categories,
                     prepends=[self.country, None],
-                    sub_layer="categories"
+                    sub_layer="categories",
+                    max_items=limit,
                 )
 
                 dataset.update(categories)

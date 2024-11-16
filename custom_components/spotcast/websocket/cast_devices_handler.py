@@ -1,15 +1,17 @@
-"""Websocket Endpoint for getting the list of accounts"""
+"""Websocket Endpoint for getting chromecast devices"""
 
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
-from custom_components.spotcast import DOMAIN
-from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.media_player.utils import (
+    async_entities_from_integration,
+    CastDevice,
+)
 
-ENDPOINT = "spotcast/accounts"
+ENDPOINT = "spotcast/castdevices"
 SCHEMA = vol.Schema({
     vol.Required("id"): cv.positive_int,
     vol.Required("type"): ENDPOINT,
@@ -17,7 +19,7 @@ SCHEMA = vol.Schema({
 
 
 @websocket_wrapper
-async def async_get_accounts(
+async def async_get_cast_devices(
     hass: HomeAssistant,
     connection: ActiveConnection,
     msg: dict
@@ -31,24 +33,30 @@ async def async_get_accounts(
         - msg(dict): the message received through the websocket API
     """
 
-    accounts: dict[str, SpotifyAccount]
-    accounts = {x: y["account"] for x, y in hass.data[DOMAIN].items()}
+    entities: dict[str, CastDevice] = await async_entities_from_integration(
+        hass,
+        "cast",
+        ["media_player"],
+    )
 
-    result = []
+    devices = []
 
-    for entry_id, account in accounts.items():
-        result.append({
-            "entry_id": entry_id,
-            "spotify_id": account.id,
-            "spotify_name": account.name,
-            "is_default": account.is_default,
-            "country": account.country,
+    for id, entity in entities.items():
+
+        cast_info = entity._cast_info.cast_info
+
+        devices.append({
+            "entity_id": id,
+            "uuid": str(cast_info.uuid),
+            "model_name": cast_info.model_name,
+            "friendly_name": cast_info.friendly_name,
+            "manufacturer": cast_info.manufacturer,
         })
 
     connection.send_result(
         msg["id"],
         {
-            "total": len(result),
-            "accounts": result,
+            "total": len(devices),
+            "devices": devices
         },
     )

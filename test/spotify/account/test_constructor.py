@@ -60,3 +60,6 @@ class TestDataRetention(TestCase):
     def test_datasets_are_dataset_objects(self):
         for item in self.account._datasets.values():
             self.assertIsInstance(item, Dataset)
+
+    def test_default_refresh_rate_set(self):
+        self.assertEqual(self.account._base_refresh_rate, 30)

@@ -3,7 +3,6 @@
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
-from homeassistant.components import websocket_api
 from homeassistant.components.websocket_api import ActiveConnection
 
 from custom_components.spotcast.utils import get_account_entry, search_account
@@ -21,9 +20,8 @@ SCHEMA = vol.Schema({
 })
 
 
-@websocket_api.async_response
 @websocket_wrapper
-async def async_get_playlist(
+async def async_get_playlists(
     hass: HomeAssistant,
     connection: ActiveConnection,
     msg: dict

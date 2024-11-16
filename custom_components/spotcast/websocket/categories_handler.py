@@ -1,4 +1,4 @@
-"""Websocket Endpoint for getting playback state"""
+"""Websocket Endpoint for getting categories"""
 
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
@@ -9,16 +9,17 @@ from custom_components.spotcast.utils import get_account_entry, search_account
 from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.utils import websocket_wrapper
 
-ENDPOINT = "spotcast/player"
+ENDPOINT = "spotcast/categories"
 SCHEMA = vol.Schema({
     vol.Required("id"): cv.positive_int,
     vol.Required("type"): ENDPOINT,
     vol.Optional("account"): cv.string,
+    vol.Optional("limit"): cv.positive_int,
 })
 
 
 @websocket_wrapper
-async def async_get_playback(
+async def async_get_categories(
     hass: HomeAssistant,
     connection: ActiveConnection,
     msg: dict
@@ -33,6 +34,7 @@ async def async_get_playback(
     """
 
     account_id = msg.get("account")
+    limit = msg.get("limit")
     account: SpotifyAccount
 
     if account_id is None:
@@ -41,9 +43,12 @@ async def async_get_playback(
     else:
         account = search_account(hass, account_id)
 
-    playback_state = await account.async_playback_state(force=True)
+    categories = await account.async_categories(limit=limit)
 
     connection.send_result(
         msg["id"],
-        playback_state,
+        {
+            "total": len(categories),
+            "categories": categories
+        },
     )
