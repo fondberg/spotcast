@@ -7,6 +7,7 @@ Classes:
 from logging import getLogger
 
 import voluptuous as vol
+from homeassistant.helpers import config_validation as cv
 from homeassistant.config_entries import (
     OptionsFlowWithConfigEntry,
     FlowResult
@@ -23,7 +24,8 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
     SCHEMAS = {
         "init": vol.Schema(
             {
-                vol.Required("set_default"): bool
+                vol.Required("set_default"): bool,
+                vol.Required("base_refresh_rate"): cv.positive_int,
             }
         )
     }
@@ -33,58 +35,74 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
         user_input: dict[str] | None = None
     ) -> FlowResult:
         return self.async_show_form(
-            step_id="apply_default",
-            data_schema=self.SCHEMAS["init"],
+            step_id="apply_options",
+            data_schema=self.add_suggested_values_to_schema(
+                self.SCHEMAS["init"],
+                self.config_entry.options
+            ),
             errors={},
             last_step=True,
         )
 
-    async def async_step_apply_default(
-        self,
-        user_input: dict[str]
-    ) -> FlowResult:
+    def set_default_user(self) -> dict:
+        """Set the current user as default for spotcast"""
 
-        if not user_input["set_default"]:
-            LOGGER.debug(
-                "Config entry `%s` not set to default, skipping",
-                self.config_entry.title,
-            )
-            return self.async_create_entry(title="", data={})
-
-        if self.config_entry.data["is_default"]:
+        if self.config_entry.options["is_default"]:
             LOGGER.info(
                 "Config Entry `%s` already set to default spotcast account",
                 self.config_entry.title
             )
-            return self.async_create_entry(title="", data={})
+            return
 
         entries = self.hass.config_entries.async_entries(DOMAIN)
         old_default = None
 
         for entry in entries:
-            entry_data = dict(entry.data)
+            current_options = dict(entry.options)
             if entry.entry_id == self.config_entry.entry_id:
                 continue
 
-            is_default = entry.data["is_default"]
-            entry_data["is_default"] = False
+            is_default = current_options["is_default"]
+            current_options["is_default"] = False
 
             if is_default:
                 old_default = entry.title
                 self.hass.data[DOMAIN][entry.entry_id]["account"]\
                     .is_default = False
 
-            self.hass.config_entries.async_update_entry(entry, entry_data)
+            self.hass.config_entries.async_update_entry(
+                entry,
+                options=current_options
+            )
 
         LOGGER.info(
-            "Switched Spotcast default account from `%s` to `%s`",
+            "Switching Default Spotcast account from `%s` to `%s`",
             old_default,
             self.config_entry.title,
         )
+        self.config_entry.options["is_default"] = True
 
-        new_data = dict(self.config_entry.data)
-        new_data["is_default"] = True
-        self.hass.data[DOMAIN][self.config_entry.entry_id]["account"]\
-            .is_default = True
+    def set_base_refresh_rate(self, new_refresh_rate: int):
+        """Sets the base refresh rate for the account
 
-        self.async_create_entry(title=self.config_entry.title, data=new_data)
+        Args:
+            - new_refresh_rate(int): the new refresh rate to set for
+                the account
+        """
+        entry_id = self.config_entry.entry_id
+        self.hass.data[DOMAIN][entry_id]["account"]\
+            .base_refresh_rate = new_refresh_rate
+
+        self.config_entry.options["base_refresh_rate"] = new_refresh_rate
+
+    async def async_step_apply_options(
+        self,
+        user_input: dict[str]
+    ) -> FlowResult:
+
+        if user_input["set_default"]:
+            self.set_default_user()
+
+        self.set_base_refresh_rate(user_input["base_refresh_rate"])
+
+        self.async_create_entry(title="", data={})

@@ -50,6 +50,10 @@ class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
                 "sp_key": "bar"
             }
         }
+        self.mocks["entry"].options = {
+            "is_default": True,
+            "base_refresh_rate": 30,
+        }
 
         self.result = await SpotifyAccount.async_from_config_entry(
             self.mocks["hass"],
@@ -94,6 +98,10 @@ class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
                 "sp_dc": "foo",
                 "sp_key": "bar"
             }
+        }
+        self.mocks["entry"].options = {
+            "is_default": True,
+            "base_refresh_rate": 30,
         }
 
         self.result = await SpotifyAccount.async_from_config_entry(
@@ -148,6 +156,10 @@ class TestPreexistingAccount(IsolatedAsyncioTestCase):
                 "sp_dc": "foo",
                 "sp_key": "bar"
             }
+        }
+        self.mocks["entry"].options = {
+            "is_default": True,
+            "base_refresh_rate": 30,
         }
 
         self.result = await SpotifyAccount.async_from_config_entry(

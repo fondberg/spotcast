@@ -135,15 +135,22 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             self.flow_handler.data
         )
 
+        data = {
+            "external_api": self.external_api,
+            "internal_api": self.internal_api,
+            "name": "Dummy User"
+        }
+
+        options = {
+            "is_default": False,
+            "base_refresh_rate": 30,
+        }
+
         try:
             mock_entry.assert_called_with(
                 title="Dummy User",
-                data={
-                    "name": "Dummy User",
-                    "external_api": self.external_api,
-                    "internal_api": self.internal_api,
-                    "is_default": False,
-                }
+                data=data,
+                options=options,
             )
         except AssertionError:
             self.fail("Wrong arguments provided to entry creation")
@@ -177,7 +184,10 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
                     "name": "foo",
                     "external_api": self.external_api,
                     "internal_api": self.internal_api,
+                },
+                options={
                     "is_default": True,
+                    "base_refresh_rate": 30,
                 }
             )
         except AssertionError:

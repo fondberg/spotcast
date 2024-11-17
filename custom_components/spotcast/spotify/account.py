@@ -882,9 +882,13 @@ class SpotifyAccount:
         internal_api = InternalSession(hass, entry)
         await internal_api.async_ensure_token_valid()
 
-        is_default = "is_default" in entry.data and entry.data["is_default"]
+        account = SpotifyAccount(
+            hass,
+            external_api,
+            internal_api,
+            **entry.options
+        )
 
-        account = SpotifyAccount(hass, external_api, internal_api, is_default)
         await account.async_profile()
 
         LOGGER.debug(

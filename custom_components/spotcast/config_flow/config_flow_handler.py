@@ -94,11 +94,18 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
 
         current_entries = self.hass.config_entries.async_entries(DOMAIN)
 
-        self.data["is_default"] = len(current_entries) == 0
+        options = {
+            "is_default": len(current_entries) == 0,
+            "base_refresh_rate": 30,
+        }
 
         await self.async_set_unique_id(current_user["id"])
 
-        return self.async_create_entry(title=name, data=self.data)
+        return self.async_create_entry(
+            title=name,
+            data=self.data,
+            options=options,
+        )
 
     @staticmethod
     def async_get_options_flow(
