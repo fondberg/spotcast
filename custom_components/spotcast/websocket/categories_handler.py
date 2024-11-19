@@ -8,6 +8,7 @@ from homeassistant.components.websocket_api import ActiveConnection
 from custom_components.spotcast.utils import get_account_entry, search_account
 from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.spotify.utils import select_image_url
 
 ENDPOINT = "spotcast/categories"
 SCHEMA = vol.Schema({
@@ -43,7 +44,17 @@ async def async_get_categories(
     else:
         account = search_account(hass, account_id)
 
-    categories = await account.async_categories(limit=limit)
+    raw_categories = await account.async_categories(limit=limit)
+
+    categories = []
+
+    for data in raw_categories:
+
+        categories.append({
+            "id": data["id"],
+            "icon": select_image_url(data["icons"]),
+            "name": data["name"],
+        })
 
     connection.send_result(
         msg["id"],

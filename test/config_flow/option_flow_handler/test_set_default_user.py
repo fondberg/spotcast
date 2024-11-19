@@ -1,7 +1,7 @@
 """Module to test the set_default_user function"""
 
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -32,7 +32,10 @@ class TestAlreadyDefaultUser(TestCase):
             "base_refresh_rate": 30,
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
+        self.handler.config_entry = self.mocks["entry"]
+        self.handler._options = None
+        self.handler._options = self.mocks["entry"].options
         self.handler.hass = self.mocks["hass"]
 
         self.handler.set_default_user()
@@ -61,10 +64,11 @@ class TestUserSwitchToDefault(TestCase):
         }
         self.mocks["entry"].entry_id = "12345"
         self.mocks["entry"].title = "Dummy Name"
-        self.mocks["entry"].options = {
+        self.mocks["entry"]._options = {
             "is_default": False,
             "base_refresh_rate": 30,
         }
+        self.mocks["entry"].options = self.mocks["entry"]._options
 
         self.mocks["other_entry"].data = {
             "external_api": "foo",
@@ -72,10 +76,11 @@ class TestUserSwitchToDefault(TestCase):
         }
         self.mocks["other_entry"].entry_id = "23456"
         self.mocks["other_entry"].title = "Other Name"
-        self.mocks["other_entry"].options = {
+        self.mocks["other_entry"]._options = {
             "is_default": True,
             "base_refresh_rate": 30,
         }
+        self.mocks["other_entry"].options = self.mocks["other_entry"]._options
 
         self.mocks["hass"].data = {
             "spotcast": {
@@ -97,10 +102,11 @@ class TestUserSwitchToDefault(TestCase):
         }
         self.mocks["third_entry"].entry_id = "34567"
         self.mocks["third_entry"].title = "Third Name"
-        self.mocks["third_entry"].options = {
+        self.mocks["third_entry"]._options = {
             "is_default": False,
             "base_refresh_rate": 30,
         }
+        self.mocks["third_entry"].options = self.mocks["third_entry"]._options
 
         self.mocks["hass"].data["spotcast"]["12345"]["account"]\
             .is_default = True
@@ -113,7 +119,10 @@ class TestUserSwitchToDefault(TestCase):
             self.mocks["third_entry"],
         ]
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
+        self.handler.config_entry = self.mocks["entry"]
+        self.handler._options = None
+        self.handler._options = self.mocks["entry"].options
         self.handler.hass = self.mocks["hass"]
 
         self.handler.set_default_user()

@@ -11,6 +11,47 @@ from custom_components.spotcast.websocket.categories_handler import (
 )
 
 TEST_MODULE = "custom_components.spotcast.websocket.categories_handler"
+CATEGORIES = [
+    {
+        "href": (
+            "https://api.spotify.com/v1/browse/categories/"
+            "foo"
+        ),
+        "id": "foo",
+        "icons": [
+            {
+                "height": 274,
+                "url": "https://t.scdn.co/images/foo.jpeg",
+                "width": 274
+            }
+        ],
+        "name": "Made For You"
+    },
+    {
+        "href": "https://api.spotify.com/v1/browse/categories/bar",
+        "id": "bar",
+        "icons": [
+            {
+                "height": 274,
+                "url": "https://t.scdn.co/images/bar.jpeg",
+                "width": 274
+            }
+        ],
+        "name": "Discover"
+    },
+    {
+        "href": "https://api.spotify.com/v1/browse/categories/baz",
+        "id": "baz",
+        "icons": [
+            {
+                "height": 274,
+                "url": "https://t.scdn.co/images/baz.jpeg",
+                "width": 274
+            }
+        ],
+        "name": "Metal"
+    },
+]
 
 
 class TestDevicesRetrieval(IsolatedAsyncioTestCase):
@@ -28,12 +69,7 @@ class TestDevicesRetrieval(IsolatedAsyncioTestCase):
         }
 
         self.mocks["account"].async_categories = AsyncMock()
-        self.mocks["account"].async_categories.return_value = [
-            "foo",
-            "bar",
-            "baz",
-        ]
-
+        self.mocks["account"].async_categories.return_value = CATEGORIES
         await async_get_categories(
             self.mocks["hass"],
             self.mocks["connection"],
@@ -49,7 +85,23 @@ class TestDevicesRetrieval(IsolatedAsyncioTestCase):
                 1,
                 {
                     "total": 3,
-                    "categories": ["foo", "bar", "baz"]
+                    "categories": [
+                        {
+                            "id": "foo",
+                            "icon": "https://t.scdn.co/images/foo.jpeg",
+                            "name": "Made For You"
+                        },
+                        {
+                            "id": "bar",
+                            "icon": "https://t.scdn.co/images/bar.jpeg",
+                            "name": "Discover"
+                        },
+                        {
+                            "id": "baz",
+                            "icon": "https://t.scdn.co/images/baz.jpeg",
+                            "name": "Metal"
+                        },
+                    ]
                 }
             )
         except AssertionError:
@@ -70,12 +122,7 @@ class TestAccountSearch(IsolatedAsyncioTestCase):
         }
 
         self.mocks["account"].async_categories = AsyncMock()
-        self.mocks["account"].async_categories.return_value = [
-            "foo",
-            "bar",
-            "baz",
-        ]
-
+        self.mocks["account"].async_categories.return_value = CATEGORIES
         await async_get_categories(
             self.mocks["hass"],
             self.mocks["connection"],
@@ -92,7 +139,24 @@ class TestAccountSearch(IsolatedAsyncioTestCase):
                 1,
                 {
                     "total": 3,
-                    "categories": ["foo", "bar", "baz"]
+                    "categories": [
+                        {
+                            "id": "foo",
+                            "icon": "https://t.scdn.co/images/foo.jpeg",
+                            "name": "Made For You"
+                        },
+                        {
+                            "id": "bar",
+                            "icon": "https://t.scdn.co/images/bar.jpeg",
+                            "name": "Discover"
+                        },
+                        {
+                            "id": "baz",
+                            "icon": "https://t.scdn.co/images/baz.jpeg",
+                            "name": "Metal"
+                        },
+                    ]
+
                 }
             )
         except AssertionError:

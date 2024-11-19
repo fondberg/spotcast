@@ -42,7 +42,9 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
+        self.handler.config_entry = self.mocks["entry"]
+        self.handler._options = None
         self.handler.hass = self.mocks["hass"]
         self.handler.async_show_form = MagicMock()
 
@@ -57,7 +59,6 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
                     {"is_default": True, "base_refresh_rate": 30},
                 ),
                 errors={},
-                last_step=True,
             )
         except AssertionError:
             self.fail()

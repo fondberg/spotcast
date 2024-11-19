@@ -28,7 +28,7 @@ from custom_components.spotcast.sessions import (
 from custom_components.spotcast.utils import ensure_default_data
 from custom_components.spotcast.spotify.dataset import Dataset
 from custom_components.spotcast.spotify.search_query import SearchQuery
-
+from custom_components.spotcast.spotify.utils import select_image_url
 from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
 )
@@ -251,18 +251,7 @@ class SpotifyAccount:
     def image_link(self) -> str:
         """Returns the link for the account profile image"""
         images = self.get_profile_value("images")
-        image_url = None
-        max_area = 0
-
-        for image in images:
-
-            area = image["width"] * image["height"]
-
-            if area > max_area:
-                image_url = image["url"]
-                max_area = area
-
-        return image_url
+        return select_image_url(images)
 
     @property
     def product(self) -> str:
@@ -714,7 +703,7 @@ class SpotifyAccount:
             self,
             force: bool = False,
             limit: int = None,
-    ) -> dict[str, str]:
+    ) -> list[dict]:
         """Fetches the categories available for the account"""
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Getting Browse Categories for account `%s`", self.name)
