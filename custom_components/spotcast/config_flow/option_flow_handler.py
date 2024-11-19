@@ -9,16 +9,22 @@ from logging import getLogger
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 from homeassistant.config_entries import (
-    OptionsFlowWithConfigEntry,
-    FlowResult
+    OptionsFlow,
+    FlowResult,
 )
 
 from custom_components.spotcast import DOMAIN
+from custom_components.spotcast.utils import copy_to_dict
 
 LOGGER = getLogger(__name__)
 
+DEFAULT_OPTIONS = {
+    "is_default": False,
+    "base_refresh_rate": 30,
+}
 
-class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
+
+class SpotcastOptionsFlowHandler(OptionsFlow):
     """Handles option configuration via the Integration page"""
 
     SCHEMAS = {
@@ -34,6 +40,9 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
         self,
         user_input: dict[str] | None = None
     ) -> FlowResult:
+
+        self._options = copy_to_dict(self.config_entry.options)
+
         return self.async_show_form(
             step_id="apply_options",
             data_schema=self.add_suggested_values_to_schema(
@@ -41,7 +50,6 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
                 self.config_entry.options
             ),
             errors={},
-            last_step=True,
         )
 
     def set_default_user(self) -> dict:
@@ -80,12 +88,7 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
             old_default,
             self.config_entry.title,
         )
-        self.config_entry.options["is_default"] = True
-        self.hass.config_entries.async_update_entry(
-            self.config_entry,
-            data=self.config_entry.data,
-            options=self.config_entry.options,
-        )
+        self._options["is_default"] = True
 
     def set_base_refresh_rate(self, new_refresh_rate: int):
         """Sets the base refresh rate for the account
@@ -94,11 +97,21 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
             - new_refresh_rate(int): the new refresh rate to set for
                 the account
         """
+
+        if new_refresh_rate == self._options["base_refresh_rate"]:
+            LOGGER.debug("Same refresh rate. Skipping")
+            return
+
+        LOGGER.info(
+            "Setting spotcast entry `%s` to a base refresh rate of %d",
+            self.config_entry.title,
+            new_refresh_rate,
+        )
         entry_id = self.config_entry.entry_id
         self.hass.data[DOMAIN][entry_id]["account"]\
             .base_refresh_rate = new_refresh_rate
 
-        self.config_entry.options["base_refresh_rate"] = new_refresh_rate
+        self._options["base_refresh_rate"] = new_refresh_rate
 
     async def async_step_apply_options(
         self,
@@ -110,4 +123,8 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
 
         self.set_base_refresh_rate(user_input["base_refresh_rate"])
 
-        self.async_create_entry(title="", data={})
+        self.hass.config_entries.async_update_entry(
+            self.config_entry,
+            options=self._options,
+        )
+        return self.async_create_entry(title="", data={})

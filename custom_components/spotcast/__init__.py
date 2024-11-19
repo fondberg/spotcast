@@ -21,6 +21,9 @@ from custom_components.spotcast.services import ServiceHandler
 from custom_components.spotcast.services.const import SERVICE_SCHEMAS
 from custom_components.spotcast.sessions.exceptions import TokenRefreshError
 from custom_components.spotcast.websocket import async_setup_websocket
+from custom_components.spotcast.config_flow.option_flow_handler import (
+    DEFAULT_OPTIONS
+)
 
 __version__ = "4.0.0-a0"
 
@@ -39,6 +42,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     Returns:
         - bool: returns `True` if the integration setup was successfull
     """
+
+    # ensure default options
+    updated_options = {**DEFAULT_OPTIONS, **entry.options}
+
+    if updated_options != entry.options:
+        hass.config_entries.async_update_entry(entry, options=updated_options)
+
     # because of circular depoendency
     from custom_components.spotcast.spotify.account import SpotifyAccount
 

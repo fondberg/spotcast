@@ -166,7 +166,7 @@ class SpotifyAccount:
             auth=self.sessions["external"].token["access_token"]
         )
 
-        self._datasets = {}
+        self._datasets: dict[str, Dataset] = {}
 
         for name, dataset in self.DATASETS.items():
             refresh_rate = dataset["refresh_factor"] * self._base_refresh_rate

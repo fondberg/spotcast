@@ -113,4 +113,4 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     ) -> SpotcastOptionsFlowHandler:
         """Tells Home Assistant this integration supports configuration
         options"""
-        return SpotcastOptionsFlowHandler(config_entry)
+        return SpotcastOptionsFlowHandler()

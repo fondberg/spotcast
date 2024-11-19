@@ -5,6 +5,7 @@ Functions:
 """
 
 from logging import getLogger
+from types import MappingProxyType
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -99,7 +100,7 @@ def search_account(hass: HomeAssistant, search_term: str) -> "SpotifyAccount":
 def copy_to_dict(items: dict) -> dict:
     """Makes a deep copy of a dictionary"""
 
-    if isinstance(items, dict):
+    if isinstance(items, (dict, MappingProxyType)):
 
         new_dict = {}
 
