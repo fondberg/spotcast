@@ -104,6 +104,33 @@ async def async_entities_from_integration(
     return entities
 
 
+def need_to_quit_app(
+    media_player: Chromecast,
+    active_device: str,
+    app_id: str = SpotifyController.APP_ID,
+) -> bool:
+    """Returns True if the CastDevice needs to quit the app its
+    currently running before registering Spotify for the account
+
+    Args:
+        - media_player(Chromecast): the cast device to check
+        - active_device(str): The id of the currently active device
+            on the account
+        - app_id(str, optional): The spotify App ID. Defaults to the
+            app_id set in the SpotifyController
+
+    Returns:
+        - bool: True if needs to quit the app
+    """
+
+    return (
+        (
+            media_player.app_id == app_id
+            and media_player.id != active_device
+        ) or media_player.app_id is not None
+    )
+
+
 async def async_build_from_type(
         hass: HomeAssistant,
         entity: Entity,
@@ -127,8 +154,13 @@ async def async_build_from_type(
             zconf=ChromeCastZeroconf.get_zeroconf()
         )
 
+        await hass.async_add_executor_job(media_player.wait)
+
         spotify_controller = SpotifyController(account)
         media_player.register_handler(spotify_controller)
+
+        if need_to_quit_app(media_player, account.active_device):
+            media_player.quit_app()
 
         await hass.async_add_executor_job(
             spotify_controller.launch_app,

@@ -1,5 +1,6 @@
-"""Module to test the async_step_apply_options function"""
-from unittest import IsolatedAsyncioTestCase
+"""Module to test the set_base_refresh_rate function"""
+
+from unittest import TestCase
 from unittest.mock import MagicMock
 
 from homeassistant.core import HomeAssistant
@@ -11,9 +12,9 @@ from custom_components.spotcast.config_flow.option_flow_handler import (
 )
 
 
-class TestWithDefaultSet(IsolatedAsyncioTestCase):
+class TestSettingRefreshRate(TestCase):
 
-    async def asyncSetUp(self):
+    def setUp(self):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
@@ -44,20 +45,10 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
 
         self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
         self.handler.hass = self.mocks["hass"]
-        self.handler.async_show_form = MagicMock()
+        self.handler.set_base_refresh_rate(15)
 
-        await self.handler.async_step_init({})
+    def test_account_refresh_rate_modified(self):
+        self.assertEqual(self. mocks["account"].base_refresh_rate, 15)
 
-    def test_async_show_form_called_with_proper_args(self):
-        try:
-            self.handler.async_show_form.assert_called_with(
-                step_id="apply_options",
-                data_schema=self.handler.add_suggested_values_to_schema(
-                    self.handler.SCHEMAS["init"],
-                    {"is_default": True, "base_refresh_rate": 30},
-                ),
-                errors={},
-                last_step=True,
-            )
-        except AssertionError:
-            self.fail()
+    def test_entry_refresh_rate_modified(self):
+        self.assertEqual(self. mocks["entry"].options["base_refresh_rate"], 15)

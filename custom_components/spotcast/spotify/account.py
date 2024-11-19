@@ -303,6 +303,18 @@ class SpotifyAccount:
 
         return health
 
+    @property
+    def active_device(self) -> str:
+        """returns the current active device, or None if no active
+        device"""
+
+        playback_state = self.playback_state
+
+        if self.playback_state == {}:
+            return None
+
+        return playback_state["device"]["id"]
+
     def get_profile_value(self, attribute: str) -> Any:
         """Returns the value for a profile element. Raises Error if not
         yet loaded.
@@ -882,9 +894,13 @@ class SpotifyAccount:
         internal_api = InternalSession(hass, entry)
         await internal_api.async_ensure_token_valid()
 
-        is_default = "is_default" in entry.data and entry.data["is_default"]
+        account = SpotifyAccount(
+            hass,
+            external_api,
+            internal_api,
+            **entry.options
+        )
 
-        account = SpotifyAccount(hass, external_api, internal_api, is_default)
         await account.async_profile()
 
         LOGGER.debug(
