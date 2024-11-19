@@ -58,12 +58,11 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
         old_default = None
 
         for entry in entries:
-            current_options = dict(entry.options)
             if entry.entry_id == self.config_entry.entry_id:
                 continue
 
-            is_default = current_options["is_default"]
-            current_options["is_default"] = False
+            is_default = entry.options["is_default"]
+            entry.options["is_default"] = False
 
             if is_default:
                 old_default = entry.title
@@ -72,7 +71,8 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
 
             self.hass.config_entries.async_update_entry(
                 entry,
-                options=current_options
+                data=entry.data,
+                options=entry.options
             )
 
         LOGGER.info(
@@ -81,6 +81,11 @@ class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
             self.config_entry.title,
         )
         self.config_entry.options["is_default"] = True
+        self.hass.config_entries.async_update_entry(
+            self.config_entry,
+            data=self.config_entry.data,
+            options=self.config_entry.options,
+        )
 
     def set_base_refresh_rate(self, new_refresh_rate: int):
         """Sets the base refresh rate for the account

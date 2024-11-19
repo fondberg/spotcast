@@ -303,6 +303,18 @@ class SpotifyAccount:
 
         return health
 
+    @property
+    def active_device(self) -> str:
+        """returns the current active device, or None if no active
+        device"""
+
+        playback_state = self.playback_state
+
+        if self.playback_state == {}:
+            return None
+
+        return playback_state["device"]["id"]
+
     def get_profile_value(self, attribute: str) -> Any:
         """Returns the value for a profile element. Raises Error if not
         yet loaded.
