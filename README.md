@@ -13,353 +13,83 @@ Because starting playback using the API requires more powerful token the usernam
 
 Used by [Spotify-Card](https://github.com/custom-cards/spotify-card).
 
-__[Community post](https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232)__
-
 ## Installation
 
 ### HACS
 
 This component is easiest installed using [HACS](https://github.com/custom-components/hacs).
 
+First Make sure you have `spotcast` installed through HACS:
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=fondberg&repository=spotcast&category=integration)
+
+Then, setup an account:
+
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=spotcast)
+
 ### Manual installation
 
-Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory.
+Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory and reboot your Home Assistant. Then click the following link to setup an account:
+
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=spotcast)
 
 ## Configuration
 
 ### Minimum Home Assistant version
 
-Spotcast is compatible with any version since 2021.12.0.
+Spotcast is compatible with any version since 2024.11.0.
 
 ### Official Spotify Integration
 
-Note that as of v3.5.2 you must also have the official [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) installed and configured for this custom component to work. This is because it provides the correct device list which has the correct scopes in its token.
+Note that starting with `v5.0.0`, [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) is no longer a requirement except for Media Browsing. Click the following link to setup the spotify integration:
 
-### Obtaining `sp_dc` and `sp_key` cookies
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=spotify)
 
-Spotcast uses two cookies to authenticate against Spotify in order to have access to the required services.
+### Setup
 
-To obtain the cookies, these different methods can be used:
+There are 2 steps for the setup of an account with spotcast
 
-#### Chrome based browser
+1. **Integration of the OAuth Client Information:** An OAuth client from Spotify must be provided to access your account profile and informations. You can follow the same step as described in the [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/).
+2. **Integration of the private API credentials:** Spotcast relies on the private Spotify API to link a chromecast device to your spotify account when you are trying to start playback (mimmicking what the Spotify Desktop or Spotify Mobile app are doing). The only known way of connecting to that API is through the use of browser cookies. These can be retrieved by:
+    - connecting to [spotify.com](open.spotify.com)
+    - opening the developper console
+    - pasting the `sp_dc` and `sp_key` in the Home Assistant setup form
+    - See [Obtaining SP_DC and SP_KEY](./docs/config/obtaining_sp_dc_and_sp_key.md) for more details
 
-##### Chrome web console
+## Services
 
-1. Open a new __Incognito window__ at [`https://open.spotify.com`](https://open.spotify.com) and login to Spotify.
-2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developer tools menu of your browser.
-3. Go into the `application` section.
-4. In the menu on the left go int `Storage/Cookies/open.spotify.com`.
-5. Find the `sp_dc` and `sp_key` and copy the values.
-6. Close the window without logging out (Otherwise the cookies are made invalid).
+The spotcast custom component provides multiple services to the user for different use cases. The services available are as followed (link to full documentation in table):
 
-![cookie in chrome developer tools](images/cookies_chrome_2.png)
+> [!TIP]
+> If you are converting script from pre `v5` services. The closest equivalence to `spotcast.start` is `spotcast.play_media`
 
-#### Firefox based browser
+| Service Name                                                           | Description                                                                                                                                       |
+| :---:                                                                  | :---                                                                                                                                              |
+| [spotcast.play_media](./docs/services/play_media.md)                   | Starts playback on a Chromecast or Spotify Connect device using the provided uri as context.                                                      |
+| [spotcast.play_liked_songs](./docs/services/play_liked_songs.md)       | Starts playback on a Chromecast or Spotify Connect device using the user's saved tracks as context.                                               |
+| [spotcast.play_dj](./docs/services/play_dj.md)                         | Starts playback on a Chromecast or Spotify Connect device using the dj feature as context.                                                        |
+| [spotcast.play_from_search](./docs/services/play_from_search.md)       | Starts playback on a Chromecast or Spotify Connect device using a search result as a context.                                                     |
+| [spotcast.play_category](./docs/services/play_category.md)             | Starts playback on a Chromecast or Spotify Connect device using a random playlist from a Browse Category as context.                              |
+| [spotcast.play_custom_context](./docs/services/play_custom_context.md) | Starts playback on a Chromecast or Spotify Connect device using a list of uris as context                                                         |
+| [spotcast.transfer_playback](./docs/services/transfer_playback.md)     | Transfers the playback to a different device. Fails and returns an error if there is no active playback or the playback is already on the device. |
+| [spotcast.add_to_queue](./docs/services/add_to_queue.md)               | Adds songs the the playback queue. Fails and returns an error if there is no active playback                                                      |
 
-##### Firefox web console
+### Data
 
-1. Open a new __Incognito window__ at [`https://open.spotify.com`](https://open.spotify.com) and login to Spotify.
-2. Press `Command+Option+I` (Mac) or `Control+Shift+I` or `F12`. This should open the developer tools menu of your browser.
-3. Go into the `Storage` section. (You might have to click on the right arrows to reveal the section).
-4. Select the `Cookies` sub-menu and then `https://open.spotify.com`.
-5. Find the `sp_dc` and `sp_key` and copy the values.
-6. Close the window without logging out (Otherwise the cookies are made invalid).
+Multiple options originally in the `spotcast.start` service has been moved to the `data` section. Here is a list of common ones. Some service could have additional options. Look at the service definition for more information on them.
 
-![Firefox developer tool](images/cookies_firefox_1.png)
+| Option        | type                      | default | description                                                                                                        |
+| :---:         | :---:                     | :---:   | :---                                                                                                               |
+| `position_ms` | `positive_float`          | `0.000` | The position to start playback (in seconds) of where to start the playback of the first item in the context        |
+| `offset`      | `positive_int`            | `0`     | The item in the context to start the playback at. The position is zero based and cannot be negative                |
+| `volume`      | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`     |
+| `repeat`      | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                         |
+| `shuffle`     | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                               |
+| `limit`       | `positive_int`            | `null`  | sets the maximum amount of items that can be retrieved from a spotify api endpoint. Retrieves all items if `null`. |
 
-### Single account
 
-Add the following to your configuration.yaml:
+## Sensors
 
-```yaml
-spotcast:
-  sp_dc: !secret sp_dc
-  sp_key: !secret sp_key
-  country: SE #optional, added in 3.6.24
-```
-
-### Multiple accounts
-
-Add `accounts` dict to the configuration and populate with a list of accounts to
-be able to initiate playback using diffferent accounts than the default.
-
-If you are using v3.5.2 or greater and thus also have the core Spotify Integration installed, then [the additional accounts will also need to be added there as well](https://www.home-assistant.io/integrations/spotify#using-multiple-spotify-accounts) for multiple accounts to work.
-
-```yaml
-spotcast:
-  sp_dc: !secret primary_sp_dc
-  sp_key: !secret primary_sp_key
-  country: SE #optional, added in 3.6.24
-  accounts:
-    niklas:
-      sp_dc: !secret niklas_sp_dc
-      sp_key: !secret niklas_sp_key
-    ming:
-      sp_dc: !secret ming_sp_dc
-      sp_key: !secret ming_sp_key
-```
-
-### Edit secrets.yaml
-
-Please note: configuration.yaml is a plain text file and [it is not recommended to store your passwords in this file](https://www.home-assistant.io/docs/configuration/secrets/).
-
-By using the ```!secret``` tag you are directing Home Assistant to look inside the secrets.yaml file for your key instead.
-
-For a single account add the following to your secrets.yaml file:
-
-```yaml
-sp_dc: [your sp_dc here]
-sp_key: [your sp_key here]
-```
-
-For multiple accounts add the corresponding entries to your secrets.yaml file. For example, using the same accounts as above:
-
-```yaml
-primary_sp_dc: [your sp_dc here]
-primary_sp_key: [your sp_key here]
-niklas_sp_dc: [niklas sp_dc here]
-niklas_sp_key: [niklas sp_key here]
-ming_sp_dc: [ming sp_dc here]
-ming_sp_key: [ming sp_key here]
-```
-
-## Call the service
-
-The spotcast custom component creates a service called 'spotcast.start' in Home Assistant.
-
-### Start playback on Spotify connect device
-
-```yaml
-- service: spotcast.start
-  data:
-    spotify_device_id: "ab123c5d7347324c2b1234567890f8d6dc40350"
-    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
-    random_song: true
-```
-
-### Start playback on a device with default account
-
-```yaml
-- service: spotcast.start
-  data:
-    device_name: "Kitchen"
-    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
-    random_song: true
-```
-
-where:
-
-* `spotify_device_id` is the device ID of the Spotify Connect device
-* `device_name` is the friendly name of the chromecast device
-* `uri` is the Spotify uri, supports all uris including track (limit to one track)
-* `search` is a search query to resolve into a uri. This parameter will be overlooked if a uri is provided
-* `category` let spotify pick a random playlist inside a given [category](https://developer.spotify.com/console/get-browse-categories/)
-* `country` restrict country to use when looking for playlists inside a category
-* `limit` restrict number of playlists to return when looking in a category. Note that only a single playlist will be chosen randomly from them.
-* `random_song` optional parameter that starts the playback at a random position in the playlist
-* `repeat` optional parameter that repeats the playlist/track (track|context|off)
-* `shuffle` optional parameter to set shuffle mode for playback
-* `offset` optional parameter to set offset mode for playback. 0 is the first song
-
-Optionally you can specify the `entity_id` of an existing Home Assistant chromecast media-player like:
-
-```yaml
-- service: spotcast.start
-  data:
-    entity_id: "media_player.vardagsrum"
-    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
-```
-
-### Find Spotify Device ID
-
-To use the Spotcast service with a Spotify Connect device, you need the `spotify_device_id`. To find the `spotify_device_id`, multiple option are available.
-
-#### With Spotify developer portal
-
-1. Go to [Spotify developer console](https://developer.spotify.com/console/get-users-available-devices/)
-2. Click `GET TOKEN` <br/>
-![get_token](./images/get_token.png)
-3. Select `user-read-playback-state` as a scope<br/>
-![select_scope](./images/select_scope.png)
-4. If prompt give permission to your Spotify profile
-5. For chromecast devices, make sure to play media on the device prior to checking the logs as they will not show unless active
-6. Press the option `Try it`
-7. Read the result in the console in the right.<br/>
-![device_id](./images/device_id.png)
-
-#### Through Spotcast log
-
-1. Enable the debug logs (instructions are in section `Enabling Debug Log` in this README)
-2. Reboot Home Assistant
-3. Go to `Configuration >> Logs >> Load Full Home Assistant Log`.
-4. For chromecast devices, make sure to play media on the device prior to checking the logs as they will not show unless active
-5. Find the log entry `get_spotify_devices` and look for the device ID.
-
-#### Sonos Device ID
-
-1. Open the Spotify Web Player and sign in if needed
-2. Make sure you see your Sonos devices in the Connect popup
-3. Open your browser's DevTools (F12 for Chrome)
-4. Navigate to the Network tab
-5. Connect to the desired Sonos device in the Web Player
-6. Find the associated request in your DevTools
-7. The request URL looks something like this: `https://gew1-spclient.spotify.com/connect-state/v1/connect/transfer/from/my_web_player_device_id/to/my_sonos_device_id`
-8. The `my_sonos_device_id` is the `spotify_device_id` you are looking for.
-
-##### Log example
-
-```LOG
-2022-01-13 19:10:35 DEBUG (SyncWorker_0) [custom_components.spotcast.helpers] get_spotify_devices: media_player.spotify_felix: Spotify Félix Cusson: [{'id': '################################', 'is_active': True, 'is_private_session': False, 'is_restricted': False, 'name': 'Salon', 'type': 'CastAudio', 'volume_percent': 16}]
-2022-01-13 19:10:35 DEBUG (SyncWorker_0) [custom_components.spotcast.helpers] get_spotify_devices: {'devices': [{'id': '###############################', 'is_active': False, 'is_private_session': False, 'is_restricted': False, 'name': 'Salon', 'type': 'CastAudio', 'volume_percent': 16}]}
-
-# Look for
-<...> Spotify Félix Cusson: [{'id': '################################', <- This is the device ID
-```
-
-### Automation example
-
-```yaml
-- id: 'christmas_play_christmas_music'
-  alias: Christmas play Christmas music
-  initial_state: 'on'
-  trigger:
-  - event_data:
-      id: remote_windowlamps
-      event: 5002
-    platform: event
-    event_type: deconz_event
-  condition: []
-  action:
-  - service: spotcast.start
-    data:
-      uri: 'spotify:playlist:56Bor5fbMJlJV7oryb2p3k'
-      random_song: true
-      shuffle: true
-      start_volume: 50
-      entity_id: media_player.kitchen
-```
-
-```yaml
-- service: spotcast.start
-  data:
-    search: "Brown Bird" # resolves to spotify:artist:5zzbSFZMVpvxSlWAkqqtHP at the time of writing
-    random_song: true
-    shuffle: true
-    start_volume: 50
-    entity_id: media_player.kitchen
-```
-
-### Transfer current playback for the account
-
-Omitting `uri` will transfer the playback to the specified device.
-
-```yaml
-- service: spotcast.start
-  data:
-    device_name: "Speaker kitchen"
-```
-
-Use the parameter `force_playback` to continue the user's playback even if nothing is currently playing.
-
-```yaml
-- service: spotcast.start
-  data:
-    device_name: "Speaker kitchen"
-    force_playback: true
-```
-
-where:
-
-* `device_name` is the friendly name of the chromecast
-* `force_playback` (optional) true or false, true to continue the user's playback even if nothing is currently playing
-
-### Start playback on a device with non default account
-
-```yaml
-- service: spotcast.start
-  data:
-    account: "niklas"
-    device_name: "Speaker kitchen"
-    uri: "spotify:playlist:5xddIVAtLrZKtt4YGLM1SQ"
-```
-
-where:
-
-* `account` is the name of account key in the accounts dictionary in the configuration
-* `device_name` is the friendly name of the chromecast
-* `uri` is the Spotify uri, supports all uris including track (limit to one track)
-
-### Start podcast playback
-
-Play the latest episode of a given podcast show.
-
-```yaml
-- service: spotcast.start
-  data:
-    account: "niklas"
-    device_name: "Speaker kitchen"
-    uri: "spotify:show:6PeAI9SHRZhghU7NRPXvT3"
-    ignore_fully_played: true
-```
-
-where
-
-* `account` is the name of account key in the accounts dictionary in the configuration
-* `device_name` is the friendly name of the Chromecast
-* `uri` is the spotify uri, (podcasts use the 'show' uri)
-* `ignore_fully_played` (optional) true or false, true to ignore already fully played episodes (defaults to false and plays the latest released episode)
-
-## Use the sensor
-
-The sensor has the discovered chromecasts as both json and an array of objects.
-Since v3.4.0 it does not do its own discovery but relies on data from core cast.
-Add the following to the sensor section of the configuration:
-
-```yaml
-sensor:
-  - platform: spotcast
-    country: SE
-```
-
-The country tag was added in v3.6.24. This tag is optional. If ommited or if you haven't updated the configuration since the update, it will default to "SE" (which it always did before)
-
-Sensor name:
-
-```yaml
-sensor.chromecast_devices
-```
-
-Attributes
-
-```json
-devices_json: [
-  {
-    "name": "Speaker kitchen",
-    "cast_type": "audio",
-    "model_name": "Google Home",
-    "uuid": "xxxxx",
-    "manufacturer": "Google Inc."
-  },
-  {
-    "name": "Speakers upstairs",
-    "cast_type": "group",
-    "model_name": "Google Cast Group",
-    "uuid": "xxxx",
-    "manufacturer": "Google Inc."
-  },
-  {
-    "name": "Living room",
-    "cast_type": "cast",
-    "model_name": "HK Citation 300",
-    "uuid": "xxxx",
-    "manufacturer":"Harman Kardon"
-    }
-  ]
-
-last_update: 2019-05-01T15:27:49.828553+02:00
-
-friendly_name: Chromecast Devices
-```
+## Media Players
 
 ## Websocket API
 

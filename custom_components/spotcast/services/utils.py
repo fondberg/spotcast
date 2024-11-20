@@ -26,7 +26,7 @@ from custom_components.spotcast.services.exceptions import (
 from custom_components.spotcast.utils import LowRatioError
 
 EXTRAS_SCHEMA = vol.Schema({
-    vol.Optional("position_ms"): cv.positive_int,
+    vol.Optional("position"): cv.positive_float,
     vol.Optional("offset"): cv.positive_int,
     vol.Optional("volume"): vol.All(
         vol.Coerce(int),
