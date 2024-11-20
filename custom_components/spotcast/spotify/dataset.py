@@ -12,6 +12,26 @@ from custom_components.spotcast.utils import copy_to_dict
 
 
 class Dataset:
+    """A dataset that contain a cache and a validation for when the
+    data expires
+
+    Attributes:
+        - name(str): the name of the dataset
+        - refresh_rate(int): the rate at which the dataset needs to
+            refresh
+        - can_expire(bool): Indicate if the dataset can return data if
+            expired
+        - expires_at(int): the time (in second) when the dataset will
+            be deemed expired
+        - lock(Lock): the async lock for the dataset
+
+    Properties:
+        - is_expired(bool): True if the dataset is currently expired
+        - data(list|dict): the data contained in the dataset
+
+    Methods:
+        - update
+    """
 
     def __init__(
             self,
@@ -19,6 +39,15 @@ class Dataset:
             refresh_rate: int = 30,
             can_expire: bool = False
     ):
+        """Constructor for a dataset instance
+
+        Args:
+            - name(str): the name of the dataset
+            - refresh_rate(int, optional): the duration afteer which
+                the dataset is deemed expired. Defaults to 30
+            - can_expire(bool, optional): The dataset can return data
+                even if expired if set to True. Defaults to False
+        """
         self.name = name
         self.refresh_rate = refresh_rate
         self.can_expire = can_expire
@@ -34,12 +63,18 @@ class Dataset:
     @property
     def data(self) -> list | dict:
         """Returns the data from the dataset or raises an error if
-        expired"""
+        expired
+
+        Raises:
+            - ExpiredDatasetError: raised if the dataset is expired
+                unless the can_expire flag is set to True
+        """
         if self.is_expired and not self.can_expire:
             raise ExpiredDatasetError(f"The {self.name} dataset is expired")
 
         return copy_to_dict(self._data)
 
     def update(self, data: list | dict):
+        """Updates the dataset with new data"""
         self._data = data
         self.expires_at = time() + self.refresh_rate

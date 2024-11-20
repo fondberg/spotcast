@@ -14,7 +14,7 @@ LOGGER = getLogger(__name__)
 
 async def async_get_media_browser_root_object(
     hass: HomeAssistant,
-    cast_type: str
+    cast_type: str  # pylint: disable=W0613
 ) -> list:
     """Create a root object for media browsing"""
     result = await ha_spotify.async_browse_media(hass, None, None)
@@ -55,7 +55,7 @@ async def async_browse_media(
 async def async_play_media(
     hass: HomeAssistant,
     cast_entity_id: str,
-    chromecast: Chromecast,
+    chromecast: Chromecast,  # pylint: disable=W0613
     media_type: str,
     media_id: str,
 ) -> bool:

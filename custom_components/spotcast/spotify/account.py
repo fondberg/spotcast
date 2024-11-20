@@ -31,6 +31,7 @@ from custom_components.spotcast.spotify.search_query import SearchQuery
 from custom_components.spotcast.spotify.utils import select_image_url
 from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
+    InvalidItemTypeError,
 )
 
 LOGGER = getLogger(__name__)
@@ -417,6 +418,20 @@ class SpotifyAccount:
             LOGGER.debug("Using Cached devices dataset")
 
         return self.devices
+
+    async def async_get_track(self, uri: str) -> dict:
+        """Retrieves track information"""
+        await self.async_ensure_tokens_valid()
+
+        LOGGER.debug("Getting track information for `%s`", uri)
+
+        result = await self.hass.async_add_executor_job(
+            self._spotify.track,
+            uri,
+            self.country
+        )
+
+        return result
 
     async def async_playback_state(self, force: bool = False) -> dict:
         """Returns the current playback state"""

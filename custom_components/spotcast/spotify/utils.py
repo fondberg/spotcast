@@ -25,3 +25,23 @@ def select_image_url(images: list[dict]) -> str:
             max_area = area
 
     return image_url
+
+
+def url_to_uri(url: str) -> str:
+    """converts a url to a spotify uri"""
+
+    # remove the protocol section
+    url = url.split("://", maxsplit=1)[-1]
+
+    # remove query if present
+    url = url.rsplit("?", maxsplit=1)[0]
+
+    # split items on slashes
+    elems = url.split('/')
+
+    # replace first item with spotify
+    elems[0] = "spotify"
+
+    uri = ":".join(elems)
+
+    return uri

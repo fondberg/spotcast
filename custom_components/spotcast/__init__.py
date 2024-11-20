@@ -50,7 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.config_entries.async_update_entry(entry, options=updated_options)
 
     # because of circular depoendency
-    from custom_components.spotcast.spotify.account import SpotifyAccount
+    from custom_components.spotcast.spotify.account import SpotifyAccount  # pylint: disable=C0415
 
     try:
         account = await SpotifyAccount.async_from_config_entry(hass, entry)

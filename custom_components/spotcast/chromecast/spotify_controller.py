@@ -78,7 +78,7 @@ class SpotifyController(BaseController):
         """
 
         LOGGER.debug("Build SpotifyController for Chromecast")
-        super(SpotifyController, self).__init__(
+        super().__init__(
             self.APP_NAMESPACE,
             self.APP_ID
         )
@@ -87,6 +87,8 @@ class SpotifyController(BaseController):
         self.waiting = threading.Event()
         self.is_launched = False
         self._current_message: dict = None
+        self.current_device: Chromecast = None
+        self.credential_error = False
 
     def _send_message_callback(self, *_):
         """Call back method to send a message after the launch method"""
@@ -177,7 +179,7 @@ class SpotifyController(BaseController):
 
     def _get_info_response_handler(
             self,
-            message: CastMessage,
+            message: CastMessage,  # pylint: disable=W0613
             data: dict
     ) -> bool:
         """Handler for the get info response message"""
@@ -201,6 +203,7 @@ class SpotifyController(BaseController):
             ),
             headers=headers,
             data=json.dumps(body),
+            timeout=12
         )
 
         try:
@@ -222,45 +225,29 @@ class SpotifyController(BaseController):
 
         return True
 
-    def _add_user_response_handler(
-            self,
-            message: CastMessage,
-            data: dict
-    ) -> bool:
+    def _add_user_response_handler(self, *_, **__) -> bool:
         """Handler for the add user response message"""
         self.is_launched = True
         self.waiting.set()
 
         return True
 
-    def _add_user_error_handler(
-            self,
-            message: CastMessage,
-            data: dict
-    ) -> bool:
+    def _add_user_error_handler(self, *_, **__) -> bool:
         """Handler for the add user error message"""
-        self.device = None
+        self.current_device = None
         self.credential_error = True
         self.waiting.set()
 
         raise AppLaunchError("Credentials error. Laucnhgin spotify failed")
 
-    def _transfer_error_handler(
-            self,
-            message: CastMessage,
-            data: dict,
-    ) -> bool:
+    def _transfer_error_handler(self, *_, **__) -> bool:
         """Handler for the transfer error message"""
-        self.device = None
+        self.current_device = None
         self.credential_error = True
         self.waiting.set()
 
         raise AppLaunchError("Device took too much time to start playback")
 
-    def _transfer_success_handler(
-        self,
-        message: CastMessage,
-        data: dict,
-    ) -> bool:
+    def _transfer_success_handler(self, *_, **__) -> bool:
         """Handles the transfer success message"""
         return True

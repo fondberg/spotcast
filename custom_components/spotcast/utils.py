@@ -47,7 +47,7 @@ def get_account_entry(
 
         if entry is None:
             raise AccountNotFoundError(
-                "No entry foind for id `%s`", account_id
+                f"No entry found for id `{account_id}`"
             )
 
         return entry
@@ -109,7 +109,7 @@ def copy_to_dict(items: dict) -> dict:
 
         return new_dict
 
-    elif isinstance(items, list):
+    if isinstance(items, list):
 
         new_list = []
 
@@ -118,8 +118,7 @@ def copy_to_dict(items: dict) -> dict:
 
         return new_list
 
-    else:
-        return items
+    return items
 
 
 def fuzzy_match(

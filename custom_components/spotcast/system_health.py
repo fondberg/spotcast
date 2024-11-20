@@ -19,12 +19,12 @@ LOGGER = getLogger(__name__)
 
 
 @callback
-def async_register(hass: HomeAssistant, register: SystemHealthRegistration):
+def async_register(hass: HomeAssistant, register: SystemHealthRegistration):  # pylint: disable=W0613
     """Registers the system health callbacks."""
     register.async_register_info(system_health_info)
 
 
-async def system_health_info(hass: HomeAssistant) -> dict[str]:
+async def system_health_info(hass: HomeAssistant) -> dict[str]:  # pylint: disable=W0613
     """Get Health info for the info page"""
 
     health_info = {}

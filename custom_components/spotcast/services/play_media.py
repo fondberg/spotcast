@@ -13,6 +13,7 @@ import voluptuous as vol
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.utils import get_account_entry
+from custom_components.spotcast.spotify.utils import url_to_uri
 from custom_components.spotcast.media_player.utils import (
     async_media_player_from_id,
 )
@@ -26,7 +27,7 @@ LOGGER = getLogger(__name__)
 
 PLAY_MEDIA_SCHEMA = vol.Schema({
     vol.Required("media_player"): cv.ENTITY_SERVICE_FIELDS,
-    vol.Required("spotify_uri"): cv.string,
+    vol.Required("spotify_uri"): url_to_uri,
     vol.Optional("account"): cv.string,
     vol.Optional("data"): EXTRAS_SCHEMA,
 })

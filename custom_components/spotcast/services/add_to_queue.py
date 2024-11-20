@@ -12,6 +12,7 @@ import voluptuous as vol
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.utils import get_account_entry
+from custom_components.spotcast.spotify.utils import url_to_uri
 from custom_components.spotcast.services.exceptions import (
     NoActivePlaybackError
 )
@@ -19,7 +20,7 @@ from custom_components.spotcast.services.exceptions import (
 LOGGER = getLogger(__name__)
 
 ADD_TO_QUEUE_SCHEMA = vol.Schema({
-    vol.Required("spotify_uris"): vol.All(cv.ensure_list, [cv.string]),
+    vol.Required("spotify_uris"): vol.All(cv.ensure_list, [url_to_uri]),
     vol.Optional("account"): cv.string,
 })
 

@@ -9,7 +9,7 @@ Classes:
     - ProfileNotLoadedError
 """
 
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 
 
 class TokenError(HomeAssistantError):
@@ -44,7 +44,7 @@ class ExpiredDatasetError(HomeAssistantError):
     """Raised when a dataset if retrived while expired"""
 
 
-class SearchQueryError(HomeAssistantError):
+class SearchQueryError(ServiceValidationError):
     """Abstract exception for the Search Query Object"""
 
 
@@ -59,3 +59,7 @@ class InvalidTagsError(SearchQueryError):
 class InvalidItemTypeError(SearchQueryError):
     """Raised when a search query is built with an invalid item type
     """
+
+
+class InvalidUriError(ServiceValidationError):
+    """raised when an invalid uri is provided"""
