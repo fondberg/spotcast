@@ -52,7 +52,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # because of circular depoendency
     from custom_components.spotcast.spotify.account import SpotifyAccount
 
-    account = await SpotifyAccount.async_from_config_entry(hass, entry)
+    try:
+        account = await SpotifyAccount.async_from_config_entry(hass, entry)
+    except TokenRefreshError as exc:
+        raise ConfigEntryNotReady from exc
 
     LOGGER.info(
         "Loaded spotify account `%s`. Set as default: %s",

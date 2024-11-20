@@ -42,7 +42,7 @@ class TestMissingAccount(TestCase):
     def test_no_default_account(self):
         self.mock_hass = MagicMock(spec=HomeAssistant)
         self.mock_entry = MagicMock(spec=ConfigEntry)
-        self.mock_entry.data = {
+        self.mock_entry.options = {
             "is_default": False
         }
         self.mock_hass.config_entries.async_entries.return_value = [
@@ -59,7 +59,7 @@ class TestDefaultAccount(TestCase):
 
         self.mock_hass = MagicMock(spec=HomeAssistant)
         self.mock_entry = MagicMock(spec=ConfigEntry)
-        self.mock_entry.data = {
+        self.mock_entry.options = {
             "is_default": True
         }
         self.mock_hass.config_entries.async_entries.return_value = [

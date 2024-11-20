@@ -47,6 +47,42 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         """Extra data to append to authorization url"""
         return {"scope": ",".join(SpotifyAccount.SCOPE)}
 
+    async def async_step_import(self, yaml_config: dict) -> ConfigFlowResult:
+        """Imports the yaml configuration into entries"""
+        entries = []
+
+        accounts = yaml_config.get("accounts")
+
+        if accounts is None:
+            entries.append({
+                "internal_api": {
+                    "sp_dc": yaml_config["sp_dc"],
+                    "sp_key": yaml_config["sp_key"]
+                }
+            })
+
+        else:
+            default_index = 0
+            for index, account in enumerate(accounts):
+                entries.append({
+                    "internal_api": {
+                        "sp_dc": account["sp_dc"],
+                        "sp_key": account["sp_key"],
+                    }
+                })
+
+                if account["sp_dc"] == yaml_config["sp_dc"]:
+                    default_index = index
+
+            # ensure the default entry is set first to become the
+            # default
+            entries.insert(0, entries.pop(default_index))
+
+        for entry in entries:
+            await self.async_step_user(entry)
+
+        self.async_abort(reason="migration_successful")
+
     async def async_step_internal_api(
             self,
             user_input: dict[str]

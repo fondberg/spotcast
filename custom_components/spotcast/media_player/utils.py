@@ -158,6 +158,7 @@ async def async_build_from_type(
 
         spotify_controller = SpotifyController(account)
         media_player.register_handler(spotify_controller)
+        await account.async_playback_state()
 
         if need_to_quit_app(media_player, account.active_device):
             media_player.quit_app()

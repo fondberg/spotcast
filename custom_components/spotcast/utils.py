@@ -58,7 +58,7 @@ def get_account_entry(
 
     for entry in entries:
 
-        if entry.data["is_default"]:
+        if entry.options["is_default"]:
             return entry
 
     raise NoDefaultAccountError("No Default account could be found")
