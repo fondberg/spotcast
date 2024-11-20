@@ -4,6 +4,12 @@ name: Validate with hassfest
 
 on:
   push:
+    branches:
+      - main
+      - release/*
+    paths-ignore:
+      - docs/*
+      - "*.md"
   pull_request:
   schedule:
     - cron: "0 0 * * *"

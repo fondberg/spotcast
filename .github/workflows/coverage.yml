@@ -1,0 +1,27 @@
+name: Run Coverage Test
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+    paths-ignore:
+      - docs/*
+      - "*.md"
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi 
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - run: |
+          coverage run --branch --omit=./test/* -m unittest discover -s ./test -p test_*.py
+          coverage report --fail-under=100

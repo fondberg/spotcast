@@ -1,7 +1,8 @@
-name: Report an issue with Spotcast
-description: Report an issue with Spotcast
+name: "[BETA] Beta reporting"
+description: Report an issue with the beta version of Spotcast
 labels:
   - bug
+  - beta
   - pending-triage
 assignees:
   - fcusson
@@ -9,7 +10,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This issue form is for reporting bugs only!
+        This issue form is for reporting issues with a beta version of spotcast only
   - type: textarea
     validations:
       required: true
@@ -32,15 +33,6 @@ body:
         Can be found in [Settings ⇒ System ⇒ Repairs ⇒ Three Dots in Upper Right ⇒ System information](https://my.home-assistant.io/redirect/system_health).
 
         [![Open your Home Assistant instance and show the system information.](https://my.home-assistant.io/badges/system_health.svg)](https://my.home-assistant.io/redirect/system_health/)
-  - type: input
-    validations:
-      required: true
-    attributes:
-      label: Spotcast Version
-      description: >
-        What version of spotcast are you running.
-
-        [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=spotcast)
   - type: dropdown
     validations:
       required: true
@@ -61,6 +53,8 @@ body:
       value: |
         # Details
   - type: textarea
+    validations:
+      required: true 
     attributes:
       label: Diagnostics information
       placeholder: "drag-and-drop the diagnostics data file here (do not copy-and-paste the content)"
