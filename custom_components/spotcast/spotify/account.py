@@ -420,7 +420,14 @@ class SpotifyAccount:
         return self.devices
 
     async def async_get_track(self, uri: str) -> dict:
-        """Retrieves track information"""
+        """Retrieves track information
+
+        Args:
+            - uri(str): The URI of the track to search
+
+        Returns:
+            - dict: the songs details
+        """
         await self.async_ensure_tokens_valid()
 
         LOGGER.debug("Getting track information for `%s`", uri)

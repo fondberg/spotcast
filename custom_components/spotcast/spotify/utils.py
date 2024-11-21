@@ -30,6 +30,10 @@ def select_image_url(images: list[dict]) -> str:
 def url_to_uri(url: str) -> str:
     """converts a url to a spotify uri"""
 
+    # if already a uri skip
+    if url.startswith("spotify:"):
+        return url
+
     # remove the protocol section
     url = url.split("://", maxsplit=1)[-1]
 

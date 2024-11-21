@@ -40,6 +40,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
 
     def __init__(self):
         self.data: dict = {}
+        self._import_data = None
         super().__init__()
 
     @property
@@ -48,40 +49,14 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         return {"scope": ",".join(SpotifyAccount.SCOPE)}
 
     async def async_step_import(self, yaml_config: dict) -> ConfigFlowResult:
-        """Imports the yaml configuration into entries"""
-        entries = []
+        """Imports the yaml configuration into an entry. Only the main
+        account can be transfered this way"""
+        self._import_data = {
+            "sp_dc": yaml_config["sp_dc"],
+            "sp_key": yaml_config["sp_key"],
+        }
 
-        accounts = yaml_config.get("accounts")
-
-        if accounts is None:
-            entries.append({
-                "internal_api": {
-                    "sp_dc": yaml_config["sp_dc"],
-                    "sp_key": yaml_config["sp_key"]
-                }
-            })
-
-        else:
-            default_index = 0
-            for index, account in enumerate(accounts):
-                entries.append({
-                    "internal_api": {
-                        "sp_dc": account["sp_dc"],
-                        "sp_key": account["sp_key"],
-                    }
-                })
-
-                if account["sp_dc"] == yaml_config["sp_dc"]:
-                    default_index = index
-
-            # ensure the default entry is set first to become the
-            # default
-            entries.insert(0, entries.pop(default_index))
-
-        for entry in entries:
-            await self.async_step_user(entry)
-
-        self.async_abort(reason="migration_successful")
+        return await self.async_step_user(None)
 
     async def async_step_internal_api(
             self,
@@ -101,6 +76,10 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         if "external_api" not in self.data:
             LOGGER.debug("Adding external api to entry data")
             self.data["external_api"] = data
+
+        if self._import_data is not None:
+            self.data["internal_api"] = self._import_data
+            self._import_data = None
 
         if "internal_api" not in self.data:
             return self.async_show_form(

@@ -115,3 +115,58 @@ class TestEmptyExtras(IsolatedAsyncioTestCase):
                 .assert_called()
         except AssertionError:
             self.fail()
+
+
+class TestTrackUri(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.async_media_player_from_id", new_callable=AsyncMock)
+    @patch.object(SpotifyAccount, "async_from_config_entry", new_callable=AsyncMock)
+    @patch(f"{TEST_MODULE}.get_account_entry")
+    async def asyncSetUp(
+        self,
+        mock_entry: MagicMock,
+        mock_account: MagicMock,
+        mock_player: MagicMock,
+    ):
+
+        mock_entry.return_value = MagicMock()
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+        mock_player.return_value.id = "12345"
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "call": MagicMock(spec=ServiceCall),
+            "entry": mock_entry(),
+            "account": mock_account.return_value,
+            "player": mock_player(),
+        }
+
+        self.mocks["account"].async_get_track.return_value = {
+            "album": {
+                "uri": "spotify:album:foo"
+            },
+            "track_number": 5
+        }
+
+        self.mocks["call"].data = {
+            "spotify_uri": "spotify:track:bar",
+            "account": "12345",
+            "media_player": {
+                "entity_id": [
+                    "media_player.foo"
+                ]
+            },
+        }
+
+        await async_play_media(self.mocks["hass"], self.mocks["call"])
+
+    def test_account_play_media_called_with_expected_arguments(self):
+        try:
+            self.mocks["account"].async_play_media\
+                .assert_called_with(
+                    "12345",
+                    "spotify:album:foo",
+                    offset=4,
+            )
+        except AssertionError:
+            self.fail()

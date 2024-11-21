@@ -30,7 +30,7 @@ class TestAddUserErrorHandling(TestCase):
             pass
 
     def test_device_removed(self):
-        self.assertIsNone(self.controller.device)
+        self.assertIsNone(self.controller.current_device)
 
     def test_credential_error_set(self):
         try:

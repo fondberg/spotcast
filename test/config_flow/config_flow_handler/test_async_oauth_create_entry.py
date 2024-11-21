@@ -194,7 +194,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             self.fail("Wrong arguments provided to entry creation")
 
 
-class TestCurrentUserFail(IsolatedAsyncioTestCase):
+class TestImportOfYamlConfig(IsolatedAsyncioTestCase):
 
     def setUp(self):
 
@@ -209,25 +209,43 @@ class TestCurrentUserFail(IsolatedAsyncioTestCase):
             }
         }
 
-        self.internal_api = {
+        self.flow_handler = SpotcastFlowHandler()
+        self.flow_handler.data = {
+            "external_api": self.external_api,
+        }
+        self.flow_handler._import_data = {
             "sp_dc": "foo",
             "sp_key": "bar",
         }
 
-        self.flow_handler = SpotcastFlowHandler()
-        self.flow_handler.data = {
-            "external_api": self.external_api,
-            "internal_api": self.internal_api,
+    @patch.object(SpotcastFlowHandler, "async_show_form")
+    @patch.object(SpotcastFlowHandler, "async_set_unique_id")
+    @patch.object(SpotcastFlowHandler, "hass", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    async def test_skip_internal_api_form(
+            self,
+            mock_spotify: MagicMock,
+            mock_hass: MagicMock,
+            mock_set_id: MagicMock,
+            mock_form: MagicMock,
+    ):
+
+        mock_hass.async_add_executor_job.return_value = {
+            "id": "foo",
+            "display_name": "Dummy User",
         }
 
-    @patch.object(SpotcastFlowHandler, "async_abort")
-    async def test_abort_sent(self, mock_abort: MagicMock):
+        mock_hass.config_entries.async_entries = MagicMock(
+            return_value=[
+                "foo"
+            ]
+        )
 
         await self.flow_handler.async_oauth_create_entry(
             self.flow_handler.data
         )
 
         try:
-            mock_abort.assert_called_once()
+            mock_form.assert_not_called()
         except AssertionError:
-            self.fail("Abort was not called")
+            self.fail("Spotify constructor called with wrong token")

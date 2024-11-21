@@ -58,6 +58,13 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
         entry=entry
     )
 
+    # check for track uri and switch to album with offset if necessary
+    if uri.startswith("spotify:track:"):
+        track_info = await account.async_get_track(uri)
+        uri = track_info["album"]["uri"]
+        LOGGER.debug("Switching context to song's album `%s`", uri)
+        extras["offset"] = track_info["track_number"] - 1
+
     LOGGER.debug("Getting %s from home assistant", entity_id)
     media_player = await async_media_player_from_id(hass, account, entity_id)
 

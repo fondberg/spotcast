@@ -30,3 +30,18 @@ class TestConversion(TestCase):
         expected = "spotify:user:1185903410:playlist:6YAnJeVC7tgOiocOG23Dd"
 
         self.assertEqual(url_to_uri(value), expected)
+
+
+class TestUri(TestCase):
+
+    def test_uris_are_skipped(self):
+
+        values = [
+            "spotify:album:5l5m1hnH4punS1GQXgEi3T",
+            "spotify:track:55mJleti2WfWEFNFcBduhc",
+            "spotify:artist:2yEwvVSSSUkcLeSTNyHKh8",
+            "spotify:user:1185903410:playlist:6YAnJeVC7tgOiocOG23Dd",
+        ]
+
+        for value in values:
+            self.assertEqual(url_to_uri(value), value)
