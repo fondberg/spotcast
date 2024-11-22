@@ -106,6 +106,7 @@ class TestSongRetrieval(IsolatedAsyncioTestCase):
             .return_value = self.track_info
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             internal_session=self.mocks["internal"],
             external_session=self.mocks["external"],

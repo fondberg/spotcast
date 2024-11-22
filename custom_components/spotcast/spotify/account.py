@@ -15,7 +15,7 @@ from typing import Any
 
 from spotipy import Spotify, SpotifyException
 from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, SOURCE_REAUTH
 from homeassistant.helpers.device_registry import DeviceInfo, DeviceEntryType
 
 from custom_components.spotcast.const import DOMAIN
@@ -32,6 +32,7 @@ from custom_components.spotcast.spotify.utils import select_image_url
 from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
     InvalidItemTypeError,
+    TokenError,
 )
 
 LOGGER = getLogger(__name__)
@@ -135,6 +136,7 @@ class SpotifyAccount:
 
     def __init__(
             self,
+            entry_id: str,
             hass: HomeAssistant,
             external_session: OAuth2Session,
             internal_session: InternalSession,
@@ -145,6 +147,8 @@ class SpotifyAccount:
         and private API.
 
         Args:
+            - entry_id(str): The id of the config entry in HomeAssistant
+                for the account.
             - hass(HomeAssistant): The Home Assistant Instance
             - external_session(OAuth2Session): The public api session
                 for the Spotify Account
@@ -155,6 +159,7 @@ class SpotifyAccount:
             - base_refresh_rate(int, optional): The base refresh rate
                 used to update dateset
         """
+        self.entry_id = entry_id
         self.hass = hass
         self.sessions: dict[str, ConnectionSession] = {
             "external": external_session,
@@ -354,12 +359,18 @@ class SpotifyAccount:
         await self.sessions[api].async_ensure_token_valid()
         return self.sessions[api].token
 
-    async def async_ensure_tokens_valid(self, skip_profile: bool = False):
+    async def async_ensure_tokens_valid(
+            self,
+            skip_profile: bool = False,
+            reauth_on_fail: bool = True,
+    ):
         """Ensures the token are valid
 
         Args:
             - skip_profile(bool, optional): set True to skip the
                 profile update. Defaults to False
+            - reauth_on_fail(bool, optional): Asks for reauthorisation
+                of the entry on failure to get token. Defaults to True.
         """
 
         if not skip_profile:
@@ -369,7 +380,23 @@ class SpotifyAccount:
             "Refreshing api tokens for Spotify Account"
         )
         for key, session in self.sessions.items():
-            await session.async_ensure_token_valid()
+
+            try:
+                await session.async_ensure_token_valid()
+            except TokenError as exc:
+
+                if reauth_on_fail:
+
+                    entry = self.hass.config_entries.async_get_entry(
+                        self.entry_id
+                    )
+
+                    entry.async_start_reauth(
+                        self.hass,
+                        context={"source": SOURCE_REAUTH}
+                    )
+
+                raise exc
 
             if key == "external":
                 token = await self.async_get_token(key)
@@ -868,7 +895,7 @@ class SpotifyAccount:
     @staticmethod
     async def async_from_config_entry(
             hass: HomeAssistant,
-            entry: ConfigEntry
+            entry: ConfigEntry,
     ) -> "SpotifyAccount":
         """Builds a Spotify Account from the home assistant config
         entry
@@ -906,9 +933,10 @@ class SpotifyAccount:
         await internal_api.async_ensure_token_valid()
 
         account = SpotifyAccount(
-            hass,
-            external_api,
-            internal_api,
+            entry_id=entry.entry_id,
+            hass=hass,
+            external_session=external_api,
+            internal_session=internal_api,
             **entry.options
         )
 

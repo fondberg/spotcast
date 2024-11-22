@@ -28,6 +28,7 @@ class TestPlaylistRetrieval(IsolatedAsyncioTestCase):
         self.mocks["pager"].return_value = ["foo", "bar", "baz"]
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             external_session=self.mocks["external"],
             internal_session=self.mocks["internal"],

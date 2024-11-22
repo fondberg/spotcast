@@ -26,6 +26,7 @@ class TestActivePlayback(TestCase):
         }
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             external_session=self.mocks["external"],
             internal_session=self.mocks["internal"],
@@ -57,6 +58,7 @@ class TestNoPlayback(TestCase):
         }
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             external_session=self.mocks["external"],
             internal_session=self.mocks["internal"],

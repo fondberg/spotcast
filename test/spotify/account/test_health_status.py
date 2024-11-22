@@ -33,9 +33,10 @@ class TestHealthStatus(TestCase):
         }
 
         self.account = SpotifyAccount(
-            MagicMock(spec=HomeAssistant),
-            mock_external,
-            mock_internal,
+            entry_id="12345",
+            hass=MagicMock(spec=HomeAssistant),
+            external_session=mock_external,
+            internal_session=mock_internal,
             is_default=True
         )
 

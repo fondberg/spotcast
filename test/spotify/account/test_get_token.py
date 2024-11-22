@@ -36,9 +36,10 @@ class TestDataRetention(TestCase):
         }
 
         self.account = SpotifyAccount(
-            mock_hass,
-            mock_external,
-            mock_internal,
+            entry_id="12345",
+            hass=mock_hass,
+            external_session=mock_external,
+            internal_session=mock_internal,
             is_default=True
         )
 

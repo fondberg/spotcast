@@ -28,9 +28,10 @@ class TestDataRetention(TestCase):
         }
 
         self.account = SpotifyAccount(
-            MagicMock(spec=HomeAssistant),
-            mock_external,
-            mock_internal,
+            entry_id="12345",
+            hass=MagicMock(spec=HomeAssistant),
+            external_session=mock_external,
+            internal_session=mock_internal,
             is_default=True
         )
 
@@ -63,3 +64,6 @@ class TestDataRetention(TestCase):
 
     def test_default_refresh_rate_set(self):
         self.assertEqual(self.account._base_refresh_rate, 30)
+
+    def test_entry_id_saved(self):
+        self.assertEqual(self.account.entry_id, "12345")
