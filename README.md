@@ -19,17 +19,19 @@ Used by [Spotify-Card](https://github.com/custom-cards/spotify-card).
 
 This component is easiest installed using [HACS](https://github.com/custom-components/hacs).
 
-First Make sure you have `spotcast` installed through HACS:
+1. First Make sure you have `spotcast` installed through HACS:
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=fondberg&repository=spotcast&category=integration)
 
-Then, setup an account:
+2. Then, setup an account:
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=spotcast)
 
 ### Manual installation
 
-Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory and reboot your Home Assistant. Then click the following link to setup an account:
+1. Copy all files from custom_components/spotcast/ to custom_components/spotcast/ inside your config Home Assistant directory
+2. Reboot your Home Assistant.
+3. Click the following link to setup an account:
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=spotcast)
 
