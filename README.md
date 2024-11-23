@@ -42,7 +42,7 @@ Spotcast is compatible with any version since 2024.11.0.
 ### Official Spotify Integration
 
 > [!INFO]
-> Note that starting with `v5.0.0`, [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) is no longer a requirement except for Media Browsing. Click the following link to setup the spotify integration:
+> Note that starting with `v5.0.0`, [Home Assistant Spotify Integration](https://www.home-assistant.io/integrations/spotify/) is no longer a requirement **except for Media Browsing**. Click the following link to setup the spotify integration:
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=spotify)
 
