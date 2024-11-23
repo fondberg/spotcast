@@ -8,6 +8,9 @@ from custom_components.spotcast.spotify.account import (
     OAuth2Session,
     InternalSession,
     HomeAssistant,
+    TokenError,
+    ConfigEntry,
+    SOURCE_REAUTH,
 )
 
 TEST_MODULE = "custom_components.spotcast.spotify.account"
@@ -36,9 +39,10 @@ class TestWithProfileRefresh(IsolatedAsyncioTestCase):
         }
 
         self.account = SpotifyAccount(
-            self.mocks["hass"],
-            self.mocks["external"],
-            self.mocks["internal"],
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -91,9 +95,10 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
         }
 
         self.account = SpotifyAccount(
-            self.mocks["hass"],
-            self.mocks["external"],
-            self.mocks["internal"],
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -118,6 +123,92 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
         try:
             self.account._spotify.set_auth.assert_called_with(
                 "12345"
+            )
+        except AssertionError:
+            self.fail()
+
+
+class TestTokenErrorHandling(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.Spotify")
+    async def test_reauth_process_not_called_when_not_requested(
+            self,
+            mock_spotify: MagicMock,
+    ):
+
+        self.mocks = {
+            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=OAuth2Session),
+            "hass": MagicMock(spec=HomeAssistant),
+            "entry": MagicMock(spec=ConfigEntry),
+        }
+        self.mocks["hass"].loop = MagicMock()
+        self.mocks["hass"].config_entries.async_get_entry\
+            .return_value = self.mocks["entry"]
+
+        self.mock_spotify = mock_spotify
+
+        self.mocks["internal"].async_ensure_token_valid = AsyncMock()
+        self.mocks["internal"].async_ensure_token_valid\
+            .side_effect = TokenError()
+
+        self.account = SpotifyAccount(
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
+            is_default=True
+        )
+
+        self.account.async_profile = AsyncMock()
+
+        with self.assertRaises(TokenError):
+            await self.account.async_ensure_tokens_valid(reauth_on_fail=False)
+
+        try:
+            self.mocks["entry"].async_start_reauth.assert_not_called()
+        except AssertionError:
+            self.fail()
+
+    @patch(f"{TEST_MODULE}.Spotify")
+    async def test_reauth_process_called_when_requested(
+            self,
+            mock_spotify: MagicMock,
+    ):
+
+        self.mocks = {
+            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=OAuth2Session),
+            "hass": MagicMock(spec=HomeAssistant),
+            "entry": MagicMock(spec=ConfigEntry),
+        }
+        self.mocks["hass"].loop = MagicMock()
+        self.mocks["hass"].config_entries.async_get_entry\
+            .return_value = self.mocks["entry"]
+
+        self.mock_spotify = mock_spotify
+
+        self.mocks["internal"].async_ensure_token_valid = AsyncMock()
+        self.mocks["internal"].async_ensure_token_valid\
+            .side_effect = TokenError()
+
+        self.account = SpotifyAccount(
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
+            is_default=True
+        )
+
+        self.account.async_profile = AsyncMock()
+
+        with self.assertRaises(TokenError):
+            await self.account.async_ensure_tokens_valid()
+
+        try:
+            self.mocks["entry"].async_start_reauth.assert_called_with(
+                self.mocks["hass"],
+                context={"source": SOURCE_REAUTH},
             )
         except AssertionError:
             self.fail()

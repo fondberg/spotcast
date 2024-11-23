@@ -28,6 +28,7 @@ class TestSearchQuery(IsolatedAsyncioTestCase):
         self.mocks["pager"].return_value = ["foo", "bar", "baz"]
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             external_session=self.mocks["external"],
             internal_session=self.mocks["internal"],
@@ -63,10 +64,13 @@ class TestHighMaxItems(IsolatedAsyncioTestCase):
         self.mocks["pager"].return_value = ["foo", "bar", "baz"]
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             external_session=self.mocks["external"],
             internal_session=self.mocks["internal"],
+            is_default=True
         )
+
         self.account._datasets["profile"].expires_at = time() + 999
         self.account._datasets["profile"]._data = {
             "country": "CA"

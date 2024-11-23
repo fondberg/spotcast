@@ -41,6 +41,7 @@ class TestPagingApiEndpoint(IsolatedAsyncioTestCase):
         ]
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
             internal_session=self.mocks["internal"],
             external_session=self.mocks["external"],
@@ -94,9 +95,11 @@ class TestPagingWithLimit(IsolatedAsyncioTestCase):
         ]
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
-            internal_session=self.mocks["internal"],
             external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
+            is_default=True
         )
         self.account._spotify.dummy_endpoint = MagicMock()
 
@@ -146,10 +149,13 @@ class TestSubLayeredPager(IsolatedAsyncioTestCase):
         ]
 
         self.account = SpotifyAccount(
+            entry_id="12345",
             hass=self.mocks["hass"],
-            internal_session=self.mocks["internal"],
             external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
+            is_default=True
         )
+
         self.account._spotify.dummy_endpoint = MagicMock()
 
         self.result = await self.account._async_pager(

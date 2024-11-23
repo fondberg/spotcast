@@ -37,9 +37,10 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
         }
 
         self.account = SpotifyAccount(
-            self.mocks["hass"],
-            self.mocks["external"],
-            self.mocks["internal"],
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -81,9 +82,10 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
         }
 
         self.account = SpotifyAccount(
-            self.mocks["hass"],
-            self.mocks["external"],
-            self.mocks["internal"],
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -127,9 +129,10 @@ class TestForcerefresh(IsolatedAsyncioTestCase):
         }
 
         self.account = SpotifyAccount(
-            self.mocks["hass"],
-            self.mocks["external"],
-            self.mocks["internal"],
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            external_session=self.mocks["external"],
+            internal_session=self.mocks["internal"],
             is_default=True
         )
 

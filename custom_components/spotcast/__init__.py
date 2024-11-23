@@ -54,7 +54,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     from custom_components.spotcast.spotify.account import SpotifyAccount  # pylint: disable=C0415
 
     try:
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
+        account = await SpotifyAccount.async_from_config_entry(
+            hass=hass,
+            entry=entry,
+        )
     except TokenRefreshError as exc:
         raise ConfigEntryAuthFailed from exc
 

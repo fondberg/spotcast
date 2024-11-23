@@ -63,6 +63,9 @@ class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
     def test_result_is_spotify_account(self):
         self.assertIsInstance(self.result, SpotifyAccount)
 
+    def test_entry_id_saved_on_account(self):
+        self.assertEqual(self.result.entry_id, "12345")
+
 
 class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
 
@@ -136,9 +139,10 @@ class TestPreexistingAccount(IsolatedAsyncioTestCase):
         self.mocks["hass"].data = {"spotcast": {
             "12345": {
                 "account": SpotifyAccount(
-                    self.mocks["hass"],
-                    MagicMock(spec=OAuth2Session),
-                    MagicMock(spec=InternalSession),
+                    entry_id="12345",
+                    hass=self.mocks["hass"],
+                    external_session=MagicMock(spec=OAuth2Session),
+                    internal_session=MagicMock(spec=InternalSession),
                     is_default=True,
                 )
             }
