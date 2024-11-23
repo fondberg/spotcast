@@ -6,6 +6,7 @@ Classes:
 
 from logging import getLogger
 from typing import Any
+from unittest.mock import MagicMock
 
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL
 from homeassistant.helpers import config_validation as cv
@@ -14,11 +15,13 @@ import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigFlowResult,
     ConfigEntry,
+    SOURCE_REAUTH,
 )
 from spotipy import Spotify
 
 from custom_components.spotcast import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
+from custom_components.spotcast.sessions import InternalSession
 from custom_components.spotcast.config_flow.option_flow_handler import (
     SpotcastOptionsFlowHandler
 )
@@ -80,22 +83,37 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
 
         external_api = self.data["external_api"]
 
+        # create a mock config able to mimmick a config entry for the
+        # purpose of InternalSession
+        entry = MagicMock(spec=ConfigEntry)
+        entry.data = data
         spotify = Spotify(auth=external_api["token"]["access_token"])
+        internal_session = InternalSession(self.hass, entry)
 
         try:
             LOGGER.debug("loading curent user data")
             current_user = await self.hass.async_add_executor_job(
                 spotify.current_user
             )
+            await internal_session.async_ensure_token_valid()
         except Exception:  # noqa: BLE001
             return self.async_abort(reason="connection_error")
 
         name = external_api["id"] = current_user["id"]
+        display_name = current_user.get("display_name")
 
-        if current_user.get("display_name"):
+        if display_name is not None:
             name = current_user["display_name"]
 
         self.data["name"] = name
+
+        await self.async_set_unique_id(current_user["id"])
+
+        if self.source == SOURCE_REAUTH:
+            self._abort_if_unique_id_mismatch(reason="reauth_account_mismatch")
+            return self.async_update_reload_and_abort(
+                self._get_reauth_entry(), title=name, data=data
+            )
 
         current_entries = self.hass.config_entries.async_entries(DOMAIN)
 
@@ -104,12 +122,32 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             "base_refresh_rate": 30,
         }
 
-        await self.async_set_unique_id(current_user["id"])
-
         return self.async_create_entry(
             title=name,
             data=self.data,
             options=options,
+        )
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Confirm reauth dialog."""
+        reauth_entry = self._get_reauth_entry()
+
+        if user_input is None:
+            return self.async_show_form(
+                step_id="reauth_confirm",
+                description_placeholders={
+                    "account": reauth_entry.data["external_api"]["id"]
+                },
+                errors={},
+            )
+
+        return await self.async_step_pick_implementation(
+            user_input={
+                "implementation": reauth_entry.data[
+                    "external_api"
+                ]["auth_implementation"]}
         )
 
     @staticmethod

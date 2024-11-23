@@ -4,9 +4,13 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, MagicMock
 
 from spotipy import Spotify
+from homeassistant.core import HomeAssistant
 
 from custom_components.spotcast.config_flow.config_flow_handler import (
-    SpotcastFlowHandler
+    SpotcastFlowHandler,
+    SOURCE_REAUTH,
+    Spotify,
+    InternalSession,
 )
 
 from test.unit_utils import AsyncMock
@@ -108,6 +112,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail("Spotify constructor called with wrong token")
 
+    @patch(f"{TEST_MODULE}.InternalSession")
     @patch.object(SpotcastFlowHandler, "async_create_entry")
     @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
     @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
@@ -118,7 +123,10 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             mock_hass: MagicMock,
             mock_set_id: MagicMock,
             mock_entry: MagicMock,
+            mock_session: MagicMock,
     ):
+        mock_session.return_value = MagicMock(spec=InternalSession)
+        mock_session.return_value.async_ensure_token_valid = AsyncMock()
 
         mock_hass.async_add_executor_job.return_value = {
             "id": "foo",
@@ -155,6 +163,7 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail("Wrong arguments provided to entry creation")
 
+    @patch(f"{TEST_MODULE}.InternalSession")
     @patch.object(SpotcastFlowHandler, "async_create_entry")
     @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
     @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
@@ -165,8 +174,11 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             mock_hass: MagicMock,
             mock_set_id: MagicMock,
             mock_entry: MagicMock,
+            mock_session: MagicMock,
     ):
 
+        mock_session.return_value = MagicMock(spec=InternalSession)
+        mock_session.return_value.async_ensure_token_valid = AsyncMock()
         mock_hass.async_add_executor_job.return_value = {
             "id": "foo",
         }
@@ -249,3 +261,56 @@ class TestImportOfYamlConfig(IsolatedAsyncioTestCase):
             mock_form.assert_not_called()
         except AssertionError:
             self.fail("Spotify constructor called with wrong token")
+
+
+class TestReauthProcess(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.InternalSession")
+    @patch(f"{TEST_MODULE}.Spotify")
+    async def asyncSetUp(
+            self,
+            mock_spotify: MagicMock,
+            mock_session: MagicMock,
+    ):
+
+        mock_spotify.return_value = MagicMock(spec=Spotify)
+        mock_session.return_value = MagicMock(spec=InternalSession)
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "spotify": mock_spotify.return_value,
+            "session": mock_session.return_value,
+        }
+
+        self.mocks["session"].async_ensure_token_valid = AsyncMock()
+        self.mocks["hass"].async_add_executor_job = AsyncMock()
+        self.mocks["hass"].async_add_executor_job.return_value = {
+            "id": "dummy_user",
+            "name": "Dummy Name"
+        }
+
+        self.mocks["hass"].config_entries = MagicMock()
+        self.mocks["hass"].config_entries.async_entries = []
+
+        self.handler = SpotcastFlowHandler()
+        self.handler.context = {"source": SOURCE_REAUTH}
+        self.handler.hass = self.mocks["hass"]
+        self.handler._abort_if_unique_id_mismatch = MagicMock()
+        self.handler.async_update_reload_and_abort = MagicMock()
+        self.handler._get_reauth_entry = MagicMock()
+        self.handler.data = {
+            "external_api": {
+                "token": {
+                    "access_token": "foo"
+                }
+            },
+            "internal_api": {},
+        }
+
+        await self.handler.async_oauth_create_entry({})
+
+    async def test_reload_called(self):
+        try:
+            self.handler.async_update_reload_and_abort.assert_called()
+        except AssertionError:
+            self.fail()

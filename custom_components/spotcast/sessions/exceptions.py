@@ -12,5 +12,5 @@ class TokenRefreshError(HomeAssistantError):
     """Raised when a token refresh fails"""
 
 
-class ExpiredSpotifyCookiesError(HomeAssistantError):
+class ExpiredSpotifyCookiesError(TokenRefreshError):
     """Raised if the sp_dc and sp_key are expired"""

@@ -446,6 +446,34 @@ class SpotifyAccount:
 
         return self.devices
 
+    async def async_saved_episodes(
+            self,
+            limit: int = None,
+    ) -> list[dict]:
+        """Retrieves the list of podcast episode saved to the user
+        account
+
+        Args:
+            - limit(int, optional): If not None, stops getting episode
+                once the limit of item reached. Defaults to None
+
+        Return:
+            - list[dict]: a list of dictionary with the episodes
+                information
+        """
+
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug(
+            "Getting List of saved podcast episode for account `%s`",
+            self.name,
+        )
+
+        return await self._async_pager(
+            self._spotify.current_user_saved_episodes,
+            appends=[self.country],
+            max_items=limit,
+        )
+
     async def async_get_track(self, uri: str) -> dict:
         """Retrieves track information
 

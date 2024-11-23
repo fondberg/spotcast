@@ -82,7 +82,7 @@ transfer_playback:
           integration: spotcast
     data:
       name: Data
-      description: Additional modifiers for the play_media service call.
+      description: Additional modifiers for the service call.
       required: false
       selector:
         object:
@@ -109,7 +109,34 @@ play_liked_songs:
           integration: spotcast
     data:
       name: Data
-      description: Additional modifiers for the play_media service call.
+      description: Additional modifiers for the service call.
+      required: false
+      selector:
+        object:
+play_saved_episodes:
+  name: Saved Podcast
+  description: Play User's Saved Podcast Episodes
+  fields:
+    media_player:
+      name: Media Player
+      required: true
+      selector:
+        target:
+          entity:
+            - domain: media_player
+              integration: cast
+            - domain: media_player
+              integration: spotcast
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast
+    data:
+      name: Data
+      description: Additional modifiers for the service call.
       required: false
       selector:
         object:
@@ -143,7 +170,7 @@ play_category:
           integration: spotcast
     data:
       name: Data
-      description: Additional modifiers for the play_media service call.
+      description: Additional modifiers for the service call.
       required: false
       selector:
         object:
@@ -182,7 +209,7 @@ play_custom_context:
           integration: spotcast
     data:
       name: Data
-      description: Additional modifiers for the play_media service call.
+      description: Additional modifiers for the service call.
       required: false
       selector:
         object:
@@ -256,7 +283,7 @@ play_from_search:
           integration: spotcast
     data:
       name: Data
-      description: Additional modifiers for the play_media service call.
+      description: Additional modifiers for the service call.
       required: false
       selector:
         object:

@@ -23,6 +23,9 @@
         },
         "add_to_queue": {
             "service": "mdi:plus-box-multiple"
+        },
+        "play_saved_episodes": {
+            "service": "mdi:podcast"
         }
     }
 }
