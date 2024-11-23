@@ -8,7 +8,7 @@ from custom_components.spotcast import (
     HomeAssistant,
     ConfigEntry,
     TokenRefreshError,
-    ConfigEntryNotReady,
+    ConfigEntryAuthFailed,
 )
 from custom_components.spotcast.spotify import SpotifyAccount
 
@@ -150,7 +150,7 @@ class TestTokensErrorAtRefresh(IsolatedAsyncioTestCase):
         self.mocks["hass"].services\
             .async_register = self.mocks["register_service"]
 
-        with self.assertRaises(ConfigEntryNotReady):
+        with self.assertRaises(ConfigEntryAuthFailed):
             await async_setup_entry(
                 self.mocks["hass"],
                 self.mocks["entry"],
@@ -186,7 +186,7 @@ class TestTokensErrorAtAccountBuild(IsolatedAsyncioTestCase):
         self.mocks["hass"].services\
             .async_register = self.mocks["register_service"]
 
-        with self.assertRaises(ConfigEntryNotReady):
+        with self.assertRaises(ConfigEntryAuthFailed):
             await async_setup_entry(
                 self.mocks["hass"],
                 self.mocks["entry"],

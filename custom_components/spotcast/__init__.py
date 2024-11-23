@@ -70,7 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         await account.async_ensure_tokens_valid()
     except TokenRefreshError as exc:
-        raise ConfigEntryNotReady from exc
+        raise ConfigEntryAuthFailed from exc
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
