@@ -10,10 +10,11 @@ Constants:
 """
 
 from logging import getLogger
+import asyncio
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.const import Platform
 
 from custom_components.spotcast.const import DOMAIN
@@ -55,7 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         account = await SpotifyAccount.async_from_config_entry(hass, entry)
     except TokenRefreshError as exc:
-        raise ConfigEntryNotReady from exc
+        raise ConfigEntryAuthFailed from exc
 
     LOGGER.info(
         "Loaded spotify account `%s`. Set as default: %s",
@@ -107,4 +108,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN].pop(entry.entry_id)
 
+    # check if no entry remaining
+    if len(hass.data[DOMAIN]) == 0:
+        LOGGER.info("Last Spotcast Entry removed. Unloading services")
+
+        for service in SERVICE_SCHEMAS:
+            hass.services.async_remove(DOMAIN, service)
+
     return True
+
+if __name__ == '__main__':  # pragma: no cover
+    asyncio.run(async_setup())
