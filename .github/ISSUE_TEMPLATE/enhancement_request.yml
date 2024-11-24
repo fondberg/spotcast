@@ -1,0 +1,53 @@
+name: Enhancement Request
+description: Suggest an improvement or a new feature for the integration
+labels:
+  - enhancement
+  - pending-triage
+assignees:
+  - fcusson
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement or new feature for spotcast!
+        Please fill out the sections below to help us understand your request
+        
+  - type: textarea
+    id: summary
+    validations:
+      required: true
+    attributes:
+      label: "Summary"
+      description: "Provide a brief summary of the feature or enhancement you'd like to see."
+      placeholder: "E.g., Add support for a specific device or improve a particular functionality."
+
+  - type: textarea
+    id: use_case
+    validations:
+      required: true
+    attributes:
+      label: "Use Case"
+      description: "Describe the problem you are trying to solve or the use case for the requested feature."
+      placeholder: "E.g., I want to use the spotcast to control XYZ in scenario ABC."
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: "Benefits"
+      description: "Explain how this feature would benefit users or improve the integration."
+      placeholder: "E.g., This feature would allow users to do XYZ more efficiently."
+
+  - type: textarea
+    id: potential_solutions
+    attributes:
+      label: "Potential Solutions"
+      description: "Describe any ideas or approaches you have for implementing the feature."
+      placeholder: "E.g., This could be achieved by adding a configuration option or using an existing library."
+
+  - type: textarea
+    id: extra_details
+    attributes:
+      label: "Additional Details"
+      description: "Add any extra details or context to support your request."
+      placeholder: "E.g., Relevant links, similar features in other systems, or related issues."
+      render: "markdown"
