@@ -1,14 +1,7 @@
 name: Run Coverage Test
 
 on:
-  push:
-    branches:
-      - main
-      - release/*
-    paths-ignore:
-      - docs/*
-      - "*.md"
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
