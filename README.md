@@ -11,7 +11,10 @@ Spotcast implements a cast platform (requires Home Assistant Core 2022.2.0 or la
 This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromecast device and the Spotify playback after the initial start is done in their respective components.
 Because starting playback using the API requires more powerful token the username and password used for browser login is used.
 
-Used by [Spotify-Card](https://github.com/custom-cards/spotify-card).
+> [!WARNING]
+> A breaking change in Home Assitant `2024.11` is causing [Spotify-Card](https://github.com/custom-cards/spotify-card) to break. As the project as no active maintainer, this break cannot be fixed, but a fork of the project can be found [here](https://github.com/mikevanes/spotify-card-v2). If you are having issue with [Spotify-Card-V2](https://github.com/mikevanes/spotify-card-v2) make sure bto open a ticket in that repository. This projects and its maintainers do not manage the other project and cannot help you directly.
+
+Used by [Spotify-Card-V2](https://github.com/mikevanes/spotify-card-v2)
 
 __[Community post](https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232)__
 
@@ -29,10 +32,7 @@ Copy all files from custom_components/spotcast/ to custom_components/spotcast/ i
 
 ### Minimum Home Assistant version
 
-Spotcast is compatible with any version since 2022.2.0.
-
-> [!WARNING] 
-> An iminent change to Home Assistant will require `v3.9.2` when installing Home Assistant `2024.11` or newer. The current target version will be updated once `2024.11` become generally available.
+Spotcast is compatible with any version since 2024.11.0.
 
 ### Official Spotify Integration
 
