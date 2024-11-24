@@ -72,7 +72,7 @@ The spotcast custom component provides multiple services to the user for differe
 > If you are converting script from pre `v5` services. The closest equivalence to `spotcast.start` is `spotcast.play_media`
 
 | Service Name                                                           | Description                                                                                                                                       |
-| :---:                                                                  | :---                                                                                                                                              |
+| :---                                                                  | :---                                                                                                                                              |
 | [spotcast.play_media](./docs/services/play_media.md)                   | Starts playback on a Chromecast or Spotify Connect device using the provided uri as context.                                                      |
 | [spotcast.play_liked_songs](./docs/services/play_liked_songs.md)       | Starts playback on a Chromecast or Spotify Connect device using the user's saved tracks as context.                                               |
 | [spotcast.play_dj](./docs/services/play_dj.md)                         | Starts playback on a Chromecast or Spotify Connect device using the dj feature as context.                                                        |
@@ -104,7 +104,7 @@ Spotcast creates multiple entities for each Spotify accounts.
 ### Sensors
 
 | example name                        | description                                                                           | states          |
-| :---:                               | :---                                                                                  | :---:           |
+| :---                               | :---                                                                                  | :---:           |
 | `sensor.[...]_spotify_profile`      | Reports the profile of the Spotify Account. Provide attributes linked to the account. | `ok\|unknown`   |
 | `sensor.[...]_spotify_devices`      | Tracks the number of devices available for the account.                               | `int`           |
 | `sensor.[...]_spotify_followers`    | Tracks the number of followers the account has.                                       | `int`           |
@@ -116,7 +116,7 @@ Spotcast creates multiple entities for each Spotify accounts.
 ### Binary Sensors
 
 | example name                               | description                                                                                 |
-| :---:                                      | :---                                                                                        |
+| :---                                      | :---                                                                                        |
 | `sensor.[...]_is_default_spotcast_account` | Diagnostic sensor that confirm if the account is currently the default account for spotcast |
 | `sensor.[...]_spotify_profile_malfunction` | Diagnostic error sensor that turns on when an connection issue happens with the API         |
 
@@ -130,7 +130,7 @@ Spotcast will create `media_player` entities and devices to represent Spotify Co
 Spotcast provides multiple websocket API endpoints:
 
 | endpoint                                                   | description                                                                                                                                                                           |
-| :---:                                                      | :---                                                                                                                                                                                  |
+| :---                                                       | :---                                                                                                                                                                                  |
 | [`spotcast/accounts`](./docs/websocket/accounts.md)        | Provides a list of accounts linked to spotcast                                                                                                                                        |
 | [`spotcast/castdevices`](./docs/websocket/cast_devices.md) | Provides a list of Chromecast devices available in Home Assistant                                                                                                                     |
 | [`spotcast/categories`](./docs/websocket/categories.md)    | Provides a list of [Browse categories](https://developer.spotify.com/documentation/web-api/reference/get-a-category) an account has access to                                         |
