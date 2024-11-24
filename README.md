@@ -12,7 +12,7 @@ This component is not meant to be a full Spotify chromecast media_player but onl
 Because starting playback using the API requires more powerful token the username and password used for browser login is used.
 
 > [!WARNING]
-> A breaking change in Home Assitant `2024.11` is causing [Spotify-Card](https://github.com/custom-cards/spotify-card) to break. As the project as no active maintainer, this break cannot be fixed, but a fork of the project can be found [here](https://github.com/mikevanes/spotify-card-v2). If you are having issue with [Spotify-Card-V2](https://github.com/mikevanes/spotify-card-v2) make sure bto open a ticket in that repository. This projects and its maintainers do not manage the other project and cannot help you directly.
+> A breaking change in Home Assitant `2024.11` is causing [Spotify-Card](https://github.com/custom-cards/spotify-card) to break. As the project has no active maintainer, this break cannot be fixed, but a fork of the project can be found [here](https://github.com/mikevanes/spotify-card-v2). If you are having issue with [Spotify-Card-V2](https://github.com/mikevanes/spotify-card-v2) make sure bto open a ticket in that repository. This projects and its maintainers do not manage the other project and cannot help you directly.
 
 Used by [Spotify-Card-V2](https://github.com/mikevanes/spotify-card-v2)
 
@@ -327,7 +327,7 @@ sensor.chromecast_devices
 
 Attributes
 
-```json
+```yaml
 devices_json: [
   {
     "name": "Speaker kitchen",
