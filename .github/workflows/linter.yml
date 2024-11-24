@@ -1,4 +1,4 @@
-name: Run Coverage Test
+name: Run Linter Test
 
 on:
   workflow_dispatch:
