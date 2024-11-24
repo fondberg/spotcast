@@ -17,5 +17,3 @@ jobs:
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
       - run: |
           python -m unittest discover -s ./test -p test_*.py
-
-
