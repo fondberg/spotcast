@@ -5,6 +5,7 @@ Classes:
 """
 
 from logging import getLogger
+from types import MappingProxyType
 
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
@@ -36,12 +37,20 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
         )
     }
 
+    OPTIONS_DEFAULT = MappingProxyType({
+        "is_default": False,
+        "base_refresh_rate": 30,
+    })
+
     async def async_step_init(
         self,
         user_input: dict[str] | None = None
     ) -> FlowResult:
 
-        self._options = copy_to_dict(self.config_entry.options)
+        options = copy_to_dict(self.config_entry.options)
+
+        self._options = self.OPTIONS_DEFAULT
+        self._options = self.OPTIONS_DEFAULT | options
 
         return self.async_show_form(
             step_id="apply_options",
@@ -55,22 +64,14 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
     def set_default_user(self) -> dict:
         """Set the current user as default for spotcast"""
 
-        if self.config_entry.options["is_default"]:
-            LOGGER.info(
-                "Config Entry `%s` already set to default spotcast account",
-                self.config_entry.title
-            )
-            return
-
         entries = self.hass.config_entries.async_entries(DOMAIN)
         old_default = None
 
         for entry in entries:
-            if entry.entry_id == self.config_entry.entry_id:
-                continue
 
             is_default = entry.options["is_default"]
-            entry.options["is_default"] = False
+            options = copy_to_dict(entry.options)
+            options["is_default"] = False
 
             if is_default:
                 old_default = entry.title
@@ -79,8 +80,7 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
 
             self.hass.config_entries.async_update_entry(
                 entry,
-                data=entry.data,
-                options=entry.options
+                options=options,
             )
 
         LOGGER.info(
@@ -88,7 +88,10 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
             old_default,
             self.config_entry.title,
         )
+
         self._options["is_default"] = True
+        self.hass.data[DOMAIN][self.config_entry.entry_id]["account"]\
+            .is_default = True
 
     def set_base_refresh_rate(self, new_refresh_rate: int):
         """Sets the base refresh rate for the account
@@ -127,4 +130,5 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
             self.config_entry,
             options=self._options,
         )
-        return self.async_create_entry(title="", data={})
+
+        return self.async_abort(reason="Successfull")

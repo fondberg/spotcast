@@ -12,41 +12,6 @@ from custom_components.spotcast.config_flow.option_flow_handler import (
 from custom_components.spotcast.spotify.account import SpotifyAccount
 
 
-class TestAlreadyDefaultUser(TestCase):
-
-    def setUp(self):
-
-        self.mocks = {
-            "hass": MagicMock(spec=HomeAssistant),
-            "entry": MagicMock(spec=ConfigEntry)
-        }
-
-        self.mocks["entry"].data = {
-            "external_api": "foo",
-            "internal_api": "bar",
-        }
-        self.mocks["entry"].entry_id = "12345"
-        self.mocks["entry"].title = "Dummy Name"
-        self.mocks["entry"].options = {
-            "is_default": True,
-            "base_refresh_rate": 30,
-        }
-
-        self.handler = SpotcastOptionsFlowHandler()
-        self.handler.config_entry = self.mocks["entry"]
-        self.handler._options = None
-        self.handler._options = self.mocks["entry"].options
-        self.handler.hass = self.mocks["hass"]
-
-        self.handler.set_default_user()
-
-    def test_early_exit_ran(self):
-        try:
-            self.mocks["hass"].config_entries.async_entries.assert_not_called()
-        except AssertionError:
-            self.fail()
-
-
 class TestUserSwitchToDefault(TestCase):
 
     def setUp(self):
@@ -131,7 +96,14 @@ class TestUserSwitchToDefault(TestCase):
         self.assertTrue(self.mocks["entry"].options["is_default"])
 
     def test_other_entry_removed_from_default(self):
-        self.assertFalse(self.mocks["other_entry"].options["is_default"])
+        try:
+            self.mocks["hass"].config_entries.async_update_entry\
+                .assert_any_call(
+                    self.mocks["other_entry"],
+                    options={"is_default": False, "base_refresh_rate": 30}
+            )
+        except AssertionError:
+            self.fail()
 
     def test_current_account_set_to_default(self):
         self.assertTrue(
