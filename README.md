@@ -4,13 +4,17 @@
   <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png">
 </picture>
 
----
+------------------------------------------------------------------------------
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![spotcast](https://img.shields.io/github/release/fondberg/spotcast.svg?1)](https://github.com/fondberg/spotcast)
 ![Maintenance](https://img.shields.io/maintenance/yes/2024.svg)
 
 Home Assistant custom component to start Spotify playback on an idle Chromecast or a Spotify Connect device. Meaning you can target automation for chromecast as well as connect devices.
+
+This component is not meant to be a full Spotify chromecast media_player but only serves to start the playback. Controlling the chromecast device and the Spotify playback after the initial start is done in their respective components. Because starting playback using the API requires more powerful token the username and password used for browser login is used.
+
+Used by [Spotify-Card-V2](https://github.com/mikevanes/spotify-card-v2)
 
 ## Installation
 
@@ -56,7 +60,9 @@ There are 2 steps for the setup of an account with spotcast
     - connecting to [spotify.com](open.spotify.com)
     - opening the developper console
     - pasting the `sp_dc` and `sp_key` in the Home Assistant setup form
-    - See [Obtaining SP_DC and SP_KEY](./docs/config/obtaining_sp_dc_and_sp_key.md) for more details
+
+> [!TIP]
+> See [Obtaining SP_DC and SP_KEY](./docs/config/obtaining_sp_dc_and_sp_key.md) for more details
 
 ## Services
 
@@ -75,6 +81,7 @@ The spotcast custom component provides multiple services to the user for differe
 | [spotcast.play_custom_context](./docs/services/play_custom_context.md) | Starts playback on a Chromecast or Spotify Connect device using a list of uris as context                                                         |
 | [spotcast.transfer_playback](./docs/services/transfer_playback.md)     | Transfers the playback to a different device. Fails and returns an error if there is no active playback or the playback is already on the device. |
 | [spotcast.add_to_queue](./docs/services/add_to_queue.md)               | Adds songs the the playback queue. Fails and returns an error if there is no active playback                                                      |
+| [spotcast.play_saved_episodes](./docs/services/play_saved_episodes.md) | Plays the list of podcast episodes part of the `Saved Episodes` playlist                                                                          |
 
 ### Data
 
@@ -90,65 +97,53 @@ Multiple options originally in the `spotcast.start` service has been moved to th
 | `limit`       | `positive_int`            | `null`  | sets the maximum amount of items that can be retrieved from a spotify api endpoint. Retrieves all items if `null`. |
 
 
-## Sensors
+## Entitites
 
-## Media Players
+Spotcast creates multiple entities for each Spotify accounts.
+
+### Sensors
+
+| example name                        | description                                                                           | states          |
+| :---:                               | :---                                                                                  | :---:           |
+| `sensor.[...]_spotify_profile`      | Reports the profile of the Spotify Account. Provide attributes linked to the account. | `ok\|unknown`   |
+| `sensor.[...]_spotify_devices`      | Tracks the number of devices available for the account.                               | `int`           |
+| `sensor.[...]_spotify_followers`    | Tracks the number of followers the account has.                                       | `int`           |
+| `sensor.[...]_spotify_liked_songs`  | Tracks the number of songs liked by the account.                                      | `int`           |
+| `sensor.[...]_spotify_playlists`    | Tracks the number of playlists created by the account.                                | `int`           |
+| `sensor.[...]_spotify_account_type` | Diagnostic sensor that reports the type of account connected through spotcast         | `user`          |
+| `sensor.[...]_spotify_product`      | Diagnostic sensor that reports the subscription level of the account.                 | `premium\|free` |
+
+### Binary Sensors
+
+| example name                               | description                                                                                 |
+| :---:                                      | :---                                                                                        |
+| `sensor.[...]_is_default_spotcast_account` | Diagnostic sensor that confirm if the account is currently the default account for spotcast |
+| `sensor.[...]_spotify_profile_malfunction` | Diagnostic error sensor that turns on when an connection issue happens with the API         |
+
+
+### Media Players
+
+Spotcast will create `media_player` entities and devices to represent Spotify Connect Devices linked to a Spotcast account. These media players do not implement any functionality and are ment to be used in service call when starting playback on a spotify connect device.
 
 ## Websocket API
 
-The components websocket api.
+Spotcast provides multiple websocket API endpoints:
 
-Method: `spotcast/playlist` supporting different `playlist_type`s.
+| endpoint                                                   | description                                                                                                                                                                           |
+| :---:                                                      | :---                                                                                                                                                                                  |
+| [`spotcast/accounts`](./docs/websocket/accounts.md)        | Provides a list of accounts linked to spotcast                                                                                                                                        |
+| [`spotcast/castdevices`](./docs/websocket/cast_devices.md) | Provides a list of Chromecast devices available in Home Assistant                                                                                                                     |
+| [`spotcast/categories`](./docs/websocket/categories.md)    | Provides a list of [Browse categories](https://developer.spotify.com/documentation/web-api/reference/get-a-category) an account has access to                                         |
+| [`spotcast/devices`](./docs/websocket/devices.md)          | Provides a list of Spotify Connect Devices available to the account                                                                                                                   |
+| [`spotcast/player`](./docs/websocket/player.md)            | Provides the playback state of an account                                                                                                                                             |
+| [`spotcast/playlists`](./docs/websocket/playlists.md)      | Provides the list of playlists. Either the user's playlist of the playlists part of a [Browse Category](https://developer.spotify.com/documentation/web-api/reference/get-a-category) |
 
-* `user`, or `default` for user chosen saved playlists
-* `featured` for spotify "featured" playlists (not personalized)
-* `discover-weekly` for personalized "Made for _____" (includes daily mixes)
-* `recently-played` for "Recently Played"
-* ... any other `view id` as found in the API at [https://api.spotify.com/v1/views/personalized-recommendations](https://api.spotify.com/v1/views/personalized-recommendations)
-
-Example usage:
-
-```python
-// Retrieve playlists
-const res = await this.props.hass.callWS({
-  type: 'spotcast/playlists',
-  playlist_type: 'featured', // 'user' for saved playlists, 'featured' for spotify featured, or personalized view id
-  country_code: 'SV', // Optional country code used by featured playlists
-  limit: 20, // Optional limit, default is 10
-  account: 'ming' // optional account name
-});
-
-// Retrieve devices
-const res = await this.props.hass.callWS({
-  type: 'spotcast/devices',
-  account: 'ming' // optional account name
-});
-
-// Retrieve player
-const res = await this.props.hass.callWS({
-  type: 'spotcast/player',
-  account: 'ming' // optional account name
-});
-```
-
-## Enabling debug log
-
-In configuration.yaml for you HA add and attach those the relevant logs.
-Be sure to disable it later as it is quite noisy.
-
-```yaml
-logger:
-  default: info
-  logs:
-    custom_components.spotcast: debug
-```
 
 ## Contribute
 
-Please do! Open a Pull Request with your improvements.
+Please do! Open a Pull Request with your improvements. This project was made possible by the original creator Niklas Fondberg. All improvements are greatly appreciated.
 
-This project was made possible by the original creator Niklas Fondberg. All
-your great work are greatly appreciated.
+In order for a pull request to be approve, you will have to provide a full test coverage of you code. A pylint score >=9/10 is also required.
 
 ## License
 
