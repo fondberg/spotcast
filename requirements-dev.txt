@@ -1,1 +1,2 @@
-coverage>=7.6.8
+coverage==7.6.8
+CairoSVG==2.7.1
