@@ -20,5 +20,5 @@
         "Levenshtein>=0.26.1",
         "spotifyaio>=0.8.8"
     ],
-    "version": "v5.0.0-b1"
+    "version": "v5.0.0-b2"
 }
