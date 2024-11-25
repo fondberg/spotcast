@@ -1,12 +1,8 @@
 # Play Media
 
-`spotcast.play_media`
-
-## Description
-
 Play spotify media on Spotcast compatible device
 
-## Example service call
+## Action
 
 ```yaml
 action: spotcast.play_media
@@ -19,23 +15,21 @@ data:
         repeat: context
 ```
 
-## Fields
-
-### Media Player
+### `media_player` (dict)
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### URI
+### `uri` (str)
 
-The Spotify URI used for the context in the playback. In the case of a track URI, the context will become the album of the track, but set to the correct position of the track in the album.
+The Spotify URI or URL used for the context in the playback. In the case of a track URI, the context will become the album of the track, but set to the correct position of the track in the album.
 
-### Spotify Account
+### `spotify_account` (str)
 
 *Optional*
 
 The `entry_id` of the account to use for Spotcast. If empty, the default Spotcast account is used.
 
-### Data
+### `data` (dict)
 
 *Optional*
 

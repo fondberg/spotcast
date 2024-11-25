@@ -3,6 +3,8 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, AsyncMock, patch
 
+from homeassistant.config_entries import ConfigEntry
+
 from custom_components.spotcast.websocket.player_handler import (
     async_get_playback,
     HomeAssistant,
@@ -20,13 +22,16 @@ class TestPlaybackRetrieval(IsolatedAsyncioTestCase):
     async def asyncSetUp(self, mock_account: AsyncMock, mock_entry: MagicMock):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
+        mock_entry.return_value = MagicMock(spec=ConfigEntry)
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
             "connection": MagicMock(spec=ActiveConnection),
             "account": mock_account.return_value,
+            "entry": mock_entry.return_value,
         }
 
+        self.mocks["entry"].entry_id = "12345"
         self.mocks["account"].async_playback_state = AsyncMock()
         self.mocks["account"].async_playback_state.return_value = {
             "hello": "world"
@@ -45,7 +50,10 @@ class TestPlaybackRetrieval(IsolatedAsyncioTestCase):
         try:
             self.mocks["connection"].send_result.assert_called_with(
                 1,
-                {"hello": "world"},
+                {
+                    "account": "12345",
+                    "state": {"hello": "world"}
+                },
             )
         except AssertionError:
             self.fail()
@@ -83,7 +91,10 @@ class TestAccountSearch(IsolatedAsyncioTestCase):
         try:
             self.mocks["connection"].send_result.assert_called_with(
                 1,
-                {"hello": "world"}
+                {
+                    "account": "12345",
+                    "state": {"hello": "world"}
+                }
             )
         except AssertionError:
             self.fail()

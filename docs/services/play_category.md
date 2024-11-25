@@ -1,12 +1,8 @@
 # Playlist from Category
 
-`spotcast.play_category`
-
-## Description
-
 Play a random playlist from a Spotify Browse Category
 
-## Example service call
+## Action
 
 ```yaml
 action: spotcast.play_category
@@ -19,23 +15,21 @@ data:
         limit: 10
 ```
 
-## Fields
-
-### Media Player
+### `media_player` (dict)
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### Category
+### `category` (str)
 
 Can be either the name of a Browse Category or a Category ID. In the case of a Category Name, a fuzzy match is applied to match the best case for the category name. A category ID must be exact. You can find a list of Categories by calling the [`spotcast/categories` Websocket Endpoint](../websocket/categories.md).
 
-### Spotify Account
+### `spotify_account` (str)
 
 *Optional*
 
 The `entry_id` of the account to use for Spotcast. If empty, the default Spotcast account is used.
 
-### Data
+### `data` (dict)
 
 *Optional*
 

@@ -40,6 +40,7 @@ async def async_get_categories(
 
     if account_id is None:
         entry = get_account_entry(hass)
+        account_id = entry.entry_id
         account = await SpotifyAccount.async_from_config_entry(hass, entry)
     else:
         account = search_account(hass, account_id)
@@ -60,6 +61,7 @@ async def async_get_categories(
         msg["id"],
         {
             "total": len(categories),
+            "account": account_id,
             "categories": categories
         },
     )

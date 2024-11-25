@@ -21,7 +21,7 @@ The id of the transaction. Must be an increment of the last transaction id.
 
 The endpoint of the websocket to reach. Must be `spotcast/categories`
 
-### `acount` (str)
+### `account` (str)
 
 *Optional*
 
@@ -43,6 +43,7 @@ Limits the number of categories retrieved to the number provided. If absent, ret
     "result":
     {
         "total": 10,
+        "account": "01JDG07KSBTYWZGJSBJ1EW6XEF",
         "categories":[
             {
                 "id":"0JQ5DAt0tbjZptfcdMSKl3",
@@ -84,6 +85,10 @@ The result of the transaction
 > #### `total` (int)
 > 
 > Number of browse categories retrieved
+>
+> #### `account` (str)
+>
+> The id of the account used in the query
 > 
 > #### `categories` (list[dict])
 > 

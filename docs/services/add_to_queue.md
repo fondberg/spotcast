@@ -1,12 +1,8 @@
 # Add To Queue
 
-`spotcast.add_to_queue`
-
-## Description
-
 Adds a list of spotify URI to the 
 
-## Example service call
+## Action
 
 ```yaml
 action: spotcast.add_to_queue
@@ -17,13 +13,11 @@ data:
     spotify_account: 01JDG07KSBTYWZGJSBJ1EW6XEF
 ```
 
-## Fields
+###  `spotify_uris` (list[str])
 
-### Spotify URIs
+A list of spotify URI or URL to add to the queue of the current playback
 
-A list of spotify URI to add to the queue of the current playback
-
-### Spotify Account
+### `spotify_account` (str)
 
 *Optional*
 

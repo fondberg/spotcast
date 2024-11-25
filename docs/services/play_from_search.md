@@ -1,12 +1,8 @@
 # Play From Search
 
-`spotcast.play_from_search`
-
-## Description
-
 Starts playing the top result of a search in Spotify. Either starts playing the top item or a list of top item in the case of tracks.
 
-## Example service call
+## Action
 
 ```yaml
 action: spotcast.play_from search
@@ -24,19 +20,17 @@ data:
         repeat: context
 ```
 
-## Fields
-
-### Media Player
+### `media_player` (dict)
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### Search Term
+### `search_term` (str)
 
 *optional*
 
 A generic search term that could be for any type of items
 
-### Tags
+### `tags` (list[str])
 
 *optional*
 
@@ -45,7 +39,7 @@ A list of tags used to limit the search. Can only be used to search for albums:
 - `hipster`: Limits results to albums with a popularity of less than 10%
 - `new`: Limits results to albums released in the past 2 weeks
 
-### Filters
+### `filters` (dict[str,str])
 
 A list of filters to apply to the search result. Are key value pairs of filters that can be:
 
@@ -57,13 +51,13 @@ A list of filters to apply to the search result. Are key value pairs of filters 
 - `isrc`: The Iternational Standard Recording Code of the song searched for. Can only be used on songs.
 - `genre`: The genre of the item searched for. can only be used on artist or tracks
 
-### Spotify Account
+### `spotify_account` (str)
 
 *Optional*
 
 The `entry_id` of the account to use for Spotcast. If empty, the default Spotcast account is used.
 
-### Data
+### `data` (dict)
 
 *Optional*
 

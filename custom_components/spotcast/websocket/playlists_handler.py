@@ -42,12 +42,14 @@ async def async_get_playlists(
 
     if account_id is None:
         entry = get_account_entry(hass)
+        account_id = entry.entry_id
         account = await SpotifyAccount.async_from_config_entry(hass, entry)
     else:
         account = search_account(hass, account_id)
 
     if category == "user":
         playlists = await account.async_playlists(max_items=limit)
+        category = {"id": "user"}
 
     else:
         categories = await account.async_categories()
@@ -62,6 +64,8 @@ async def async_get_playlists(
         msg["id"],
         {
             "total": len(playlists),
+            "account": account_id,
+            "category": category["id"],
             "playlists": playlists
         },
     )

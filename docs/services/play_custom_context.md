@@ -1,12 +1,8 @@
 # Play Custom Context
 
-`spotcast.play_custom_context`
-
-## Description
-
 Starts a Spotify playback with a context of custom Spotify URIs.
 
-## Example service call
+## Action
 
 ```yaml
 action: spotcast.play_custom_context
@@ -22,23 +18,21 @@ data:
         repeat: context
 ```
 
-## Fields
-
-### Media Player
+### `media_player` (dict)
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### Items
+### `items` (list[str])
 
-A list of Spotify URI used to build a custom context for playback. The list of songs will be used as if it was an album or playlist. Songs added to queue still take precedent on next item in context.
+A list of Spotify URI or URL used to build a custom context for playback. The list of songs will be used as if it was an album or playlist. Songs added to queue still take precedent on next item in context.
 
-### Spotify Account
+### `spotify_account` (str)
 
 *Optional*
 
 The `entry_id` of the account to use for Spotcast. If empty, the default Spotcast account is used.
 
-### Data
+### `data` (dict)
 
 *Optional*
 

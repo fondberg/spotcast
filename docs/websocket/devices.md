@@ -6,7 +6,7 @@ Provides the list of currently available player for a Spotify Account
 
 ```json
 {
-    "id": 4,
+    "id": 5,
     "type": "spotcast/devices",
     "account": "01JDG07KSBTYWZGJSBJ1EW6XEF"
 }
@@ -20,19 +20,22 @@ The id of the transaction. Must be an increment of the last transaction id.
 
 The endpoint of the websocket to reach. Must be `spotcast/categories`
 
-### `acount` (str)
+### `account` (str)
 
 *Optional*
 
-The entry id of the account used to look for Browse Categories. Defaults to the Spotcast default account if not provided.
+The entry id of the account used to look for available devices. Defaulst to the default Spotcast account if not provided.
+
+## Response
 
 ```json
 {
-    "id": 6,
+    "id": 5,
     "type": "result",
     "success": true,
     "result": {
         "total": 1,
+        "account": "01JDG07KSBTYWZGJSBJ1EW6XEF",
         "devices": [
             {
                 "id":"042ee68e1c57247fe3c214f1669e5a4933a9f6b4",
@@ -72,6 +75,10 @@ The result of the transaction
 > #### `devices` (list[dict])
 > 
 > The number of player available for the account at the moment of the transaction
+>
+> #### `account` (str)
+> 
+> The id of the account used in the query
 >
 > > ##### `id` (str)
 > > 

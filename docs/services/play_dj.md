@@ -1,12 +1,8 @@
 # Play DJ
 
-`spotcast.play_dj`
-
-## Description
-
 Start the playback of the DJ playlist on a specified device
 
-## Example service call
+## Action
 
 ```yaml
 action: spotcast.play_dj
@@ -18,19 +14,17 @@ data:
         repeat: context
 ```
 
-## Fields
-
-### Media Player
+### `media_player` (dict)
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### Spotify Account
+### `spotify_account` (str)
 
 *Optional*
 
 The `entry_id` of the account to use for Spotcast. If empty, the default Spotcast account is used.
 
-### Data
+### `data` (dict)
 
 *Optional*
 
