@@ -41,6 +41,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Setups media player for Spotcast"""
 
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
     device_manager = DeviceManager(account, async_add_entities)

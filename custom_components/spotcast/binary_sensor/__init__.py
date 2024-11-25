@@ -32,6 +32,14 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ):
+    """Setup for the binaries sensors for a spotcast entry
+
+    Args:
+        - hass(HomeAssistant): The Home Assistant Instance
+        - entry(ConfigEntry): The config entry being setup
+        - async_add_entities(AddEntitiesCallback): The function
+            callback for creating binary_sensors
+    """
 
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
 

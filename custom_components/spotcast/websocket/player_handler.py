@@ -1,20 +1,14 @@
 """Websocket Endpoint for getting playback state"""
 
-import voluptuous as vol
-from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
 from custom_components.spotcast.utils import get_account_entry, search_account
 from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.websocket.devices_handler import SCHEMA
 
 ENDPOINT = "spotcast/player"
-SCHEMA = vol.Schema({
-    vol.Required("id"): cv.positive_int,
-    vol.Required("type"): ENDPOINT,
-    vol.Optional("account"): cv.string,
-})
 
 
 @websocket_wrapper

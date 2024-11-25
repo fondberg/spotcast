@@ -46,6 +46,7 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
         self,
         user_input: dict[str] | None = None
     ) -> FlowResult:
+        """Initial Step for the Option Configuration Flow"""
 
         options = copy_to_dict(self.config_entry.options)
 
@@ -120,6 +121,7 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
         self,
         user_input: dict[str]
     ) -> FlowResult:
+        """Step to apply the options configured"""
 
         if user_input["set_default"]:
             self.set_default_user()

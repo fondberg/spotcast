@@ -11,12 +11,12 @@ from unittest.mock import MagicMock
 from homeassistant.config_entries import CONN_CLASS_CLOUD_POLL
 from homeassistant.helpers import config_validation as cv
 from homeassistant.components.spotify.config_flow import SpotifyFlowHandler
-import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigFlowResult,
     ConfigEntry,
     SOURCE_REAUTH,
 )
+import voluptuous as vol
 from spotipy import Spotify
 
 from custom_components.spotcast import DOMAIN
@@ -30,6 +30,32 @@ LOGGER = getLogger(__name__)
 
 
 class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
+    """Hnadler of the Config Flow for Spotcast
+
+    Attributes:
+        - data(dict): The set of information currently collected for
+            the entry
+
+    Constants:
+        - DOMAIN(str): The domain of flow is linked to
+        - VERSION(int): The major version of the config
+        - MINOR_VERSION(int): the minor version of the config
+        - CONNECTION_CLASS(str): The type of integration being setup
+        - INTERNAL_API_SCEHMA(vol.Schema): the schema for the
+            internal api setup
+
+    Properties:
+        - extra_authorize_data(dict[str]): Provides additional
+            information required for the OAuth authorisation
+
+    Methods:
+        - async_step_internal_api
+        - async_oauth_create_entry
+        - async_step_reauth_confirm
+
+    Functions:
+        - async_get_options_flow
+    """
 
     DOMAIN = DOMAIN
     VERSION = 1
@@ -42,6 +68,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     })
 
     def __init__(self):
+        """Constructor of the Spotcast Config Flow"""
         self.data: dict = {}
         self._import_data = None
         super().__init__()
@@ -96,7 +123,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
                 spotify.current_user
             )
             await internal_session.async_ensure_token_valid()
-        except Exception:  # noqa: BLE001
+        except Exception:  # pylint: disable=W0718
             return self.async_abort(reason="connection_error")
 
         name = external_api["id"] = current_user["id"]

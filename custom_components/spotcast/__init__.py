@@ -119,6 +119,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass.services.async_remove(DOMAIN, service)
 
     return True
-
-if __name__ == '__main__':  # pragma: no cover
-    asyncio.run(async_setup())
