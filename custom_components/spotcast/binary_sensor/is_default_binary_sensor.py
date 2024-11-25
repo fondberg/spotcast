@@ -26,8 +26,8 @@ class IsDefaultBinarySensor(SpotcastBinarySensor):
         - async_update
     """
 
-    GENERIC_NAME = "Spotcast Default"
-    GENERIC_ID = "is_default_spotcast_account"
+    GENERIC_NAME = "Default Account"
+    GENERIC_ID = "is_default_account"
     ICON = "mdi:account-check"
     ICON_OFF = ICON
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
