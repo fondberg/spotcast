@@ -42,7 +42,8 @@ The endpoint of the websocket to reach. Must be `spotcast/castdevices`
                 "model_name":"Google Home",
                 "friendly_name":"Cuisine",
                 "manufacturer":"Google Inc."
-            }
+            },
+            ...
         ]
     }
 }
