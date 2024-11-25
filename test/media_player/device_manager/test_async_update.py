@@ -225,5 +225,8 @@ class TestRemovedDevice(IsolatedAsyncioTestCase):
 
         await self.device_manager.async_update()
 
-    async def test_device_removed_from_tracked(self):
+    def test_device_removed_from_tracked(self):
         self.assertEqual(len(self.device_manager.tracked_devices), 0)
+
+    def test_device_added_to_unavailable_devices(self):
+        self.assertIn("1234", self.device_manager.unavailable_devices)
