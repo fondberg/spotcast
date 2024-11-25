@@ -1,0 +1,14 @@
+{
+    "config": {
+        "step": {
+            "internal_api": {
+                "data": {
+                    "sp_dc": "SP DC",
+                    "sp_key": "SP Key"
+                },
+                "description": "Allez sur [Spotify](open.spotify.com) et connectez-vous. Ensuite, récupérez les cookies intitulés `sp_dc` et `sp_key` dans la console de développer. Vous pouvez consulter [ce tutoriel](https://github.com/fondberg/spotcast/blob/dev/docs/config/obtaining_sp_dc_and_sp_key.md) pour plus d'information"
+            }
+        },
+        "title": "Spotcast"
+    }
+}
