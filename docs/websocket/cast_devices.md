@@ -72,22 +72,22 @@ The result of the transaction
 > 
 > A list of Chromecast devices
 > 
-> ##### `entity_id` (str)
-> 
-> The entity id of the device in Home Assistant
-> 
-> ##### `uuid` (str)
-> 
-> The Universal Unique Identifier of the Chromecast device
-> 
-> ##### `model_name` (str)
-> 
-> The model of the Chromecast Device as reported by itself.
-> 
-> ##### `friendly_name` (str)
-> 
-> Name of the device in Google Services
-> 
-> ##### `manufacturer` (str)
-> 
-> The manufacturer of the Chromecast Device as reported by itself.
+> > ##### `entity_id` (str)
+> > 
+> > The entity id of the device in Home Assistant
+> > 
+> > ##### `uuid` (str)
+> > 
+> > The Universal Unique Identifier of the Chromecast device
+> > 
+> > ##### `model_name` (str)
+> > 
+> > The model of the Chromecast Device as reported by itself.
+> > 
+> > ##### `friendly_name` (str)
+> > 
+> > Name of the device in Google Services
+> > 
+> > ##### `manufacturer` (str)
+> > 
+> > The manufacturer of the Chromecast Device as reported by itself.
