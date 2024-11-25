@@ -1,26 +1,25 @@
 # Accounts
 
-`spotcast/accounts`
+Provides a list of Spotify Accounts currently managed by Spotcast.
 
-## Description
-
-Provides a list of account managed by Spotcast.
-
-## Example
+## Request
 
 ```json
 {
-    "id": 2,
-    "type": "spotcast/accounts"
+    "id": 3,
+    "type": "spotcast/castdevices"
 }
 ```
 
-## Fields
+### `id` (str)
 
-- `id(int)`: The id of the current transaction. Must be an increment of the last transaction.
-- `type(str)`: The endpoint to reach. Must be `spotcast/accounts`
+The id of the transaction. Must be an increment of the last transaction id.
 
-## Reply
+### `type` (str)
+
+The endpoint of the websocket to reach. Must be `spotcast/castdevices`
+
+## Response
 
 ```json
 {
@@ -48,3 +47,47 @@ Provides a list of account managed by Spotcast.
     }
 }
 ```
+
+### `id` (str)
+
+The id provided in the request
+
+### `type` (str)
+
+Always `result` on a successful request.
+
+### `success` (bool)
+
+True if the transaction was successful.
+
+### `result` (dict)
+
+The result of the transaction
+
+> #### `total` (int)
+> 
+> Total number of accounts currently managed by Spotcast
+> 
+> #### `accounts` (list[dict])
+> 
+> A list of all accounts managed by Spotcast
+> 
+> > ##### `entry_id` (str)
+> > 
+> > The identifier of the configuration entry for the account
+> > 
+> > ##### `spotify_id` (str)
+> > 
+> > The Spotify Identifier of the account
+> > 
+> > ##### `spotify_name` (str)
+> > 
+> > The Display Name for the account in Spotify
+> >
+> > ##### `is_default` (bool)
+> > 
+> > `true` if the account is used as the default account for Spotcast services and websocket endpoints
+> > 
+> > ##### `country` (str)
+> > 
+> > The [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code of the user's country as set in the user's account profile.
