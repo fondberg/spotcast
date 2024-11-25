@@ -45,6 +45,7 @@ class DeviceManager:
     ):
 
         self.tracked_devices: dict[str, SpotifyDevice] = {}
+        self.unavailable_devices: dict[str, SpotifyDevice] = {}
 
         self._account = account
         self.async_add_entities = async_add_entitites
@@ -64,7 +65,22 @@ class DeviceManager:
                 )
                 continue
 
-            if id not in self.tracked_devices:
+            if (
+                id not in self.tracked_devices
+                and id in self.unavailable_devices
+            ):
+                LOGGER.info(
+                    "Device `%s` has became available again",
+                    device["name"],
+                    self._account.name,
+                )
+                self.tracked_devices[id] = self.unavailable_devices.pop(id)
+                self.tracked_devices[id]._is_unavailable = False
+
+            elif (
+                id not in self.tracked_devices
+                and id not in self.unavailable_devices
+            ):
                 LOGGER.info(
                     "Adding New Device `%s` for account `%s`",
                     device["name"],
@@ -74,9 +90,9 @@ class DeviceManager:
                 self.tracked_devices[id] = new_device
                 self.async_add_entities([new_device])
 
-        remove = []
         playback_state = await self._account.async_playback_state()
         playing_id = None
+        remove = []
 
         if "device" in playback_state:
             playing_id = playback_state["device"]["id"]
@@ -102,4 +118,4 @@ class DeviceManager:
                     device._playback_state = {}
 
         for id in remove:
-            self.tracked_devices.pop(id)
+            self.unavailable_devices[id] = self.tracked_devices.pop(id)

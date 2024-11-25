@@ -15,7 +15,7 @@ To obtain the cookies, these different methods can be used:
 5. Find the `sp_dc` and `sp_key` and copy the values.
 6. Close the window without logging out (Otherwise the cookies are made invalid).
 
-![cookie in chrome developer tools](images/cookies_chrome_2.png)
+![cookie in chrome developer tools](../assets/cookies_chrome.png)
 
 ## Firefox based browser
 
@@ -28,4 +28,4 @@ To obtain the cookies, these different methods can be used:
 5. Find the `sp_dc` and `sp_key` and copy the values.
 6. Close the window without logging out (Otherwise the cookies are made invalid).
 
-![Firefox developer tool](images/cookies_firefox_1.png)
+![Firefox developer tool](../assets/cookies_firefox.png)

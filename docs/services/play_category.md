@@ -1,22 +1,22 @@
-# Play Media
+# Playlist from Category
 
-`spotcast.play_media`
+`spotcast.play_category`
 
 ## Description
 
-Play spotify media on Spotcast compatible device
+Play a random playlist from a Spotify Browse Category
 
 ## Example service call
 
 ```yaml
-action: spotcast.play_media
+action: spotcast.play_category
 data:
     media_player:
         entity_id: media_player.foo
-    spotify_uri: spotify:album:1chw1DFmefTueG1VbNVoGN
+    category: "Made for You"
     spotify_account: 01JDG07KSBTYWZGJSBJ1EW6XEF
     data:
-        repeat: context
+        limit: 10
 ```
 
 ## Fields
@@ -25,9 +25,9 @@ data:
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### URI
+### Category
 
-The Spotify URI used for the context in the playback. In the case of a track URI, the context will become the album of the track, but set to the correct position of the track in the album.
+Can be either the name of a Browse Category or a Category ID. In the case of a Category Name, a fuzzy match is applied to match the best case for the category name. A category ID must be exact. You can find a list of Categories by calling the [`spotcast/categories` Websocket Endpoint](../websocket/categories.md).
 
 ### Spotify Account
 
@@ -48,3 +48,4 @@ Set of additional settings to apply when starting the playback. The available op
 | `volume`   | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`                              |
 | `repeat`   | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                                                  |
 | `shuffle`  | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                                        |
+| `limit`    | `possite_int`             | `null`  | Sets the maximum number of categories to retrieve. Retrieves all categories if `null`.                                                      |

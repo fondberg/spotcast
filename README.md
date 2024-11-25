@@ -87,14 +87,14 @@ The spotcast custom component provides multiple services to the user for differe
 
 Multiple options originally in the `spotcast.start` service has been moved to the `data` section. Here is a list of common ones. Some service could have additional options. Look at the service definition for more information on them.
 
-| Option        | type                      | default | description                                                                                                        |
-| :---:         | :---:                     | :---:   | :---                                                                                                               |
-| `position_ms` | `positive_float`          | `0.000` | The position to start playback (in seconds) of where to start the playback of the first item in the context        |
-| `offset`      | `positive_int`            | `0`     | The item in the context to start the playback at. The position is zero based and cannot be negative                |
-| `volume`      | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`     |
-| `repeat`      | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                         |
-| `shuffle`     | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                               |
-| `limit`       | `positive_int`            | `null`  | sets the maximum amount of items that can be retrieved from a spotify api endpoint. Retrieves all items if `null`. |
+| Option     | type                      | default | description                                                                                                        |
+| :---:      | :---:                     | :---:   | :---                                                                                                               |
+| `position` | `positive_float`          | `0.000` | The position to start playback (in seconds) of where to start the playback of the first item in the context        |
+| `offset`   | `positive_int`            | `0`     | The item in the context to start the playback at. The position is zero based and cannot be negative                |
+| `volume`   | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`     |
+| `repeat`   | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                         |
+| `shuffle`  | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                               |
+| `limit`    | `positive_int`            | `null`  | sets the maximum amount of items that can be retrieved from a spotify api endpoint. Retrieves all items if `null`. |
 
 
 ## Entitites

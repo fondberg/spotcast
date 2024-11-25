@@ -1,19 +1,18 @@
-# Play Media
+# Play Save Podcast
 
-`spotcast.play_media`
+`spotcast.play_saved_episodes`
 
 ## Description
 
-Play spotify media on Spotcast compatible device
+Play user's saved podcast episodes
 
 ## Example service call
 
 ```yaml
-action: spotcast.play_media
+action: spotcast.play_saved_episodes
 data:
     media_player:
         entity_id: media_player.foo
-    spotify_uri: spotify:album:1chw1DFmefTueG1VbNVoGN
     spotify_account: 01JDG07KSBTYWZGJSBJ1EW6XEF
     data:
         repeat: context
@@ -24,10 +23,6 @@ data:
 ### Media Player
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
-
-### URI
-
-The Spotify URI used for the context in the playback. In the case of a track URI, the context will become the album of the track, but set to the correct position of the track in the album.
 
 ### Spotify Account
 
@@ -48,3 +43,4 @@ Set of additional settings to apply when starting the playback. The available op
 | `volume`   | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`                              |
 | `repeat`   | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                                                  |
 | `shuffle`  | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                                        |
+| `limit`    | `positive_int`            | `null`  | The maximum number of Spotcast episode to fetch                                                                                             |

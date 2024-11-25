@@ -1,19 +1,18 @@
-# Play Media
+# Play Liked Songs
 
-`spotcast.play_media`
+`spotcast.play_liked_songs`
 
 ## Description
 
-Play spotify media on Spotcast compatible device
+Play user's liked songs
 
 ## Example service call
 
 ```yaml
-action: spotcast.play_media
+action: spotcast.play_liked_songs
 data:
     media_player:
         entity_id: media_player.foo
-    spotify_uri: spotify:album:1chw1DFmefTueG1VbNVoGN
     spotify_account: 01JDG07KSBTYWZGJSBJ1EW6XEF
     data:
         repeat: context
@@ -24,10 +23,6 @@ data:
 ### Media Player
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
-
-### URI
-
-The Spotify URI used for the context in the playback. In the case of a track URI, the context will become the album of the track, but set to the correct position of the track in the album.
 
 ### Spotify Account
 

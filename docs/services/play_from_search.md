@@ -1,19 +1,24 @@
-# Play Media
+# Play From Search
 
-`spotcast.play_media`
+`spotcast.play_from_search`
 
 ## Description
 
-Play spotify media on Spotcast compatible device
+Starts playing the top result of a search in Spotify. Either starts playing the top item or a list of top item in the case of tracks.
 
 ## Example service call
 
 ```yaml
-action: spotcast.play_media
+action: spotcast.play_from search
 data:
     media_player:
         entity_id: media_player.foo
-    spotify_uri: spotify:album:1chw1DFmefTueG1VbNVoGN
+    search_term: Taman Shud
+    item_type: track
+    filters:
+        artist: The Drones
+        album: Feelin Kinda Free
+        year: 2010-2019
     spotify_account: 01JDG07KSBTYWZGJSBJ1EW6XEF
     data:
         repeat: context
@@ -25,9 +30,32 @@ data:
 
 Let the user select a compatible device on which to start the playback. **_Must be a single device_**.
 
-### URI
+### Search Term
 
-The Spotify URI used for the context in the playback. In the case of a track URI, the context will become the album of the track, but set to the correct position of the track in the album.
+*optional*
+
+A generic search term that could be for any type of items
+
+### Tags
+
+*optional*
+
+A list of tags used to limit the search. Can only be used to search for albums:
+
+- `hipster`: Limits results to albums with a popularity of less than 10%
+- `new`: Limits results to albums released in the past 2 weeks
+
+### Filters
+
+A list of filters to apply to the search result. Are key value pairs of filters that can be:
+
+- `album`: The name of the album the item searched for is on. Can only be used on tracks or album
+- `artist`: The name of the artist that made the item searched.
+- `track`: The name of the track searched for. Can only be used on tracks
+- `year`: The year the item was created. Can be a specific date like `2016` or a range like `2010-2019`
+- `upc`: The UPC code of the album searched for. Can only be used with albums
+- `isrc`: The Iternational Standard Recording Code of the song searched for. Can only be used on songs.
+- `genre`: The genre of the item searched for. can only be used on artist or tracks
 
 ### Spotify Account
 
@@ -48,3 +76,4 @@ Set of additional settings to apply when starting the playback. The available op
 | `volume`   | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`                              |
 | `repeat`   | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                                                  |
 | `shuffle`  | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                                        |
+| `limit`    | `positive_int`            | `20`    | Sets the maximum number of items to retrieve when looking for a track. Forced to 1 for other item types                                     |
