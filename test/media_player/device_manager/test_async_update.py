@@ -112,6 +112,48 @@ class TestAlreadyTrackedDevice(IsolatedAsyncioTestCase):
             self.fail()
 
 
+class TestUnavailableDevice(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mock_account = MagicMock(spec=SpotifyAccount)
+        self.mock_callack = MagicMock(spec=AddEntitiesCallback)
+
+        self.mock_account.async_devices = AsyncMock(
+            return_value=[
+                {
+                    "id": "1234",
+                    "name": "dummy device",
+                    "type": "Computer",
+                }
+            ]
+        )
+
+        self.device_manager = DeviceManager(
+            self.mock_account,
+            self.mock_callack,
+        )
+
+        self.device_manager.unavailable_devices = {
+            "1234": MagicMock(spec=SpotifyDevice)
+        }
+
+        self.device_manager.unavailable_devices["1234"]._is_unavailable = True
+
+        await self.device_manager.async_update()
+
+    def test_device_added_to_tracked(self):
+        self.assertIn("1234", self.device_manager.tracked_devices)
+
+    def test_device_was_set_to_available(self):
+        self.assertFalse(
+            self.device_manager.tracked_devices["1234"]._is_unavailable
+        )
+
+    def test_device_removed_from_unavailable(self):
+        self.assertNotIn("1234", self.device_manager.unavailable_devices)
+
+
 class TestCurrentlyPlayingDevice(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
