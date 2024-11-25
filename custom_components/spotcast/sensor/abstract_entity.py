@@ -79,7 +79,7 @@ class SpotcastEntity(ABC, Entity):
         self._attributes = self.DEFAULT_ATTRIBUTES
         self._attr_state = STATE_UNKNOWN
         self.entity_id = (
-            f"{self.PLATFORM}.{self.account.id}_{self._generic_id}"
+            f"{self.PLATFORM}.spotcast_{self.account.id}_{self._generic_id}"
         )
         self._attr_device_info = self._get_device_info()
         self.entity_category = self.ENTITY_CATEGORY
@@ -122,7 +122,7 @@ class SpotcastEntity(ABC, Entity):
     @property
     def name(self) -> str:
         """returns the name of the entity"""
-        return f"{self.account.name} {self.GENERIC_NAME}"
+        return f"Spotcast - {self.account.name} {self.GENERIC_NAME}"
 
     @property
     def unique_id(self) -> str:
