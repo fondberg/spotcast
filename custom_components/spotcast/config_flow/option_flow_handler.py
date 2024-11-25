@@ -50,14 +50,18 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
 
         options = copy_to_dict(self.config_entry.options)
 
+        LOGGER.debug("Opening Config menu for `%s`", self.config_entry.title)
+
         self._options = self.OPTIONS_DEFAULT
         self._options = self.OPTIONS_DEFAULT | options
+
+        LOGGER.debug("Options set to `%s`", self._options)
 
         return self.async_show_form(
             step_id="apply_options",
             data_schema=self.add_suggested_values_to_schema(
                 self.SCHEMAS["init"],
-                self.config_entry.options
+                self._options,
             ),
             errors={},
         )

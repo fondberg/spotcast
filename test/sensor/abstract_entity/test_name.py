@@ -28,4 +28,7 @@ class TestNameDefinition(TestCase):
         self.entity = DummyEntity(self.account)
 
     def test_name_value_is_as_expected(self):
-        self.assertEqual(self.entity.name, "Dummy Account Abstract Spotcast")
+        self.assertEqual(
+            self.entity.name,
+            "Spotcast - Dummy Account Abstract Spotcast"
+        )

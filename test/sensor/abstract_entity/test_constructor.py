@@ -45,7 +45,7 @@ class TestDataRetention(TestCase):
     def test_entity_id_correctly_created(self):
         self.assertEqual(
             self.entity.entity_id,
-            "dummy.dummy_id_abstract_spotcast"
+            "dummy.spotcast_dummy_id_abstract_spotcast"
         )
 
     def test_device_info_from_account_by_default(self):
