@@ -84,8 +84,7 @@ class TestUserSwitchToDefault(TestCase):
             self.mocks["third_entry"],
         ]
 
-        self.handler = SpotcastOptionsFlowHandler()
-        self.handler.config_entry = self.mocks["entry"]
+        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
         self.handler._options = None
         self.handler._options = self.mocks["entry"].options
         self.handler.hass = self.mocks["hass"]

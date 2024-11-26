@@ -10,7 +10,7 @@ from types import MappingProxyType
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 from homeassistant.config_entries import (
-    OptionsFlow,
+    OptionsFlowWithConfigEntry,
     FlowResult,
 )
 
@@ -25,7 +25,7 @@ DEFAULT_OPTIONS = {
 }
 
 
-class SpotcastOptionsFlowHandler(OptionsFlow):
+class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
     """Handles option configuration via the Integration page"""
 
     SCHEMAS = {

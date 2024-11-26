@@ -10,5 +10,61 @@
             }
         },
         "title": "Spotcast"
+    },
+    "options": {
+        "step": {
+            "apply_options": {
+                "data": {
+                    "set_default": "Set the current account as the default Spotcast account",
+                    "base_refresh_rate": "Base Refresh Rate"
+                },
+                "title": "Spotcast - Options"
+            }
+        }
+    },
+    "services": {
+        "play_media": {
+            "name": "Play Media",
+            "description": "Play Spotify media on Chromecast devices",
+            "fields": {
+                "media_player": {
+                    "name": "Media Player"
+                },
+                "spotify_uri": {
+                    "name": "URI",
+                    "description": "Supported Spotify URI or URL"
+                },
+                "account": {
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
+                }
+            }
+        },
+        "play_dj": {
+            "name": "Spotify DJ Playlist",
+            "description": "Play Spotify DJ playlist on a Chromecast device",
+            "fields": {
+                "media_player": {
+                    "name": "Media Player"
+                },
+                "account": {
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
+                }
+            }
+        },
+        "transfer_playback": {
+            "name": "Transfer Playback",
+            "description": "Transfers the Spotify playback to the targeted device",
+            "fields": {}
+        }
     }
 }

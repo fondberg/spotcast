@@ -42,8 +42,7 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler()
-        self.handler.config_entry = self.mocks["entry"]
+        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
         self.handler._options = None
         self.handler.hass = self.mocks["hass"]
         self.handler.set_base_refresh_rate = MagicMock()
@@ -98,8 +97,7 @@ class TestWithoutDefaultSet(IsolatedAsyncioTestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler()
-        self.handler.config_entry = self.mocks["entry"]
+        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
         self.handler._options = None
         self.handler.hass = self.mocks["hass"]
         self.handler.set_base_refresh_rate = MagicMock()
