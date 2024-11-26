@@ -59,7 +59,7 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     )
 
     # check for track uri and switch to album with offset if necessary
-    if uri.startswith("spotify:track:"):
+    if uri is not None and uri.startswith("spotify:track:"):
         track_info = await account.async_get_track(uri)
         uri = track_info["album"]["uri"]
         LOGGER.debug("Switching context to song's album `%s`", uri)

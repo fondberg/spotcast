@@ -31,7 +31,6 @@ from custom_components.spotcast.spotify.search_query import SearchQuery
 from custom_components.spotcast.spotify.utils import select_image_url
 from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
-    InvalidItemTypeError,
     TokenError,
 )
 
