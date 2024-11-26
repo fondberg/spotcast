@@ -36,8 +36,8 @@ from custom_components.spotcast.sensor.spotify_account_type_sensor import (
 LOGGER = getLogger(__name__)
 SENSORS = (
     SpotifyDevicesSensor,
-    SpotifyPlaylistsSensor,
     SpotifyProfileSensor,
+    SpotifyPlaylistsSensor,
     SpotifyLikedSongsSensor,
     SpotifyProductSensor,
     SpotifyFollowersSensor,
@@ -65,4 +65,4 @@ async def async_setup_entry(
 
         built_sensors.append(sensor(account))
 
-    async_add_entities(built_sensors, True)
+    async_add_entities(built_sensors, False)
