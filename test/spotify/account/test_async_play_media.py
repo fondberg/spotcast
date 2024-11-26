@@ -61,7 +61,7 @@ class TestMediaPlayback(IsolatedAsyncioTestCase):
     def test_play_media_was_called(self):
         try:
             self.mocks["hass"].async_add_executor_job.assert_called_with(
-                self.account._spotify.start_playback,
+                self.account._internal_cont.start_playback,
                 "foo",
                 "spotify:dummy:uri",
                 None,

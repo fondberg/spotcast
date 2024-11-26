@@ -170,6 +170,9 @@ class SpotifyAccount:
         self._spotify = Spotify(
             auth=self.sessions["external"].token["access_token"]
         )
+        self._internal_cont = Spotify(
+            auth=self.sessions["internal"].token
+        )
 
         self._datasets: dict[str, Dataset] = {}
 
@@ -194,9 +197,8 @@ class SpotifyAccount:
         self._base_refresh_rate = value
 
         for name, dataset in self._datasets.items():
-            dataset.refresh_rate = value * self.DATASETS[name][
-                "refresh_factor"
-            ]
+            refresh_factor = self.DATASETS[name]["refresh_factor"]
+            dataset.refresh_rate = value * refresh_factor
 
     @property
     def id(self) -> str:
@@ -397,9 +399,11 @@ class SpotifyAccount:
 
                 raise exc
 
+            token = await self.async_get_token(key)
             if key == "external":
-                token = await self.async_get_token(key)
                 self._spotify.set_auth(token["access_token"])
+            if key == "internal":
+                self._internal_cont.set_auth(token)
 
     async def async_profile(self, force: bool = False) -> dict:
         """Test the connection and returns a user profile
@@ -667,7 +671,7 @@ class SpotifyAccount:
 
         try:
             await self.hass.async_add_executor_job(
-                self._spotify.start_playback,
+                self._internal_cont.start_playback,
                 device_id,
                 context_uri,
                 uris,
