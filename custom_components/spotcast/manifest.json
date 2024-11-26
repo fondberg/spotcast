@@ -17,8 +17,8 @@
     "issue_tracker": "https://github.com/fondberg/spotcast/issues",
     "requirements": [
         "spotipy>=2.23.0",
-        "Levenshtein>=0.26.1",
-        "spotifyaio>=0.8.8"
+        "spotifyaio>=0.8.8",
+        "RapidFuzz>=3.10.1"
     ],
     "version": "v5.0.0-b5"
 }

@@ -9,7 +9,7 @@ from types import MappingProxyType
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from Levenshtein import ratio
+from rapidfuzz import fuzz
 
 from custom_components.spotcast.services.exceptions import (
     AccountNotFoundError,
@@ -159,7 +159,7 @@ def fuzzy_match(
         if key is not None:
             compared = compared[key]
 
-        current_ratio = ratio(search, compared)
+        current_ratio = fuzz(search, compared)
 
         if current_ratio > best_ratio:
             best_ratio = current_ratio

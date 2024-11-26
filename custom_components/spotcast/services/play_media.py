@@ -40,7 +40,6 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
         - hass(HomeAssistant): the Home Assistant Instance
         - call(ServiceCall): the service call data pack
     """
-
     uri: str = call.data.get("spotify_uri")
     account_id: str = call.data.get("account")
     media_players: dict[str, list] = call.data.get("media_player")

@@ -170,6 +170,7 @@ class SpotifyAccount:
         self._spotify = Spotify(
             auth=self.sessions["external"].token["access_token"]
         )
+
         self._internal_cont = Spotify(
             auth=self.sessions["internal"].token
         )
