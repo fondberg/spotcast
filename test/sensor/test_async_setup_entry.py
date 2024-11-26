@@ -49,6 +49,7 @@ class TestSensorCreation(IsolatedAsyncioTestCase):
         }
 
         self.mocks["account"].id = "dummy_account"
+        self.mocks["account"].product = "free"
 
         self.mocks["hass"].data = {
             "spotcast": {
