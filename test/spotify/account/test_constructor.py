@@ -46,7 +46,7 @@ class TestDataRetention(TestCase):
 
     def test_spotify_created_with_proper_auth(self):
         try:
-            self.mock_spotify.assert_called_with(
+            self.mock_spotify.assert_any_call(
                 auth="12345",
             )
         except AssertionError:

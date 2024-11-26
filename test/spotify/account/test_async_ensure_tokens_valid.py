@@ -65,7 +65,7 @@ class TestWithProfileRefresh(IsolatedAsyncioTestCase):
 
     def test_spotify_token_updated_after_refresh(self):
         try:
-            self.account._spotify.set_auth.assert_called_with(
+            self.account._spotify.set_auth.assert_any_call(
                 "12345"
             )
         except AssertionError:
@@ -94,6 +94,8 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
             "expires_at": 12345.61,
         }
 
+        self.mocks["internal"].token = "23456"
+
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
@@ -121,9 +123,15 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
 
     def test_spotify_token_updated_after_refresh(self):
         try:
-            self.account._spotify.set_auth.assert_called_with(
+            self.account._spotify.set_auth.assert_any_call(
                 "12345"
             )
+        except AssertionError:
+            self.fail()
+
+    def test_internal_controller_token_updated_after_refresh(self):
+        try:
+            self.account._spotify.set_auth.assert_any_call("23456")
         except AssertionError:
             self.fail()
 
