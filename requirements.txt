@@ -3,5 +3,5 @@ homeassistant>=2024.8.3
 spotipy>=2.24.0
 PyChromecast>=14.0.1
 requests>=2.32.3
-Levenshtein>=0.26.1
 spotifyaio>=0.8.8
+RapidFuzz>=3.10.1
