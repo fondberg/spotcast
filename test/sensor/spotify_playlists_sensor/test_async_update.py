@@ -40,20 +40,14 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
 
         await self.sensor.async_update()
 
-    def test_profile_was_retrieved(self):
+    def test_playlist_count_was_retrieved(self):
         try:
-            self.account.async_playlists.assert_called()
+            self.account.async_playlists_count.assert_called()
         except AssertionError:
             self.fail()
 
     def test_attribute_state__was_set_to_11(self):
         self.assertEqual(self.sensor.state, 11)
-
-    def test_attribute_only_holds_top_10_playlist(self):
-        self.assertEqual(
-            len(self.sensor.extra_state_attributes["first_10_playlists"]),
-            10
-        )
 
 
 class TestUnsuccessfulUpdate(IsolatedAsyncioTestCase):
@@ -71,10 +65,6 @@ class TestUnsuccessfulUpdate(IsolatedAsyncioTestCase):
             MagicMock(),
         )
 
-        self.sensor._attributes = {
-            "first_10_playlists": [1, 2, 3]
-        }
-
         await self.sensor.async_update()
 
     def test_profile_was_retrieved(self):
@@ -85,9 +75,3 @@ class TestUnsuccessfulUpdate(IsolatedAsyncioTestCase):
 
     def test_attribute_state_was_set_to_account_type(self):
         self.assertEqual(self.sensor.state, STATE_UNKNOWN)
-
-    def test_extra_attributes_were_resetted(self):
-        self.assertEqual(
-            self.sensor.extra_state_attributes,
-            {"first_10_playlists": []}
-        )

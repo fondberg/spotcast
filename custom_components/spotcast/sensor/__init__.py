@@ -34,15 +34,15 @@ from custom_components.spotcast.sensor.spotify_account_type_sensor import (
 )
 
 LOGGER = getLogger(__name__)
-SENSORS = {
-    SpotifyDevicesSensor: False,
-    SpotifyPlaylistsSensor: True,
-    SpotifyProfileSensor: False,
-    SpotifyLikedSongsSensor: False,
-    SpotifyProductSensor: False,
-    SpotifyFollowersSensor: False,
-    SpotifyAccountTypeSensor: False,
-}
+SENSORS = (
+    SpotifyDevicesSensor,
+    SpotifyPlaylistsSensor,
+    SpotifyProfileSensor,
+    SpotifyLikedSongsSensor,
+    SpotifyProductSensor,
+    SpotifyFollowersSensor,
+    SpotifyAccountTypeSensor,
+)
 
 
 async def async_setup_entry(
@@ -52,18 +52,10 @@ async def async_setup_entry(
 ) -> None:
 
     account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    has_premium = account.product == "premium"
 
     built_sensors = []
 
-    for sensor, requires_premium in SENSORS.items():
-
-        if not has_premium and requires_premium:
-            LOGGER.info(
-                "Skipping %s sensor. Premium Required",
-                type(sensor)
-            )
-            continue
+    for sensor in SENSORS:
 
         LOGGER.debug(
             "Creating Sensor %s for `%s`",

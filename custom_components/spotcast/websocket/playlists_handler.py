@@ -48,7 +48,7 @@ async def async_get_playlists(
         account = search_account(hass, account_id)
 
     if category == "user":
-        playlists = await account.async_playlists(max_items=limit)
+        playlists = await account.async_playlists(max_items=limit, force=True)
         category = {"id": "user"}
 
     else:

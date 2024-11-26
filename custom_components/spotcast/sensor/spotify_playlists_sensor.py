@@ -30,7 +30,6 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
     GENERIC_NAME = "Spotify Playlists"
     ICON = "mdi:playlist-music"
     ICON_OFF = ICON
-    DEFAULT_ATTRIBUTES = {"first_10_playlists": []}
     UNITS_OF_MEASURE = "playlists"
 
     async def async_update(self):
@@ -38,10 +37,8 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
 
         try:
             count = await self.account.async_playlists_count()
-            playlists = await self.account.async_playlists(max_items=10)
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
-            self._attributes["first_10_playlists"] = []
             return
 
         LOGGER.debug(
@@ -51,8 +48,6 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
         )
 
         self._attr_state = count
-        top_10 = [self._clean_playlist(x) for x in playlists]
-        self._attributes["first_10_playlists"] = top_10
 
     @staticmethod
     def _clean_playlist(playlist: dict) -> dict:
