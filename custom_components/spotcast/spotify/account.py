@@ -946,6 +946,8 @@ class SpotifyAccount:
             items.extend(current_items)
             offset = len(items)
 
+        items = [x for x in items if x is not None]
+
         return items
 
     async def async_add_to_queue(self,  uri: str, device_id: str = None):
