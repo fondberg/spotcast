@@ -34,22 +34,15 @@ class SpotifyLikedSongsSensor(SpotcastSensor):
         """Updates the number of liked songs asynchronously"""
 
         try:
-            liked_songs = await self.account.async_liked_songs()
+            count = await self.account.async_liked_songs_count()
         except (ReadTimeoutError, ReadTimeout):
             self._attr_state = STATE_UNKNOWN
             return
 
         LOGGER.debug(
-            "Getting Spotify Liked Songs for account `%s`",
-            self.account.name
-        )
-
-        song_count = len(liked_songs)
-
-        LOGGER.debug(
             "Found %d liked songs for spotify account `%s`",
-            song_count,
+            count,
             self.account.name
         )
 
-        self._attr_state = song_count
+        self._attr_state = count

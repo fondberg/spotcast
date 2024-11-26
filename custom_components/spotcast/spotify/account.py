@@ -518,6 +518,12 @@ class SpotifyAccount:
 
         return self.playback_state
 
+    async def async_playlists_count(self) -> int:
+        """Returns the number of user playlist for an account"""
+        return await self._async_get_count(
+            self._spotify.current_user_playlists
+        )
+
     async def async_playlists(
             self,
             force: bool = False,
@@ -703,6 +709,12 @@ class SpotifyAccount:
             device_id,
         )
 
+    async def async_liked_songs_count(self) -> int:
+        """returns the number of linked songs for an account"""
+        return await self._async_get_count(
+            self._spotify.current_user_saved_tracks,
+        )
+
     async def async_liked_songs(self, force: bool = False) -> list[str]:
         """Retrieves the list of uris of songs in the user liked songs
         """
@@ -834,6 +846,45 @@ class SpotifyAccount:
         )
 
         return playlists
+
+    async def _async_get_count(
+            self,
+            function: callable,
+            prepends: list = None,
+            appends: list = None,
+            sub_layer: str = None,
+            max_items: int = None,
+    ) -> int:
+        """Returns the number of item in a specific pagination
+
+        Args:
+            - function(callable): the function to call to retrieve
+                content. Must be able to take a `limit` and `offset`
+                arguments.
+            - preppends: arguments to pass to the function on
+                each call before the limit and offset
+            - appends: arguments to pass to the function on
+                each call after the limit and offset
+            - sub_layer(str, optional): sub key in the response
+                containing the pagination. Use the response as a
+                pagination if None. Defaults to None.
+
+        Returns:
+            - int: the number of items in the pagination
+        """
+        prepends = [] if prepends is None else prepends
+        appends = [] if appends is None else appends
+        arguments = [*prepends, 1, 0, *appends]
+
+        result = await self.hass.async_add_executor_job(
+            function,
+            *arguments,
+        )
+
+        if sub_layer is not None:
+            result = result[sub_layer]
+
+        return result["total"]
 
     async def _async_pager(
             self,

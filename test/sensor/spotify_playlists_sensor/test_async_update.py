@@ -34,7 +34,10 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
                     }
                 ]
             }
-        ]*11
+        ]*10
+
+        self.account.async_playlists_count.return_value = 11
+
         await self.sensor.async_update()
 
     def test_profile_was_retrieved(self):
@@ -62,7 +65,7 @@ class TestUnsuccessfulUpdate(IsolatedAsyncioTestCase):
 
         self.account.name = "Dummy Account"
 
-        self.account.async_playlists.side_effect = ReadTimeoutError(
+        self.account.async_playlists_count.side_effect = ReadTimeoutError(
             MagicMock(),
             MagicMock(),
             MagicMock(),
@@ -76,7 +79,7 @@ class TestUnsuccessfulUpdate(IsolatedAsyncioTestCase):
 
     def test_profile_was_retrieved(self):
         try:
-            self.account.async_playlists.assert_called()
+            self.account.async_playlists_count.assert_called()
         except AssertionError:
             self.fail()
 
