@@ -349,7 +349,7 @@ def search_tracks(
 def add_tracks_to_queue(
     spotify_client: spotipy.Spotify, tracks: list = [], limit: int = 20
 ):
-    filtered = list(filter(lambda x: x and x["type"] == "track", tracks))
+    filtered = list(filter(lambda x: isinstance(x, dict) and x.get("type") == "track", tracks))
 
     if len(filtered) == 0:
         _LOGGER.debug("Cannot add ZERO tracks to the queue!")
