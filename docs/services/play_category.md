@@ -43,3 +43,4 @@ Set of additional settings to apply when starting the playback. The available op
 | `repeat`   | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                                                  |
 | `shuffle`  | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                                        |
 | `limit`    | `possite_int`             | `null`  | Sets the maximum number of categories to retrieve. Retrieves all categories if `null`.                                                      |
+| `random`   | `bool`                    | `False` | Sets the first played songs to a random song in the playlist                                                                                |

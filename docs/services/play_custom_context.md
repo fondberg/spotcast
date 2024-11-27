@@ -45,3 +45,4 @@ Set of additional settings to apply when starting the playback. The available op
 | `volume`   | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`                              |
 | `repeat`   | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                                                  |
 | `shuffle`  | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                                        |
+| `random`   | `bool`                    | `False` | Sets the start songs to a random one in the custom context                                                                                  |
