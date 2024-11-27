@@ -20,6 +20,7 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
         self.sensor = SpotifyProfileSensor(self.account)
 
         self.account.name = "Dummy Account"
+        self.account.entry_id = "12345"
 
         self.account.async_profile.return_value = {
             "id": "dummy_id",
@@ -61,6 +62,7 @@ class TestSuccessfulUpdate(IsolatedAsyncioTestCase):
                 "filter_explicit_enabled": False,
                 "filter_explicit_locked": False,
                 "followers_count": 10,
+                "entry_id": "12345",
             },
         )
 

@@ -64,6 +64,7 @@ class SpotifyProfileSensor(SpotcastSensor):
         )
 
         self._attributes = self._clean_profile(profile)
+        self._attributes["entry_id"] = self.account.entry_id
         self._attr_state = STATE_OK
 
     @staticmethod
