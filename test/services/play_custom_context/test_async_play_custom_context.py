@@ -19,7 +19,7 @@ TEST_MODULE = "custom_components.spotcast.services.play_custom_context"
 class TestPlayContext(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_media_player_from_id")
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
             self,
@@ -76,18 +76,21 @@ class TestPlayContext(IsolatedAsyncioTestCase):
 
 class TestPlayContextWithExtras(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.randint", new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.async_media_player_from_id")
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
             self,
             mock_account: AsyncMock,
             mock_entry: MagicMock,
             mock_media_player: AsyncMock,
+            mock_random: MagicMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
         mock_media_player.return_value = MagicMock(spec=MediaPlayer)
+        mock_random.return_value = 1
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
@@ -106,6 +109,7 @@ class TestPlayContextWithExtras(IsolatedAsyncioTestCase):
             "data": {
                 "volume": 80,
                 "position_ms": 5000,
+                "random": True,
             }
         }
 
@@ -124,6 +128,8 @@ class TestPlayContextWithExtras(IsolatedAsyncioTestCase):
                 uris=["foo", "bar"],
                 position_ms=5000,
                 volume=80,
+                random=True,
+                offset=1,
             )
         except AssertionError:
             self.fail()
@@ -135,6 +141,8 @@ class TestPlayContextWithExtras(IsolatedAsyncioTestCase):
                 {
                     "volume": 80,
                     "position_ms": 5000,
+                    "random": True,
+                    "offset": 1,
                 }
             )
         except AssertionError:
