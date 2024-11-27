@@ -5,6 +5,7 @@ Functions:
 """
 
 from logging import getLogger
+from random import randint
 
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
@@ -44,10 +45,7 @@ async def async_play_custom_context(hass: HomeAssistant, call: ServiceCall):
     tracks: list[str] = call.data.get("tracks")
     account_id: str = call.data.get("account")
     media_players: dict[str, list] = call.data.get("media_player")
-    extras: dict[str] = call.data.get("data")
-
-    if extras is None:
-        extras = {}
+    extras: dict[str] = call.data.get("data", {})
 
     entry = get_account_entry(hass, account_id)
     entity_id = entity_from_target_selector(hass, media_players)
@@ -66,6 +64,9 @@ async def async_play_custom_context(hass: HomeAssistant, call: ServiceCall):
         len(tracks),
         account.id,
     )
+
+    if extras.get("random", False):
+        extras["offset"] = randint(0, len(tracks)-1)
 
     await account.async_play_media(media_player.id, uris=tracks, **extras)
     await account.async_apply_extras(media_player.id, extras)

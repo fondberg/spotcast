@@ -499,6 +499,65 @@ class SpotifyAccount:
 
         return result
 
+    async def async_get_playlist(self, uri: str) -> dict:
+        """Retrieves a playlist information
+
+        Args:
+            - uri(str): the URI of the playlist to search
+
+        Returns:
+            - dict: the playlist details
+        """
+
+        playlist_id = uri.rsplit(":", maxsplit=1)[-1]
+
+        result = await self.hass.async_add_executor_job(
+            self._spotify.playlist,
+            playlist_id,
+            None,
+            self.country,
+        )
+
+        return result
+
+    async def async_get_album(self, uri: str) -> dict:
+        """Retrieves an album information
+
+        Args:
+            - uri(str): the URI of the album to search
+
+        Returns:
+            - dict: the album details
+        """
+
+        album_id = uri.rsplit(":", maxsplit=1)[-1]
+
+        result = await self.hass.async_add_executor_job(
+            self._spotify.album,
+            album_id,
+            self.country,
+        )
+
+        return result
+
+    async def async_get_artist_top_tracks(self, uri: str) -> list[dict]:
+        """Retrieves the list of top tracks for an artist
+
+        Args:
+            - uri(str): the URI of the artist to search
+
+        Returns:
+            - list[dict]: the list of top songes for an artist
+        """
+
+        result = await self.hass.async_add_executor_job(
+            self._spotify.artist_top_tracks,
+            uri,
+            self.country,
+        )
+
+        return result["tracks"]
+
     async def async_playback_state(self, force: bool = False) -> dict:
         """Returns the current playback state"""
         await self.async_ensure_tokens_valid()
@@ -525,6 +584,7 @@ class SpotifyAccount:
 
     async def async_playlists_count(self) -> int:
         """Returns the number of user playlist for an account"""
+
         return await self._async_get_count(
             self._spotify.current_user_playlists
         )

@@ -5,8 +5,10 @@ Functions:
 """
 
 from logging import getLogger
+from random import randint
 
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 import voluptuous as vol
 
@@ -58,11 +60,15 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     )
 
     # check for track uri and switch to album with offset if necessary
-    if uri is not None and uri.startswith("spotify:track:"):
+    if uri is None:
+        pass
+    elif uri.startswith("spotify:track:"):
         track_info = await account.async_get_track(uri)
         uri = track_info["album"]["uri"]
         LOGGER.debug("Switching context to song's album `%s`", uri)
         extras["offset"] = track_info["track_number"] - 1
+    elif extras.get("random", False):
+        extras["offset"] = await async_random_index(account, uri)
 
     LOGGER.debug("Getting %s from home assistant", entity_id)
     media_player = await async_media_player_from_id(hass, account, entity_id)
@@ -76,3 +82,33 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
 
     await account.async_play_media(media_player.id, uri, **extras)
     await account.async_apply_extras(media_player.id, extras)
+
+
+async def async_random_index(account: SpotifyAccount, uri: str) -> int:
+    """Returns a random index for starting the context at. Must be an
+    artist, album or playlist
+
+    Args:
+        - account(SpotifyAccount): the account used for fetching
+            context info
+        - uri(str): the uri of the context to start at a random index
+
+    Result:
+        - int: a random index between 0 and the number of items in the
+            context uri - 1
+    """
+
+    if uri.startswith("spotify:album:"):
+        count = await account.async_get_album(uri)["total_tracks"]
+    elif uri.startswith("spotify:artist:"):
+        count = len(await account.async_get_artist_top_tracks(uri))
+    elif uri.startswith("spotify:playlist:"):
+        count = await account.async_get_playlist(uri)["tracks"]["total"]
+    elif uri == account.liked_songs_uri:
+        count = await account.async_liked_songs_count()
+    else:
+        raise ServiceValidationError(
+            f"{uri} is not compatible with random start track"
+        )
+
+    return randint(0, count-1)
