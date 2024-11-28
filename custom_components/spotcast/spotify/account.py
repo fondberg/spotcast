@@ -51,7 +51,7 @@ class SpotifyAccount:
 
     Properties:
         - id(str): the identifier of the account
-        - name(str): the dusplay name for the account
+        - name(str): the display name for the account
         - profile(dict): the full profile dictionary of the account
         - country(str): the country code where the account currently
             is.
@@ -86,6 +86,7 @@ class SpotifyAccount:
         - async_liked_songs
         - async_repeat
         - async_set_volume
+        - async_generic_playlists
 
     Functions:
         - async_from_config_entry
@@ -911,6 +912,41 @@ class SpotifyAccount:
         )
 
         return playlists
+
+    async def async_generic_playlists(
+            self,
+            url: str,
+            limit: int = None,
+            locale: str = None,
+            platform: str = "web",
+            types: str = "album,playlist,artist,show,station",
+    ) -> list:
+        """Fetches playlists based on the provided parameters.
+
+        Args:
+            - url(str): The url of playlist to fetch (e.g., 'views/made-for-x').
+            - limit(int): The maximum number of playlists to retrieve.
+            - locale(str): The locale for the request (optional).
+            - platform(str): The platform from which the request is made (default is "web").
+            - types(str): The types of content to retrieve (default is 'album,playlist,artist,show,station').
+
+        Returns:
+            - list: A list of playlists.
+        """
+        await self.async_ensure_tokens_valid()
+
+        # Make the API call to get the playlists based on the playlist_type
+        response = await self._spotify._get(
+            url,
+            content_limit=limit,
+            locale=locale,
+            platform=platform,
+            types=types,
+            limit=limit,
+            offset=0,
+        )
+
+        return response.get("content", [])
 
     async def _async_get_count(
             self,
