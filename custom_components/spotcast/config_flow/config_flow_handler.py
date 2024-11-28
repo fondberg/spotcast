@@ -21,7 +21,7 @@ from spotipy import Spotify
 
 from custom_components.spotcast import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.sessions import InternalSession
+from custom_components.spotcast.sessions import PrivateSession
 from custom_components.spotcast.config_flow.option_flow_handler import (
     SpotcastOptionsFlowHandler
 )
@@ -115,7 +115,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         entry = MagicMock(spec=ConfigEntry)
         entry.data = data
         spotify = Spotify(auth=external_api["token"]["access_token"])
-        internal_session = InternalSession(self.hass, entry)
+        internal_session = PrivateSession(self.hass, entry)
 
         try:
             LOGGER.debug("loading curent user data")

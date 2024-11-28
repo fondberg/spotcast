@@ -9,9 +9,6 @@ from time import time
 from typing import Callable, Awaitable
 from logging import getLogger
 
-from custom_components.spotcast.spotify.exceptions import ExpiredDatasetError
-from custom_components.spotcast.utils import copy_to_dict
-
 LOGGER = getLogger(__name__)
 
 
@@ -76,7 +73,7 @@ class Dataset:
         async with self.lock:
             if self.is_expired:
                 LOGGER.debug("Refreshing %s dataset", self.name)
-                self._data = await self.refresh_function(
+                self._data = await self._refresh_function(
                     *self.args,
                     **self.kwargs
                 )

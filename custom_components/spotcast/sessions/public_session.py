@@ -13,7 +13,7 @@ from aiohttp import ClientError
 from asyncio import Lock
 
 from homeassistant.helpers.config_entry_oauth2_flow import (
-    OAuth2Session as ParentOAuth2Session,
+    OAuth2Session,
     client,
     async_oauth2_request,
 )
@@ -33,7 +33,7 @@ from custom_components.spotcast.sessions.exceptions import (
 )
 
 
-class OAuth2Session(ParentOAuth2Session, ConnectionSession):
+class PublicSession(OAuth2Session, ConnectionSession):
     """Custom implementation of the OAuth2Session for Spotcast
 
     Properties:
@@ -95,7 +95,7 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
         await self.async_ensure_token_valid()
         return self.token[CONF_ACCESS_TOKEN]
 
-    async def async_request(
+    async def request(
             self,
             method: str,
             url: str,

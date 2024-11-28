@@ -1,8 +1,8 @@
-"""Module containing the InternalSession class that manages the
-internal api credentials
+"""Module containing the Private class that manages the
+Private api credentials
 
 Classes:
-    - InternalSession
+    - Private
     - ExpiredSpotifyKeyError
     - TokenError
 """
@@ -18,6 +18,11 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
     CLOCK_OUT_OF_SYNC_MAX_SEC,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers.config_entry_oauth2_flow import (
+    OAuth2Session,
+    client,
+    async_oauth2_request,
+)
 
 from custom_components.spotcast.sessions.connection_session import (
     ConnectionSession,
@@ -30,7 +35,7 @@ from custom_components.spotcast.sessions.exceptions import (
 LOGGER = getLogger(__name__)
 
 
-class InternalSession(ConnectionSession):
+class PrivateSession(OAuth2Session, ConnectionSession):
     """Api session with access to Spotify's private API
 
     Attributes:
@@ -123,9 +128,30 @@ class InternalSession(ConnectionSession):
 
             LOGGER.debug("Token is expired. Getting a new one")
 
-            await self.async_refresh_token()
+            await self.async_get_new_token()
 
-    async def async_refresh_token(self) -> tuple[str, float]:
+    async def async_refresh_token(self) -> str:
+        """Refreshes the session token and returns it"""
+        await self.async_ensure_token_valid()
+        return self.token
+
+    async def request(
+        self,
+        method: str,
+        url: str,
+        **kwargs,
+    ) -> client.ClientResponse:
+        """Makes a request"""
+        await self.async_ensure_token_valid()
+        return await async_oauth2_request(
+            self.hass,
+            {"access_token": self.token},
+            method,
+            url,
+            **kwargs
+        )
+
+    async def async_get_new_token(self) -> tuple[str, float]:
         """Retrives a new token, sets it in the session and returns
         the token and when it expires
 

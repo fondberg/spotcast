@@ -26,6 +26,7 @@ def async_register(hass: HomeAssistant, register: SystemHealthRegistration):  # 
 
 async def system_health_info(hass: HomeAssistant) -> dict[str]:  # pylint: disable=W0613
     """Get Health info for the info page"""
+    return {}
 
     health_info = {}
 

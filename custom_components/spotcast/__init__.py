@@ -66,8 +66,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         account.is_default
     )
 
-    LOGGER.warn(account.get_profile())
-    LOGGER.warn(account.get_devices())
+    LOGGER.warn(await account.get_profile())
+    LOGGER.warn(await account.get_devices())
 
     return True
 
