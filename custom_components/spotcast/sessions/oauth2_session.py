@@ -18,6 +18,7 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
     async_oauth2_request,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.config_entry_oauth2_flow import (
     AbstractOAuth2Implementation,
@@ -88,6 +89,11 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
                 data=new_data,
             )
             self._is_healthy = True
+
+    async def async_refresh_token(self) -> str:
+        """Refreshes the session token and returns it"""
+        await self.async_ensure_token_valid()
+        return self.token[CONF_ACCESS_TOKEN]
 
     async def async_request(
             self,

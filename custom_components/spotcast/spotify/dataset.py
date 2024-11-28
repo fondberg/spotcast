@@ -6,9 +6,13 @@ Classes:
 
 from asyncio import Lock
 from time import time
+from typing import Callable, Awaitable
+from logging import getLogger
 
 from custom_components.spotcast.spotify.exceptions import ExpiredDatasetError
 from custom_components.spotcast.utils import copy_to_dict
+
+LOGGER = getLogger(__name__)
 
 
 class Dataset:
@@ -36,8 +40,11 @@ class Dataset:
     def __init__(
             self,
             name: str,
+            refresh_function: Callable[[], Awaitable],
             refresh_rate: int = 30,
-            can_expire: bool = False
+            can_expire: bool = False,
+            *args,
+            **kwargs,
     ):
         """Constructor for a dataset instance
 
@@ -49,30 +56,35 @@ class Dataset:
                 even if expired if set to True. Defaults to False
         """
         self.name = name
+        self._refresh_function = refresh_function
         self.refresh_rate = refresh_rate
         self.can_expire = can_expire
         self._data: list | dict | None = None
         self.expires_at = 0
         self.lock = Lock()
+        self.args = args
+        self.kwargs = kwargs
 
     @property
     def is_expired(self) -> bool:
         """Returns True if the dataset is past is cached time"""
         return time() > self.expires_at or self._data is None
 
-    @property
-    def data(self) -> list | dict:
-        """Returns the data from the dataset or raises an error if
-        expired
+    async def async_get(self) -> dict:
+        """Retrives the dataset content. Updating it if necessary"""
 
-        Raises:
-            - ExpiredDatasetError: raised if the dataset is expired
-                unless the can_expire flag is set to True
-        """
-        if self.is_expired and not self.can_expire:
-            raise ExpiredDatasetError(f"The {self.name} dataset is expired")
+        async with self.lock:
+            if self.is_expired:
+                LOGGER.debug("Refreshing %s dataset", self.name)
+                self._data = await self.refresh_function(
+                    *self.args,
+                    **self.kwargs
+                )
+                self.expires_at = time() + self.refresh_rate
+            else:
+                LOGGER.debug("Using cached %s dataset", self.name)
 
-        return copy_to_dict(self._data)
+        return self._data
 
     def update(self, data: list | dict):
         """Updates the dataset with new data"""

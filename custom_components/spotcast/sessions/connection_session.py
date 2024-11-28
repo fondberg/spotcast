@@ -27,3 +27,7 @@ class ConnectionSession(ABC):
     def is_healthy(self) -> bool:
         """Returns True if the session is able to refresh its token"""
         return self._is_healthy
+
+    @abstractmethod
+    async def async_refresh_token(self):
+        """Refreshes if necessary the token and returns it"""
