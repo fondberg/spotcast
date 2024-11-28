@@ -12,6 +12,7 @@ from asyncio import (
 )
 from time import time
 from typing import Any
+from functools import partial
 
 from spotipy import Spotify, SpotifyException
 from homeassistant.core import HomeAssistant
@@ -33,6 +34,7 @@ from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
     TokenError,
 )
+
 
 LOGGER = getLogger(__name__)
 
