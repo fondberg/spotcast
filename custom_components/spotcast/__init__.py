@@ -10,7 +10,6 @@ Constants:
 """
 
 from logging import getLogger
-import asyncio
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -50,11 +49,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if updated_options != entry.options:
         hass.config_entries.async_update_entry(entry, options=updated_options)
 
-    # because of circular depoendency
+    # because of circular dependancy
     from custom_components.spotcast.spotify.account import SpotifyAccount  # pylint: disable=C0415
 
     try:
-        account = await SpotifyAccount.async_from_config_entry(
+        account = await SpotifyAccount.from_config_entry(
             hass=hass,
             entry=entry,
         )
@@ -67,10 +66,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         account.is_default
     )
 
-    try:
-        await account.async_ensure_tokens_valid()
-    except TokenRefreshError as exc:
-        raise ConfigEntryAuthFailed from exc
+    LOGGER.warn(account.get_profile())
+    LOGGER.warn(account.get_devices())
+
+    return True
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -88,8 +87,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     await async_setup_websocket(hass)
-
-    return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
