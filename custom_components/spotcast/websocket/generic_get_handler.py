@@ -18,6 +18,7 @@ SCHEMA = vol.Schema(
         vol.Optional("locale"): cv.string,
         vol.Optional("platform"): cv.string,
         vol.Optional("types"): cv.string,
+        vol.Optional("account"): cv.string,
     }
 )
 
@@ -35,10 +36,10 @@ async def async_get_generic_playlists(
     """
     account_id = msg.get("account")
     url = msg.get("url")
-    limit = msg.get("limit")
-    locale = msg.get("locale")
-    platform = msg.get("platform")
-    types = msg.get("types")
+    limit = msg.get("limit", 10)
+    locale = msg.get("locale", "en_US")
+    platform = msg.get("platform", "web")
+    types = msg.get("types", "album,playlist,artist,show,station")
 
     account: SpotifyAccount
 
@@ -50,7 +51,7 @@ async def async_get_generic_playlists(
         account = search_account(hass, account_id)
 
     playlists = await account.async_generic_playlists(
-        playlist_type=url,
+        url=url,
         limit=limit,
         locale=locale,
         platform=platform,
@@ -61,9 +62,12 @@ async def async_get_generic_playlists(
         {
             "id": playlist["id"],
             "name": playlist["name"],
-            "icon": select_image_url(playlist.get("icons", [])),
+            "icon": playlist["images"][0]["url"]
+            if "images" in playlist and len(playlist["images"]) > 0
+            else None,
         }
-        for playlist in playlists
+        for playlist in playlists["content"]["items"]
+        if "id" in playlist  # Only include playlists with an 'id'
     ]
 
     # Send the results back to the WebSocket connection

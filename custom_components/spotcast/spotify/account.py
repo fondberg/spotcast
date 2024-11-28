@@ -914,12 +914,12 @@ class SpotifyAccount:
         return playlists
 
     async def async_generic_playlists(
-            self,
-            url: str,
-            limit: int = None,
-            locale: str = None,
-            platform: str = "web",
-            types: str = "album,playlist,artist,show,station",
+        self,
+        url: str,
+        limit: int,
+        locale: str,
+        platform: str,
+        types: str,
     ) -> list:
         """Fetches playlists based on the provided parameters.
 
@@ -933,20 +933,21 @@ class SpotifyAccount:
         Returns:
             - list: A list of playlists.
         """
+
+        params = {
+            "content_limit": limit,
+            "locale": locale,
+            "platform": platform,
+            "types": types,
+            "limit": limit,
+            "offset": 0,
+        }
+
         await self.async_ensure_tokens_valid()
 
-        # Make the API call to get the playlists based on the playlist_type
-        response = await self._spotify._get(
-            url,
-            content_limit=limit,
-            locale=locale,
-            platform=platform,
-            types=types,
-            limit=limit,
-            offset=0,
+        return await self.hass.async_add_executor_job(
+            partial(self._internal_cont._get, url, None, **params)
         )
-
-        return response.get("content", [])
 
     async def _async_get_count(
             self,

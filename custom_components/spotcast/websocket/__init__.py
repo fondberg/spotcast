@@ -13,6 +13,7 @@ from custom_components.spotcast.websocket import (
     player_handler,
     cast_devices_handler,
     categories_handler,
+    generic_get_handler,
 )
 
 WEBSOCKET_ENDPOINTS = MappingProxyType({
@@ -39,6 +40,10 @@ WEBSOCKET_ENDPOINTS = MappingProxyType({
     categories_handler.ENDPOINT: {
         "handler": categories_handler.async_get_categories,
         "schema": categories_handler.SCHEMA,
+    },
+    generic_get_handler.ENDPOINT: {
+        "handler": generic_get_handler.async_get_categories,
+        "schema": generic_get_handler.SCHEMA,
     },
 })
 
