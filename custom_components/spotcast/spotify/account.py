@@ -421,15 +421,15 @@ class SpotifyAccount:
 
         dataset = self._datasets["profile"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing profile dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing profile dataset")
                 data = await self.hass.async_add_executor_job(
                     self._internal_cont.me
                 )
                 dataset.update(data)
-        else:
-            LOGGER.debug("Using cached profile dataset")
+            else:
+                LOGGER.debug("Using cached profile dataset")
 
         return self.profile
 
@@ -440,15 +440,15 @@ class SpotifyAccount:
 
         dataset = self._datasets["devices"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing devices dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing devices dataset")
                 data = await self.hass.async_add_executor_job(
                     self._spotify.devices
                 )
                 dataset.update(data["devices"])
-        else:
-            LOGGER.debug("Using Cached devices dataset")
+            else:
+                LOGGER.debug("Using Cached devices dataset")
 
         return self.devices
 
@@ -567,9 +567,9 @@ class SpotifyAccount:
 
         dataset = self._datasets["playback_state"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing playback state dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing playback state dataset")
                 data = await self.hass.async_add_executor_job(
                     self._internal_cont.current_playback,
                     self.country,
@@ -579,8 +579,8 @@ class SpotifyAccount:
                     data = {}
 
                 dataset.update(data)
-        else:
-            LOGGER.debug("Using Cached playback state dataset")
+            else:
+                LOGGER.debug("Using Cached playback state dataset")
 
         return self.playback_state
 
@@ -602,9 +602,9 @@ class SpotifyAccount:
 
         dataset = self._datasets["playlists"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing playlists dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing playlists dataset")
 
                 playlists = await self._async_pager(
                     self._internal_cont.current_user_playlists,
@@ -613,8 +613,8 @@ class SpotifyAccount:
 
                 dataset.update(playlists)
 
-        else:
-            LOGGER.debug("Using cached playlists dataset")
+            else:
+                LOGGER.debug("Using cached playlists dataset")
 
         return self.playlists
 
@@ -790,17 +790,17 @@ class SpotifyAccount:
 
         dataset = self._datasets["liked_songs"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing liked songs dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing liked songs dataset")
 
                 liked_songs = await self._async_pager(
                     self._internal_cont.current_user_saved_tracks,
                 )
 
                 dataset.update(liked_songs)
-        else:
-            LOGGER.debug("Using cached liked songs dataset")
+            else:
+                LOGGER.debug("Using cached liked songs dataset")
 
         return self.liked_songs
 
@@ -865,9 +865,9 @@ class SpotifyAccount:
 
         dataset = self._datasets["categories"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing Browse Categories dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing Browse Categories dataset")
 
                 categories = await self._async_pager(
                     self._internal_cont.categories,
@@ -877,8 +877,8 @@ class SpotifyAccount:
                 )
 
                 dataset.update(categories)
-        else:
-            LOGGER.debug("Using cached Browse Categories dataset")
+            else:
+                LOGGER.debug("Using cached Browse Categories dataset")
 
         return self.categories
 
