@@ -102,7 +102,9 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
         self.account._datasets["playback_state"]._data = {"foo": "bar"}
         self.mocks["hass"].async_add_executor_job = AsyncMock()
         self.mocks["hass"].async_add_executor_job.return_value = {
-            "foo": "bar"
+            "item": {
+                "uri": "foo"
+            }
         }
 
         self.result = await self.account.async_playback_state()
@@ -114,7 +116,12 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
             self.fail()
 
     def test_profile_retrieved_was_expected(self):
-        self.assertEqual(self.result, {"foo": "bar"})
+        self.assertEqual(self.result, {
+            "item": {
+                "uri": "foo"
+            },
+            "audio_features": {}
+        })
 
 
 class TestNoActivePlayback(IsolatedAsyncioTestCase):
@@ -206,7 +213,9 @@ class TestForceRefresh(IsolatedAsyncioTestCase):
         self.account._datasets["playback_state"]._data = {"foo": "bar"}
         self.mocks["hass"].async_add_executor_job = AsyncMock()
         self.mocks["hass"].async_add_executor_job.return_value = {
-            "foo": "bar"
+            "item": {
+                "uri": "foo"
+            }
         }
 
         self.result = await self.account.async_playback_state(force=True)
@@ -218,4 +227,13 @@ class TestForceRefresh(IsolatedAsyncioTestCase):
             self.fail()
 
     def test_profile_retrieved_was_expected(self):
-        self.assertEqual(self.result, {"foo": "bar"})
+        self.assertEqual(
+            self.result,
+            {
+                "item": {
+                    "uri": "foo"
+                },
+                "audio_features": {}
+            }
+
+        )
