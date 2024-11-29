@@ -31,7 +31,7 @@ async def search_handler(
         - msg (dict): The message received through the WebSocket API.
     """
     account_id = msg.get("account")
-    query = msg.get("url")
+    query = msg.get("query")
     searchType = msg.get("searchType", "playlist")
     limit = msg.get("limit", 10)
 
@@ -43,9 +43,6 @@ async def search_handler(
         account = await SpotifyAccount.async_from_config_entry(hass, entry)
     else:
         account = search_account(hass, account_id)
-
-    # prepend view/ to the url
-    url = f"view/{url}"
 
     result = await account.async_search(
         query,

@@ -976,7 +976,7 @@ class SpotifyAccount:
         await self.async_ensure_tokens_valid()
 
         return await self.hass.async_add_executor_job(
-            partial(self._internal_cont._get, url, None, **params)
+            partial(self._internal_cont._get, "search", None, **params)
         )
 
     async def _async_get_count(
