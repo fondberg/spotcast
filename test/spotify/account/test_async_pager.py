@@ -5,24 +5,24 @@ from unittest.mock import MagicMock, patch, AsyncMock
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
     Spotify
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestPagingApiEndpoint(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(self, mock_spotify: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "spotify": mock_spotify,
         }
 
@@ -43,13 +43,13 @@ class TestPagingApiEndpoint(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            internal_session=self.mocks["internal"],
-            external_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
         )
-        self.account._spotify.dummy_endpoint = MagicMock()
+        self.account.apis["private"].dummy_endpoint = MagicMock()
 
         self.result = await self.account._async_pager(
-            self.account._spotify.dummy_endpoint
+            self.account.apis["private"].dummy_endpoint
         )
 
     def test_proper_result_retrieved(self):
@@ -64,13 +64,13 @@ class TestPagingApiEndpoint(IsolatedAsyncioTestCase):
 
 class TestPagingWithLimit(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(self, mock_spotify: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "spotify": mock_spotify,
         }
 
@@ -97,14 +97,14 @@ class TestPagingWithLimit(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
-        self.account._spotify.dummy_endpoint = MagicMock()
+        self.account.apis["private"].dummy_endpoint = MagicMock()
 
         self.result = await self.account._async_pager(
-            self.account._spotify.dummy_endpoint,
+            self.account.apis["private"].dummy_endpoint,
             max_items=3,
         )
 
@@ -120,13 +120,13 @@ class TestPagingWithLimit(IsolatedAsyncioTestCase):
 
 class TestSubLayeredPager(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(self, mock_spotify: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "spotify": mock_spotify,
         }
 
@@ -151,15 +151,15 @@ class TestSubLayeredPager(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
-        self.account._spotify.dummy_endpoint = MagicMock()
+        self.account.apis["private"].dummy_endpoint = MagicMock()
 
         self.result = await self.account._async_pager(
-            self.account._spotify.dummy_endpoint,
+            self.account.apis["private"].dummy_endpoint,
             sub_layer="foo"
         )
 

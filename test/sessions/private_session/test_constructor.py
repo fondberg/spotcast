@@ -1,4 +1,4 @@
-"""Module to test the InternalSession constructor"""
+"""Module to test the PrivateSession constructor"""
 
 from unittest import TestCase
 from unittest.mock import MagicMock
@@ -6,8 +6,8 @@ from asyncio import Lock
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.spotcast.sessions.internal_session import (
-    InternalSession,
+from custom_components.spotcast.sessions.private_session import (
+    PrivateSession,
     ConfigEntry
 )
 
@@ -17,7 +17,7 @@ class TestDataRetention(TestCase):
     def setUp(self):
         self.mock_hass = MagicMock(spec=HomeAssistant)
         self.mock_entry = MagicMock(spec=ConfigEntry)
-        self.session = InternalSession(self.mock_hass, self.mock_entry)
+        self.session = PrivateSession(self.mock_hass, self.mock_entry)
 
     def test_hass_retained(self):
         self.assertIs(self.session.hass, self.mock_hass)

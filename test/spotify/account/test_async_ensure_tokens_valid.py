@@ -5,28 +5,28 @@ from unittest.mock import MagicMock, patch, AsyncMock
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
     TokenError,
     ConfigEntry,
     SOURCE_REAUTH,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestWithProfileRefresh(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -41,8 +41,8 @@ class TestWithProfileRefresh(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -65,24 +65,22 @@ class TestWithProfileRefresh(IsolatedAsyncioTestCase):
 
     def test_spotify_token_updated_after_refresh(self):
         try:
-            self.account._spotify.set_auth.assert_any_call(
-                "12345"
-            )
+            self.account.apis["public"].set_auth.assert_called()
         except AssertionError:
             self.fail()
 
 
 class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -99,8 +97,8 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -123,30 +121,28 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
 
     def test_spotify_token_updated_after_refresh(self):
         try:
-            self.account._spotify.set_auth.assert_any_call(
-                "12345"
-            )
+            self.account.apis["public"].set_auth.assert_called()
         except AssertionError:
             self.fail()
 
     def test_internal_controller_token_updated_after_refresh(self):
         try:
-            self.account._spotify.set_auth.assert_any_call("23456")
+            self.account.apis["private"].set_auth.assert_called()
         except AssertionError:
             self.fail()
 
 
 class TestTokenErrorHandling(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def test_reauth_process_not_called_when_not_requested(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
             "entry": MagicMock(spec=ConfigEntry),
         }
@@ -163,8 +159,8 @@ class TestTokenErrorHandling(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -178,15 +174,15 @@ class TestTokenErrorHandling(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail()
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def test_reauth_process_called_when_requested(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
             "entry": MagicMock(spec=ConfigEntry),
         }
@@ -203,8 +199,8 @@ class TestTokenErrorHandling(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 

@@ -7,24 +7,25 @@ from time import time
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
+    Spotify,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestDatasetFresh(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -39,8 +40,8 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -65,15 +66,15 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
 
 class TestDatasetExpired(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -88,8 +89,8 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -107,7 +108,7 @@ class TestDatasetExpired(IsolatedAsyncioTestCase):
     def test_new_profile_was_not_fetched(self):
         try:
             self.account._async_pager.assert_called_with(
-                self.account._spotify.categories,
+                self.account.apis["private"].categories,
                 prepends=[None, None],
                 sub_layer="categories",
                 max_items=None,

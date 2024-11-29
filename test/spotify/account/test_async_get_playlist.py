@@ -6,13 +6,13 @@ from time import time
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    InternalSession,
-    OAuth2Session,
+    PrivateSession,
+    PublicSession,
     HomeAssistant,
     Spotify,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 API_RESULT = {
     "collaborative": False,
@@ -60,13 +60,13 @@ API_RESULT = {
 
 class TestPlayslistRetrieval(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(self, mock_spotify: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "spotify": mock_spotify,
         }
 
@@ -76,8 +76,8 @@ class TestPlayslistRetrieval(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            internal_session=self.mocks["internal"],
-            external_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
         )
 
         self.account._datasets["profile"].expires_at = time() + 9999
@@ -95,7 +95,7 @@ class TestPlayslistRetrieval(IsolatedAsyncioTestCase):
     def test_proper_call_to__executor(self):
         try:
             self.mocks["hass"].async_add_executor_job.assert_called_with(
-                self.account._spotify.playlist,
+                self.account.apis["private"].playlist,
                 "foo",
                 None,
                 "CA",

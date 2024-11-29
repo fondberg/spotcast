@@ -5,19 +5,22 @@ from unittest.mock import MagicMock, patch
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
+    Spotify,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestDataRetention(IsolatedAsyncioTestCase):
 
-    @patch("custom_components.spotcast.spotify.account.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(self, mock_spotify: MagicMock):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
 
         self.mock_spotify = mock_spotify
 
@@ -29,14 +32,14 @@ class TestDataRetention(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=MagicMock(spec=HomeAssistant),
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 
         mock_internal.token = "12345"
 
-        self.result = await self.account.async_get_token("internal")
+        self.result = await self.account.async_get_token("private")
 
     def test_correct_token_retrieved(self):
         self.assertEqual(self.result, "12345")

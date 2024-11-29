@@ -7,8 +7,8 @@ from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
     ConfigEntry,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     ConfigEntry,
 )
 
@@ -18,8 +18,8 @@ TEST_MODULE = "custom_components.spotcast.spotify.account"
 class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
 
     @patch.object(SpotifyAccount, "async_profile")
-    @patch.object(InternalSession, "async_ensure_token_valid")
-    @patch.object(OAuth2Session, "async_ensure_token_valid")
+    @patch.object(PrivateSession, "async_ensure_token_valid")
+    @patch.object(PublicSession, "async_ensure_token_valid")
     @patch(f"{TEST_MODULE}.async_get_config_entry_implementation")
     async def asyncSetUp(
         self,
@@ -70,8 +70,8 @@ class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
 class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
 
     @patch.object(SpotifyAccount, "async_profile")
-    @patch.object(InternalSession, "async_ensure_token_valid")
-    @patch.object(OAuth2Session, "async_ensure_token_valid")
+    @patch.object(PrivateSession, "async_ensure_token_valid")
+    @patch.object(PublicSession, "async_ensure_token_valid")
     @patch(f"{TEST_MODULE}.async_get_config_entry_implementation")
     async def asyncSetUp(
         self,
@@ -119,8 +119,8 @@ class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
 class TestPreexistingAccount(IsolatedAsyncioTestCase):
 
     @patch.object(SpotifyAccount, "async_profile")
-    @patch.object(InternalSession, "async_ensure_token_valid")
-    @patch.object(OAuth2Session, "async_ensure_token_valid")
+    @patch.object(PrivateSession, "async_ensure_token_valid")
+    @patch.object(PublicSession, "async_ensure_token_valid")
     @patch(f"{TEST_MODULE}.async_get_config_entry_implementation")
     async def asyncSetUp(
         self,
@@ -141,8 +141,8 @@ class TestPreexistingAccount(IsolatedAsyncioTestCase):
                 "account": SpotifyAccount(
                     entry_id="12345",
                     hass=self.mocks["hass"],
-                    external_session=MagicMock(spec=OAuth2Session),
-                    internal_session=MagicMock(spec=InternalSession),
+                    public_session=MagicMock(spec=PublicSession),
+                    private_session=MagicMock(spec=PrivateSession),
                     is_default=True,
                 )
             }

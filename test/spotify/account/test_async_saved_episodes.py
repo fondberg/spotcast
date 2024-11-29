@@ -5,17 +5,18 @@ from time import time
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    InternalSession,
+    PrivateSession,
     HomeAssistant,
-    OAuth2Session,
+    PublicSession,
+    Spotify,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestDatasetFresh(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
@@ -24,8 +25,8 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
         mock_spotify.return_value = MagicMock(spec=SpotifyAccount)
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
             "spotify": mock_spotify.return_value,
         }
@@ -39,8 +40,8 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -63,7 +64,7 @@ class TestDatasetFresh(IsolatedAsyncioTestCase):
     def test_pager_properly_called(self):
         try:
             self.account._async_pager.assert_called_with(
-                self.account._spotify.current_user_saved_episodes,
+                self.account.apis["private"].current_user_saved_episodes,
                 appends=["CA"],
                 max_items=None
             )

@@ -2,7 +2,7 @@
 internal api credentials
 
 Classes:
-    - InternalSession
+    - PrivateSession
     - ExpiredSpotifyKeyError
     - TokenError
 """
@@ -30,7 +30,7 @@ from custom_components.spotcast.sessions.exceptions import (
 LOGGER = getLogger(__name__)
 
 
-class InternalSession(ConnectionSession):
+class PrivateSession(ConnectionSession):
     """Api session with access to Spotify's private API
 
     Attributes:
@@ -101,6 +101,11 @@ class InternalSession(ConnectionSession):
     def token(self) -> str:
         """Returns the token"""
         return self._access_token
+
+    @property
+    def clean_token(self) -> str:
+        """Returns the token"""
+        return self.token
 
     @property
     def valid_token(self) -> bool:

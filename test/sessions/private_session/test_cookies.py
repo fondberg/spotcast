@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.spotcast.sessions.internal_session import (
-    InternalSession,
+from custom_components.spotcast.sessions.private_session import (
+    PrivateSession,
     ConfigEntry
 )
 
@@ -25,7 +25,7 @@ class TestCookieValue(TestCase):
             }
         }
 
-        self.session = InternalSession(mock_hass, mock_entry)
+        self.session = PrivateSession(mock_hass, mock_entry)
         self.cookies = self.session.cookies
 
     def test_sp_dc_key_in_cookie_dict(self):

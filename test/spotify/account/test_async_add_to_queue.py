@@ -6,27 +6,27 @@ from time import time
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
     PlaybackError,
     SpotifyException,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestAddToQueueJob(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -41,8 +41,8 @@ class TestAddToQueueJob(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -60,7 +60,7 @@ class TestAddToQueueJob(IsolatedAsyncioTestCase):
     def test_proper_executor_job_called(self):
         try:
             self.mocks["hass"].async_add_executor_job.assert_called_with(
-                self.account._spotify.add_to_queue,
+                self.account.apis["private"].add_to_queue,
                 "spotify:dummy:uri",
                 None,
             )
@@ -77,8 +77,8 @@ class TestAddToQueueFails(IsolatedAsyncioTestCase):
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -93,8 +93,8 @@ class TestAddToQueueFails(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 

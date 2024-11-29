@@ -7,8 +7,8 @@ from time import time
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
-    InternalSession,
-    OAuth2Session,
+    PrivateSession,
+    PublicSession,
 )
 
 
@@ -19,8 +19,8 @@ class TestSongRetrieval(IsolatedAsyncioTestCase):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
         }
 
         self.mocks["hass"].async_add_executor_job = AsyncMock()
@@ -108,8 +108,8 @@ class TestSongRetrieval(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            internal_session=self.mocks["internal"],
-            external_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
         )
         self.account._datasets["profile"].expires_at = time() + 9999
         self.account._datasets["profile"]._data = {
@@ -126,7 +126,7 @@ class TestSongRetrieval(IsolatedAsyncioTestCase):
     def test_executor_job_properly_called(self):
         try:
             self.mocks["hass"].async_add_executor_job.assert_called_with(
-                self.account._spotify.track,
+                self.account.apis["private"].track,
                 "spotify:track:55mJleti2WfWEFNFcBduhc",
                 "CA"
             )

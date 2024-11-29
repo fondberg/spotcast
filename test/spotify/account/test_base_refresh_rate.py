@@ -5,20 +5,22 @@ from unittest.mock import MagicMock, patch
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
-    Dataset
+    Spotify,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestGetter(TestCase):
 
-    @patch("custom_components.spotcast.spotify.account.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     def setUp(self, mock_spotify: MagicMock):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
 
         self.mock_spotify = mock_spotify
 
@@ -30,8 +32,8 @@ class TestGetter(TestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=MagicMock(spec=HomeAssistant),
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 
@@ -44,11 +46,11 @@ class TestGetter(TestCase):
 
 class TestSetter(TestCase):
 
-    @patch("custom_components.spotcast.spotify.account.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     def setUp(self, mock_spotify: MagicMock):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
 
         self.mock_spotify = mock_spotify
 
@@ -60,8 +62,8 @@ class TestSetter(TestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=MagicMock(spec=HomeAssistant),
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 

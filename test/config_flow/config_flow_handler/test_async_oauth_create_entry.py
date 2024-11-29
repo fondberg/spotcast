@@ -10,7 +10,7 @@ from custom_components.spotcast.config_flow.config_flow_handler import (
     SpotcastFlowHandler,
     SOURCE_REAUTH,
     Spotify,
-    InternalSession,
+    PrivateSession,
 )
 
 from test.unit_utils import AsyncMock
@@ -35,7 +35,7 @@ class TestExternalApiEntry(IsolatedAsyncioTestCase):
 
         self.flow_handler = SpotcastFlowHandler()
 
-    @patch.object(SpotcastFlowHandler, "async_show_form")
+    @patch.object(SpotcastFlowHandler, "async_show_form", new_callable=MagicMock)
     async def test_data_attributes_has_external_api_data(
         self,
         mock_form: MagicMock
@@ -43,7 +43,7 @@ class TestExternalApiEntry(IsolatedAsyncioTestCase):
         await self.flow_handler.async_oauth_create_entry(self.external_api)
         self.assertIn("external_api", self.flow_handler.data)
 
-    @patch.object(SpotcastFlowHandler, "async_show_form")
+    @patch.object(SpotcastFlowHandler, "async_show_form", new_callable=MagicMock)
     async def test_intern_api_step_is_called(self, mock_form: MagicMock):
         await self.flow_handler.async_oauth_create_entry(self.external_api)
         try:
@@ -82,16 +82,17 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
             "internal_api": self.internal_api,
         }
 
-    @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
-    @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch.object(SpotcastFlowHandler, "async_set_unique_id")
+    @patch.object(SpotcastFlowHandler, "hass", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_spotify_object_created_with_proper_access_token(
             self,
             mock_spotify: MagicMock,
             mock_hass: MagicMock,
-            mock_set_id: MagicMock,
+            mock_set_id: AsyncMock,
     ):
 
+        mock_hass.async_add_executor_job = AsyncMock()
         mock_hass.async_add_executor_job.return_value = {
             "id": "foo",
             "display_name": "Dummy User",
@@ -112,22 +113,23 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail("Spotify constructor called with wrong token")
 
-    @patch(f"{TEST_MODULE}.InternalSession")
+    @patch(f"{TEST_MODULE}.PrivateSession", spec=PrivateSession, new_callable=MagicMock)
     @patch.object(SpotcastFlowHandler, "async_create_entry")
-    @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
-    @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch.object(SpotcastFlowHandler, "async_set_unique_id")
+    @patch.object(SpotcastFlowHandler, "hass", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_entry_setup_with_expected_data(
             self,
             mock_spotify: MagicMock,
             mock_hass: MagicMock,
-            mock_set_id: MagicMock,
-            mock_entry: MagicMock,
+            mock_set_id: AsyncMock,
+            mock_entry: AsyncMock,
             mock_session: MagicMock,
     ):
-        mock_session.return_value = MagicMock(spec=InternalSession)
+        mock_session.return_value = MagicMock(spec=PrivateSession)
         mock_session.return_value.async_ensure_token_valid = AsyncMock()
 
+        mock_hass.async_add_executor_job = AsyncMock()
         mock_hass.async_add_executor_job.return_value = {
             "id": "foo",
             "display_name": "Dummy User",
@@ -163,22 +165,23 @@ class TestInternalApiEntry(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail("Wrong arguments provided to entry creation")
 
-    @patch(f"{TEST_MODULE}.InternalSession")
+    @patch(f"{TEST_MODULE}.PrivateSession", spec=PrivateSession, new_callable=MagicMock)
     @patch.object(SpotcastFlowHandler, "async_create_entry")
-    @patch.object(SpotcastFlowHandler, "async_set_unique_id", new_callable=AsyncMock)
-    @patch.object(SpotcastFlowHandler, "hass", new_callable=AsyncMock)
-    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
+    @patch.object(SpotcastFlowHandler, "async_set_unique_id")
+    @patch.object(SpotcastFlowHandler, "hass", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_name_is_id_when_missing_display_name(
             self,
             mock_spotify: MagicMock,
             mock_hass: MagicMock,
-            mock_set_id: MagicMock,
-            mock_entry: MagicMock,
+            mock_set_id: AsyncMock,
+            mock_entry: AsyncMock,
             mock_session: MagicMock,
     ):
 
-        mock_session.return_value = MagicMock(spec=InternalSession)
+        mock_session.return_value = MagicMock(spec=PrivateSession)
         mock_session.return_value.async_ensure_token_valid = AsyncMock()
+        mock_hass.async_add_executor_job = AsyncMock()
         mock_hass.async_add_executor_job.return_value = {
             "id": "foo",
         }
@@ -230,7 +233,7 @@ class TestImportOfYamlConfig(IsolatedAsyncioTestCase):
             "sp_key": "bar",
         }
 
-    @patch.object(SpotcastFlowHandler, "async_show_form")
+    @patch.object(SpotcastFlowHandler, "async_show_form", new_callable=MagicMock)
     @patch.object(SpotcastFlowHandler, "async_set_unique_id")
     @patch.object(SpotcastFlowHandler, "hass", new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
@@ -238,7 +241,7 @@ class TestImportOfYamlConfig(IsolatedAsyncioTestCase):
             self,
             mock_spotify: MagicMock,
             mock_hass: MagicMock,
-            mock_set_id: MagicMock,
+            mock_set_id: AsyncMock,
             mock_form: MagicMock,
     ):
 
@@ -265,8 +268,8 @@ class TestImportOfYamlConfig(IsolatedAsyncioTestCase):
 
 class TestReauthProcess(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.InternalSession")
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.PrivateSession", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
@@ -274,7 +277,7 @@ class TestReauthProcess(IsolatedAsyncioTestCase):
     ):
 
         mock_spotify.return_value = MagicMock(spec=Spotify)
-        mock_session.return_value = MagicMock(spec=InternalSession)
+        mock_session.return_value = MagicMock(spec=PrivateSession)
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
