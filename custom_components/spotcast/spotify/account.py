@@ -968,7 +968,6 @@ class SpotifyAccount:
 
         params = {
             "q": query,
-            "locale": locale,
             "type": searchType,
             "limit": limit,
         }
