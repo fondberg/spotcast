@@ -24,7 +24,7 @@ SCHEMA = vol.Schema(
 async def async_search_handler(
     hass: HomeAssistant, connection: ActiveConnection, msg: dict
 ):
-    """Searches for a playlist or song.
+    """Searches for playlists or tracks.
 
     Args:
         - hass (HomeAssistant): The Home Assistant instance.
@@ -59,8 +59,8 @@ async def async_search_handler(
             if "images" in item and len(item["images"]) > 0
             else None,
         }
-        for item in result[searchType]
-        if "id" in item  # Only include playlists with an 'id'
+        for item in result[f"{searchType}s"]
+        if "id" in item
     ]
 
     connection.send_result(
@@ -68,6 +68,6 @@ async def async_search_handler(
         {
             "total": len(formatted_results),
             "account": account_id,
-            "playlists": formatted_results,
+            f"{searchType}s": formatted_results,
         },
     )

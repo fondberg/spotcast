@@ -955,15 +955,15 @@ class SpotifyAccount:
         searchType: int,
         limit: str,
     ) -> list:
-        """Fetches either a playlist or songs based.
+        """Fetches either playlists or tracks.
 
         Args:
             - query(str): The query of the list to fetch (e.g., 'Where is the love').
-            - searchType(int): what to retrieve playlists or individual songs.
+            - searchType(int): what to retrieve playlists or individual tracks.
             - limit(int): The maximum number of playlists to retrieve.
             
         Returns:
-            - list: A list of playlists or songs
+            - list: A list of playlists or tracks
         """
 
         params = {
