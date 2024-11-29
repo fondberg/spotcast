@@ -16,6 +16,7 @@ SCHEMA = vol.Schema(
         vol.Required("query"): cv.string,
         vol.Optional("searchType"): cv.string, # Playlist or song, default playlist
         vol.Optional("limit"): cv.positive_int,
+        vol.Optional("account"): cv.string,
     }
 )
 
