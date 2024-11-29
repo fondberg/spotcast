@@ -173,6 +173,11 @@ class SpotifyAccount:
         self._base_refresh_rate = 30
 
         self._datasets: dict[str, Dataset] = {}
+        self.last_playback_state = {}
+        self.current_item = {
+            "uri": None,
+            "audio_features": {}
+        }
 
         for name, dataset in self.DATASETS.items():
             refresh_rate = dataset["refresh_factor"] * self._base_refresh_rate
@@ -569,8 +574,10 @@ class SpotifyAccount:
                     self.country,
                 )
 
-                if data is None:
-                    data = {}
+                data = {} if data is None else data
+
+                if data != {}:
+                    data = await self._async_add_audio_features(data)
 
                 dataset.update(data)
             else:
@@ -578,8 +585,24 @@ class SpotifyAccount:
 
         return self.playback_state
 
+    async def _async_add_audio_features(self, playback_state: dict) -> dict:
+        """Adds the audio_features to the current playback state"""
+        current_uri = playback_state["item"]["uri"]
+        last_uri = self.current_item["uri"]
+
+        if current_uri != last_uri:
+            audio_features = await self.async_track_features(current_uri)
+            self.current_item["audio_features"] = audio_features
+
+        playback_state["audio_features"] = self.current_item["audio_features"]
+        return playback_state
+
     async def async_track_features(self, uri: str) -> str:
-        """Returns the track audio features"""
+        """Returns the track audio features. Returns an empty
+        dictionary if the item doesn't have audio features"""
+        if uri is None or not uri.startswith("spotify:track:"):
+            return {}
+
         return await self.hass.async_add_executor_job(
             self.apis["private"].audio_features(uri)
         )
