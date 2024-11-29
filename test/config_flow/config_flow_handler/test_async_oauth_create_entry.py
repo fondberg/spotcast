@@ -1,7 +1,7 @@
 """Module to test the async_oauth_create_entry function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 
 from spotipy import Spotify
 from homeassistant.core import HomeAssistant
@@ -12,8 +12,6 @@ from custom_components.spotcast.config_flow.config_flow_handler import (
     Spotify,
     PrivateSession,
 )
-
-from test.unit_utils import AsyncMock
 
 TEST_MODULE = "custom_components.spotcast.config_flow.config_flow_handler"
 
