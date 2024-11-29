@@ -424,13 +424,15 @@ class SpotifyAccount:
 
         dataset = self._datasets["profile"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing profile dataset")
-            async with dataset.lock:
-                data = await self.hass.async_add_executor_job(self._spotify.me)
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing profile dataset")
+                data = await self.hass.async_add_executor_job(
+                    self._internal_cont.me
+                )
                 dataset.update(data)
-        else:
-            LOGGER.debug("Using cached profile dataset")
+            else:
+                LOGGER.debug("Using cached profile dataset")
 
         return self.profile
 
@@ -441,15 +443,15 @@ class SpotifyAccount:
 
         dataset = self._datasets["devices"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing devices dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing devices dataset")
                 data = await self.hass.async_add_executor_job(
                     self._spotify.devices
                 )
                 dataset.update(data["devices"])
-        else:
-            LOGGER.debug("Using Cached devices dataset")
+            else:
+                LOGGER.debug("Using Cached devices dataset")
 
         return self.devices
 
@@ -476,7 +478,7 @@ class SpotifyAccount:
         )
 
         return await self._async_pager(
-            self._spotify.current_user_saved_episodes,
+            self._internal_cont.current_user_saved_episodes,
             appends=[self.country],
             max_items=limit,
         )
@@ -495,7 +497,7 @@ class SpotifyAccount:
         LOGGER.debug("Getting track information for `%s`", uri)
 
         result = await self.hass.async_add_executor_job(
-            self._spotify.track,
+            self._internal_cont.track,
             uri,
             self.country
         )
@@ -515,7 +517,7 @@ class SpotifyAccount:
         playlist_id = uri.rsplit(":", maxsplit=1)[-1]
 
         result = await self.hass.async_add_executor_job(
-            self._spotify.playlist,
+            self._internal_cont.playlist,
             playlist_id,
             None,
             self.country,
@@ -536,7 +538,7 @@ class SpotifyAccount:
         album_id = uri.rsplit(":", maxsplit=1)[-1]
 
         result = await self.hass.async_add_executor_job(
-            self._spotify.album,
+            self._internal_cont.album,
             album_id,
             self.country,
         )
@@ -554,7 +556,7 @@ class SpotifyAccount:
         """
 
         result = await self.hass.async_add_executor_job(
-            self._spotify.artist_top_tracks,
+            self._internal_cont.artist_top_tracks,
             uri,
             self.country,
         )
@@ -568,11 +570,11 @@ class SpotifyAccount:
 
         dataset = self._datasets["playback_state"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing playback state dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing playback state dataset")
                 data = await self.hass.async_add_executor_job(
-                    self._spotify.current_playback,
+                    self._internal_cont.current_playback,
                     self.country,
                 )
 
@@ -580,8 +582,8 @@ class SpotifyAccount:
                     data = {}
 
                 dataset.update(data)
-        else:
-            LOGGER.debug("Using Cached playback state dataset")
+            else:
+                LOGGER.debug("Using Cached playback state dataset")
 
         return self.playback_state
 
@@ -589,7 +591,7 @@ class SpotifyAccount:
         """Returns the number of user playlist for an account"""
 
         return await self._async_get_count(
-            self._spotify.current_user_playlists
+            self._internal_cont.current_user_playlists
         )
 
     async def async_playlists(
@@ -603,19 +605,19 @@ class SpotifyAccount:
 
         dataset = self._datasets["playlists"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing playlists dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing playlists dataset")
 
                 playlists = await self._async_pager(
-                    self._spotify.current_user_playlists,
+                    self._internal_cont.current_user_playlists,
                     max_items=max_items,
                 )
 
                 dataset.update(playlists)
 
-        else:
-            LOGGER.debug("Using cached playlists dataset")
+            else:
+                LOGGER.debug("Using cached playlists dataset")
 
         return self.playlists
 
@@ -638,7 +640,7 @@ class SpotifyAccount:
             limit = max_items
 
         search_result = await self._async_pager(
-            function=self._spotify.search,
+            function=self._internal_cont.search,
             prepends=[query.query_string],
             appends=[query.item_type, self.country],
             limit=limit,
@@ -780,7 +782,7 @@ class SpotifyAccount:
     async def async_liked_songs_count(self) -> int:
         """returns the number of linked songs for an account"""
         return await self._async_get_count(
-            self._spotify.current_user_saved_tracks,
+            self._internal_cont.current_user_saved_tracks,
         )
 
     async def async_liked_songs(self, force: bool = False) -> list[str]:
@@ -791,17 +793,17 @@ class SpotifyAccount:
 
         dataset = self._datasets["liked_songs"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing liked songs dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing liked songs dataset")
 
                 liked_songs = await self._async_pager(
-                    self._spotify.current_user_saved_tracks,
+                    self._internal_cont.current_user_saved_tracks,
                 )
 
                 dataset.update(liked_songs)
-        else:
-            LOGGER.debug("Using cached liked songs dataset")
+            else:
+                LOGGER.debug("Using cached liked songs dataset")
 
         return self.liked_songs
 
@@ -866,20 +868,20 @@ class SpotifyAccount:
 
         dataset = self._datasets["categories"]
 
-        if force or dataset.is_expired:
-            LOGGER.debug("Refreshing Browse Categories dataset")
-            async with dataset.lock:
+        async with dataset.lock:
+            if force or dataset.is_expired:
+                LOGGER.debug("Refreshing Browse Categories dataset")
 
                 categories = await self._async_pager(
-                    self._spotify.categories,
+                    self._internal_cont.categories,
                     prepends=[self.country, None],
                     sub_layer="categories",
                     max_items=limit,
                 )
 
                 dataset.update(categories)
-        else:
-            LOGGER.debug("Using cached Browse Categories dataset")
+            else:
+                LOGGER.debug("Using cached Browse Categories dataset")
 
         return self.categories
 
@@ -907,7 +909,7 @@ class SpotifyAccount:
         )
 
         playlists = await self._async_pager(
-            self._spotify.category_playlists,
+            self._internal_cont.category_playlists,
             prepends=[category_id, self.country],
             sub_layer="playlists",
             max_items=limit,
