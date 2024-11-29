@@ -55,6 +55,7 @@ async def async_search_handler(
         {
             "id": item["id"],
             "name": item["name"],
+            "href": item["href"],
             "icon": item["images"][0]["url"]
             if "images" in item and len(item["images"]) > 0
             else None,
