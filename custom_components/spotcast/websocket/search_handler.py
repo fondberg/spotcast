@@ -14,13 +14,13 @@ SCHEMA = vol.Schema(
         vol.Required("id"): cv.positive_int,
         vol.Required("type"): ENDPOINT,
         vol.Required("query"): cv.string,
-        vol.optional("searchType"): cv.string, # Playlist or song, default playlist
+        vol.Optional("searchType"): cv.string, # Playlist or song, default playlist
         vol.Optional("limit"): cv.positive_int,
     }
 )
 
 @websocket_wrapper
-async def search_handler(
+async def async_search_handler(
     hass: HomeAssistant, connection: ActiveConnection, msg: dict
 ):
     """Searches for a playlist or song.

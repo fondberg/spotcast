@@ -888,7 +888,7 @@ class SpotifyAccount:
     async def async_category_playlists(
             self,
             category_id: str,
-            limit: int = None,
+            limit: int,
     ) -> list[str]:
         """Fetches the playlist associated with a browse category
 
@@ -937,8 +937,8 @@ class SpotifyAccount:
         params = {
             "content_limit": limit,
             "locale": locale,
-            "platform": "album,playlist,artist,show,station",
-            "types": "web",
+            "platform": "web",
+            "types": "album,playlist,artist,show,station",
             "limit": limit,
             "offset": 0,
         }

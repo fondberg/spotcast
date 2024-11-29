@@ -43,11 +43,11 @@ WEBSOCKET_ENDPOINTS = MappingProxyType({
         "schema": categories_handler.SCHEMA,
     },
     view_handler.ENDPOINT: {
-        "handler": view_handler.async_get_categories,
+        "handler": view_handler.async_view_handler,
         "schema": view_handler.SCHEMA,
     },
     search_handler.ENDPOINT: {
-        "handler": search_handler.async_get_categories,
+        "handler": search_handler.async_search_handler,
         "schema": search_handler.SCHEMA,
     },
 })

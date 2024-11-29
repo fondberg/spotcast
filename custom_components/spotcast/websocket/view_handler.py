@@ -23,7 +23,7 @@ SCHEMA = vol.Schema(
 )
 
 @websocket_wrapper
-async def view_handler(
+async def async_view_handler(
     hass: HomeAssistant, connection: ActiveConnection, msg: dict
 ):
     """Gets a list of playlists from a specified account.
@@ -47,26 +47,25 @@ async def view_handler(
     else:
         account = search_account(hass, account_id)
 
-    # prepend view/ to the url
-    url = f"view/{url}"
+    # prepend views/ to the url
+    url = f"views/{url}"
 
     playlists = await account.async_view(
         url=url,
         limit=limit,
         locale=locale,
-        types=types,
     )
 
     formatted_playlists = [
         {
-            "id": playlist["id"],
+            "id": playlist.get("id", None),
             "name": playlist["name"],
+            "href": playlist["href"],
             "icon": playlist["images"][0]["url"]
             if "images" in playlist and len(playlist["images"]) > 0
             else None,
         }
         for playlist in playlists["content"]["items"]
-        if "id" in playlist  # Only include playlists with an 'id'
     ]
 
     connection.send_result(
