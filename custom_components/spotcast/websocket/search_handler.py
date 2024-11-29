@@ -48,9 +48,9 @@ async def search_handler(
     url = f"view/{url}"
 
     result = await account.async_search(
-        query: query,
-        searchType: searchType,
-        limit: limit,
+        query,
+        searchType,
+        limit,
     )
 
     formatted_results = [
