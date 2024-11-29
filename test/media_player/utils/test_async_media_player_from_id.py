@@ -1,7 +1,7 @@
 """Module to test the media_player_from_id function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from custom_components.spotcast.media_player.utils import (
     async_media_player_from_id,
@@ -18,7 +18,7 @@ TEST_MODULE = "custom_components.spotcast.media_player.utils"
 class TestDeviceFound(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_entities_from_integration")
-    async def asyncSetUp(self, mock_entities: MagicMock):
+    async def asyncSetUp(self, mock_entities: AsyncMock):
 
         self.mock_device = MagicMock(spec=SpotifyDevice)
 
@@ -47,7 +47,7 @@ class TestDeviceFound(IsolatedAsyncioTestCase):
 class TestDeviceNotFound(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_entities_from_integration")
-    async def test_error_raised(self, mock_entities: MagicMock):
+    async def test_error_raised(self, mock_entities: AsyncMock):
 
         self.mock_device = MagicMock(spec=SpotifyDevice)
 

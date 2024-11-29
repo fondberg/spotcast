@@ -1,7 +1,7 @@
 """Module ot test the async method step_internal_api"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch, AsyncMock
 
 from custom_components.spotcast.config_flow.config_flow_handler import (
     SpotcastFlowHandler
@@ -36,7 +36,7 @@ class TestInternalApiSetup(IsolatedAsyncioTestCase):
     @patch.object(SpotcastFlowHandler, "async_oauth_create_entry")
     async def test_integration_of_internal_api_information(
             self,
-            mock_create: MagicMock
+            mock_create: AsyncMock
     ):
 
         await self.flow_handler.async_step_internal_api(self.internal_api)
@@ -78,7 +78,7 @@ class TestCountryCodeProvided(IsolatedAsyncioTestCase):
     @patch.object(SpotcastFlowHandler, "async_oauth_create_entry")
     async def test_integration_of_internal_api_information(
             self,
-            mock_create: MagicMock
+            mock_create: AsyncMock
     ):
 
         await self.flow_handler.async_step_internal_api(self.internal_api)

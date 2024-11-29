@@ -18,9 +18,9 @@ TEST_MODULE = "custom_components.spotcast.services.add_to_queue"
 
 class TestPlaybackActive(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    async def asyncSetUp(self, mock_account: MagicMock, mock_entry: MagicMock):
+    async def asyncSetUp(self, mock_account: AsyncMock, mock_entry: AsyncMock):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
         mock_entry.return_value = MagicMock(spec=ConfigEntry)
@@ -59,9 +59,9 @@ class TestPlaybackActive(IsolatedAsyncioTestCase):
 
 class TestNoPlayback(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    async def asyncSetUp(self, mock_account: MagicMock, mock_entry: MagicMock):
+    async def asyncSetUp(self, mock_account: AsyncMock, mock_entry: MagicMock):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
         mock_entry.return_value = MagicMock(spec=ConfigEntry)

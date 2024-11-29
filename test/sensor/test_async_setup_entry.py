@@ -16,13 +16,13 @@ TEST_MODULE = "custom_components.spotcast.sensor"
 
 class TestSensorCreation(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.SpotifyAccountTypeSensor")
-    @patch(f"{TEST_MODULE}.SpotifyFollowersSensor")
-    @patch(f"{TEST_MODULE}.SpotifyProductSensor")
-    @patch(f"{TEST_MODULE}.SpotifyLikedSongsSensor")
-    @patch(f"{TEST_MODULE}.SpotifyProfileSensor")
-    @patch(f"{TEST_MODULE}.SpotifyPlaylistsSensor")
-    @patch(f"{TEST_MODULE}.SpotifyDevicesSensor")
+    @patch(f"{TEST_MODULE}.SpotifyAccountTypeSensor", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SpotifyFollowersSensor", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SpotifyProductSensor", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SpotifyLikedSongsSensor", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SpotifyProfileSensor", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SpotifyPlaylistsSensor", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SpotifyDevicesSensor", new_callable=MagicMock)
     async def asyncSetUp(
         self,
         mock_devices: MagicMock,

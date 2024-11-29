@@ -18,18 +18,17 @@ TEST_MODULE = "custom_components.spotcast.media_player"
 class TestMediaPlayerSetup(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_track_time_interval")
-    @patch.object(DeviceManager, "async_update", new_callable=AsyncMock)
+    @patch.object(DeviceManager, "async_update")
     @patch.object(
         SpotifyAccount,
         "async_from_config_entry",
-        new_callable=AsyncMock,
         return_value=MagicMock(spec=SpotifyAccount)
     )
     async def asyncSetUp(
         self,
-        mock_account: MagicMock,
-        mock_update: MagicMock,
-        mock_track_time: MagicMock,
+        mock_account: AsyncMock,
+        mock_update: AsyncMock,
+        mock_track_time: AsyncMock,
     ):
 
         self.mock_update = mock_update

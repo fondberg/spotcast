@@ -1,7 +1,7 @@
 """Module to test the entities_from_integration function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from homeassistant.helpers.entity_platform import EntityPlatform
 
@@ -16,7 +16,7 @@ TEST_MODULE = "custom_components.spotcast.media_player.utils"
 class TestNoFilter(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_get_platforms")
-    async def asyncSetUp(self, mock_platforms: MagicMock):
+    async def asyncSetUp(self, mock_platforms: AsyncMock):
 
         mock_platform = MagicMock(spec=EntityPlatform)
         mock_platform.entities = {
@@ -45,7 +45,7 @@ class TestNoFilter(IsolatedAsyncioTestCase):
 class TestWithFilter(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_get_platforms")
-    async def asyncSetUp(self, mock_platforms: MagicMock):
+    async def asyncSetUp(self, mock_platforms: AsyncMock):
 
         mock_platform = MagicMock(spec=EntityPlatform)
         mock_platform.entities = {

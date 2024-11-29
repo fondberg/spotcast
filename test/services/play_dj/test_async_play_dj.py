@@ -18,7 +18,7 @@ class TestBaseMediaPlayback(IsolatedAsyncioTestCase):
     @patch(f"{TEST_MODULE}.async_play_media")
     async def asyncSetUp(
         self,
-        mock_play_media: MagicMock,
+        mock_play_media: AsyncMock,
     ):
 
         self.mocks = {
@@ -74,7 +74,7 @@ class TestMediaPlaybackWithoutExtras(IsolatedAsyncioTestCase):
     @patch(f"{TEST_MODULE}.async_play_media")
     async def asyncSetUp(
         self,
-        mock_play_media: MagicMock,
+        mock_play_media: AsyncMock,
     ):
 
         self.mocks = {

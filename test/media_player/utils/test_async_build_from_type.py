@@ -93,7 +93,7 @@ class TestCastDeviceRunningSpotifyForCurrentUser(IsolatedAsyncioTestCase):
 
 class TestCastDeviceRunningNonSpotifyApp(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Chromecast")
+    @patch(f"{TEST_MODULE}.Chromecast", new_callable=MagicMock)
     async def asyncSetUp(self, mock_chromecast: MagicMock):
 
         self.mock_account = MagicMock(spec=SpotifyAccount)
@@ -137,7 +137,7 @@ class TestCastDeviceRunningNonSpotifyApp(IsolatedAsyncioTestCase):
 
 class TestCastDeviceRunningSpotifyAppForOtherAccount(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Chromecast")
+    @patch(f"{TEST_MODULE}.Chromecast", new_callable=MagicMock)
     async def asyncSetUp(self, mock_chromecast: MagicMock):
 
         self.mock_account = MagicMock(spec=SpotifyAccount)
