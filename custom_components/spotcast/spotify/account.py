@@ -356,7 +356,7 @@ class SpotifyAccount:
             - str: token for the requested session
         """
         await self.sessions[api].async_ensure_token_valid()
-        return self.sessions[api].token
+        return self.sessions[api].clean_token
 
     async def async_ensure_tokens_valid(
             self,

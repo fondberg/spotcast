@@ -67,7 +67,7 @@ class PublicSession(OAuth2Session, ConnectionSession):
     @property
     def clean_token(self) -> str:
         """Returns the token only"""
-        return self.get(CONF_ACCESS_TOKEN)
+        return self.token.get(CONF_ACCESS_TOKEN)
 
     async def async_ensure_token_valid(self) -> None:
         """Ensure that the current token is valid"""
