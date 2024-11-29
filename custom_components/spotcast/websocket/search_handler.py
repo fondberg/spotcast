@@ -8,26 +8,22 @@ from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.utils import websocket_wrapper
 from custom_components.spotcast.spotify.utils import select_image_url
 
-ENDPOINT = "spotcast/get"
+ENDPOINT = "spotcast/search"
 SCHEMA = vol.Schema(
     {
         vol.Required("id"): cv.positive_int,
         vol.Required("type"): ENDPOINT,
-        vol.Required("url"): cv.string,
+        vol.Required("query"): cv.string,
+        vol.optional("searchType"): cv.string, # Playlist or song, default playlist
         vol.Optional("limit"): cv.positive_int,
-        vol.Optional("locale"): cv.string,
-        vol.Optional("platform"): cv.string,
-        vol.Optional("types"): cv.string,
-        vol.Optional("account"): cv.string,
     }
 )
 
-
 @websocket_wrapper
-async def async_get_generic_playlists(
+async def search_handler(
     hass: HomeAssistant, connection: ActiveConnection, msg: dict
 ):
-    """Gets a list of playlists from a specified account.
+    """Searches for a playlist or song.
 
     Args:
         - hass (HomeAssistant): The Home Assistant instance.
@@ -35,11 +31,9 @@ async def async_get_generic_playlists(
         - msg (dict): The message received through the WebSocket API.
     """
     account_id = msg.get("account")
-    url = msg.get("url")
+    query = msg.get("url")
+    searchType = msg.get("searchType", "playlist")
     limit = msg.get("limit", 10)
-    locale = msg.get("locale", "en_US")
-    platform = msg.get("platform", "web")
-    types = msg.get("types", "album,playlist,artist,show,station")
 
     account: SpotifyAccount
 
@@ -50,32 +44,32 @@ async def async_get_generic_playlists(
     else:
         account = search_account(hass, account_id)
 
-    playlists = await account.async_generic_playlists(
-        url=url,
-        limit=limit,
-        locale=locale,
-        platform=platform,
-        types=types,
+    # prepend view/ to the url
+    url = f"view/{url}"
+
+    result = await account.async_search(
+        query: query,
+        searchType: searchType,
+        limit: limit,
     )
 
-    formatted_playlists = [
+    formatted_results = [
         {
-            "id": playlist["id"],
-            "name": playlist["name"],
-            "icon": playlist["images"][0]["url"]
-            if "images" in playlist and len(playlist["images"]) > 0
+            "id": item["id"],
+            "name": item["name"],
+            "icon": item["images"][0]["url"]
+            if "images" in item and len(item["images"]) > 0
             else None,
         }
-        for playlist in playlists["content"]["items"]
-        if "id" in playlist  # Only include playlists with an 'id'
+        for item in result[searchType]
+        if "id" in item  # Only include playlists with an 'id'
     ]
 
-    # Send the results back to the WebSocket connection
     connection.send_result(
         msg["id"],
         {
-            "total": len(formatted_playlists),
+            "total": len(formatted_results),
             "account": account_id,
-            "playlists": formatted_playlists,
+            "playlists": formatted_results,
         },
     )

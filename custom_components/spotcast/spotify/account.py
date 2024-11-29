@@ -88,7 +88,7 @@ class SpotifyAccount:
         - async_liked_songs
         - async_repeat
         - async_set_volume
-        - async_generic_playlists
+        - async_view
 
     Functions:
         - async_from_config_entry
@@ -915,22 +915,18 @@ class SpotifyAccount:
 
         return playlists
 
-    async def async_generic_playlists(
+    async def async_view(
         self,
         url: str,
         limit: int,
         locale: str,
-        platform: str,
-        types: str,
     ) -> list:
-        """Fetches playlists based on the provided parameters.
+        """Fetches a view based on url.
 
         Args:
-            - url(str): The url of playlist to fetch (e.g., 'views/made-for-x').
+            - url(str): The url of the view to fetch (e.g., 'made-for-x').
             - limit(int): The maximum number of playlists to retrieve.
             - locale(str): The locale for the request (optional).
-            - platform(str): The platform from which the request is made (default is "web").
-            - types(str): The types of content to retrieve (default is 'album,playlist,artist,show,station').
 
         Returns:
             - list: A list of playlists.
@@ -939,10 +935,40 @@ class SpotifyAccount:
         params = {
             "content_limit": limit,
             "locale": locale,
-            "platform": platform,
-            "types": types,
+            "platform": "album,playlist,artist,show,station",
+            "types": "web",
             "limit": limit,
             "offset": 0,
+        }
+
+        await self.async_ensure_tokens_valid()
+
+        return await self.hass.async_add_executor_job(
+            partial(self._internal_cont._get, url, None, **params)
+        )
+    
+    async def async_search(
+        self,
+        query: str,
+        searchType: int,
+        limit: str,
+    ) -> list:
+        """Fetches either a playlist or songs based.
+
+        Args:
+            - query(str): The query of the list to fetch (e.g., 'Where is the love').
+            - searchType(int): what to retrieve playlists or individual songs.
+            - limit(int): The maximum number of playlists to retrieve.
+            
+        Returns:
+            - list: A list of playlists or songs
+        """
+
+        params = {
+            "q": query,
+            "locale": locale,
+            "type": searchType,
+            "limit": limit,
         }
 
         await self.async_ensure_tokens_valid()
