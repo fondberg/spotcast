@@ -15,11 +15,12 @@ SCHEMA = vol.Schema(
         vol.Required("id"): cv.positive_int,
         vol.Required("type"): ENDPOINT,
         vol.Required("query"): cv.string,
-        vol.Optional("searchType"): cv.string, # Playlist or song, default playlist
+        vol.Optional("searchType"): cv.string,  # Playlist or song, default playlist
         vol.Optional("limit"): cv.positive_int,
         vol.Optional("account"): cv.string,
     }
 )
+
 
 @websocket_wrapper
 async def async_search_handler(
@@ -48,22 +49,21 @@ async def async_search_handler(
 
     query = SearchQuery(search=query, item_type=searchType)
 
-    result = await account.async_search(
+    results = await account.async_search(
         query,
         limit,
     )
 
     formatted_results = [
         {
-            "id": item["id"],
-            "name": item["name"],
-            "href": item["href"],
-            "icon": item["images"][0]["url"]
-            if "images" in item and len(item["images"]) > 0
+            "id": result.get("id", None),
+            "name": result["name"],
+            "href": result["href"],
+            "icon": result["images"][0]["url"]
+            if "images" in result and len(result["images"]) > 0
             else None,
         }
-        for item in result[f"{searchType}s"]
-        if "id" in item
+        for result in results
     ]
 
     connection.send_result(
