@@ -12,7 +12,6 @@ from asyncio import (
 )
 from time import time
 from typing import Any
-from functools import partial
 
 from spotipy import Spotify, SpotifyException
 from homeassistant.core import HomeAssistant
