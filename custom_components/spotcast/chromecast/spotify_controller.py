@@ -183,7 +183,7 @@ class SpotifyController(BaseController):
             data: dict
     ) -> bool:
         """Handler for the get info response message"""
-        token = self.account.get_token("internal")
+        token = self.account.get_token("private")
 
         headers = {
             "authority": SpotifyController.APP_HOSTNAME,
