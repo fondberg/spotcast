@@ -1,4 +1,5 @@
 import voluptuous as vol
+from custom_components.spotcast.spotify.search_query import SearchQuery
 from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
@@ -45,9 +46,10 @@ async def async_search_handler(
     else:
         account = search_account(hass, account_id)
 
+    query = SearchQuery(search=query, item_type=searchType)
+
     result = await account.async_search(
         query,
-        searchType,
         limit,
     )
 

@@ -934,50 +934,30 @@ class SpotifyAccount:
             - list: A list of playlists.
         """
 
-        params = {
-            "content_limit": limit,
-            "locale": locale,
-            "platform": "web",
-            "types": "album,playlist,artist,show,station",
-            "limit": limit,
-            "offset": 0,
-        }
+        # Internal method, so that the _get method can be called
+        # As the pager parameters do not allign with the _get parameters
+        # Spotipy _get is defined as: def _get(self, url, args=None, payload=None, **kwargs)
+        def fetch_page(limit, offset):
+            params = {
+                "content_limit": limit,
+                "locale": locale,
+                "platform": "web",
+                "types": "album,playlist,artist,show,station",
+                "limit": limit,
+                "offset": offset,
+            }
+
+            return self._internal_cont._get(url, None, **params)
 
         await self.async_ensure_tokens_valid()
 
-        return await self.hass.async_add_executor_job(
-            partial(self._internal_cont._get, url, None, **params)
+        return await self._async_pager(
+            function=fetch_page,
+            limit=25,  # This is the max amount per call
+            max_items=limit,
+            sub_layer="content",
         )
     
-    async def async_search(
-        self,
-        query: str,
-        searchType: int,
-        limit: str,
-    ) -> list:
-        """Fetches either playlists or tracks.
-
-        Args:
-            - query(str): The query of the list to fetch (e.g., 'Where is the love').
-            - searchType(int): what to retrieve playlists or individual tracks.
-            - limit(int): The maximum number of playlists to retrieve.
-            
-        Returns:
-            - list: A list of playlists or tracks
-        """
-
-        params = {
-            "q": query,
-            "type": searchType,
-            "limit": limit,
-        }
-
-        await self.async_ensure_tokens_valid()
-
-        return await self.hass.async_add_executor_job(
-            partial(self._internal_cont._get, "search", None, **params)
-        )
-
     async def _async_get_count(
             self,
             function: callable,

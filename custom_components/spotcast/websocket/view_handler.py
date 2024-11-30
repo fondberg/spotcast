@@ -22,6 +22,7 @@ SCHEMA = vol.Schema(
     }
 )
 
+
 @websocket_wrapper
 async def async_view_handler(
     hass: HomeAssistant, connection: ActiveConnection, msg: dict
@@ -50,7 +51,7 @@ async def async_view_handler(
     # prepend views/ to the url
     url = f"views/{url}"
 
-    playlists = await account.async_view(
+    raw_playlists = await account.async_view(
         url=url,
         limit=limit,
         locale=locale,
@@ -65,7 +66,7 @@ async def async_view_handler(
             if "images" in playlist and len(playlist["images"]) > 0
             else None,
         }
-        for playlist in playlists["content"]["items"]
+        for playlist in raw_playlists
     ]
 
     connection.send_result(
