@@ -26,7 +26,7 @@ from custom_components.spotcast.config_flow.option_flow_handler import (
     DEFAULT_OPTIONS
 )
 
-__version__ = "5.0.0-b11"
+__version__ = "5.0.0-b12"
 
 
 LOGGER = getLogger(__name__)
