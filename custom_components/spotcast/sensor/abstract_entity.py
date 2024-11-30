@@ -68,6 +68,7 @@ class SpotcastEntity(ABC, Entity):
     ENTITY_CATEGORY: str = None
 
     def __init__(self, account: SpotifyAccount):
+        """Constructor a Spotcast Entity from the account provided"""
         self.account = account
 
         LOGGER.debug(
@@ -85,6 +86,7 @@ class SpotcastEntity(ABC, Entity):
         self.entity_category = self.ENTITY_CATEGORY
 
     def _get_device_info(self):
+        """Builds the device info for the sensor"""
         if self.DEVICE_SOURCE is None:
             return None
 
@@ -95,6 +97,7 @@ class SpotcastEntity(ABC, Entity):
 
     @property
     def _generic_id(self) -> str:
+        """Constructs a generic id used for the entity_id"""
         if self.GENERIC_ID is None:
             id = self.GENERIC_NAME.lower()
             id = id.replace(" ", "_")

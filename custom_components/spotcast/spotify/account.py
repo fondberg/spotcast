@@ -574,10 +574,16 @@ class SpotifyAccount:
                     self.country,
                 )
 
-                data = {} if data is None else data
+                if data is None:
+                    data = {}
+                    self.current_item = {
+                        "uri": None,
+                        "audio_features": {}
+                    }
 
-                if data != {}:
+                else:
                     data = await self._async_add_audio_features(data)
+                    self.last_playback_state = data
 
                 dataset.update(data)
             else:
@@ -603,9 +609,12 @@ class SpotifyAccount:
         if uri is None or not uri.startswith("spotify:track:"):
             return {}
 
-        return await self.hass.async_add_executor_job(
-            self.apis["private"].audio_features(uri)
+        response = await self.hass.async_add_executor_job(
+            self.apis["private"].audio_features,
+            [uri],
         )
+
+        return response[0]
 
     async def async_playlists_count(self) -> int:
         """Returns the number of user playlist for an account"""
