@@ -559,6 +559,18 @@ class SpotifyAccount:
 
         return result["tracks"]
 
+    async def async_get_playlist_tracks(self, uri: str) -> list[dict]:
+        """Retrieves the list of tracks inside a playlist"""
+        playlist_id = uri.rsplit(':', maxsplit=1)[-1]
+
+        result = await self._async_pager(
+            function=self.apis["private"].playlist_tracks,
+            prepends=[playlist_id, None],
+            appends=[self.country],
+        )
+
+        return result
+
     async def async_playback_state(self, force: bool = False) -> dict:
         """Returns the current playback state"""
         await self.async_ensure_tokens_valid()

@@ -70,7 +70,7 @@ class DeviceManager:
                 and id in self.unavailable_devices
             ):
                 LOGGER.info(
-                    "Device `%s` has became available again",
+                    "Device `%s` has became available again for account `%s`",
                     device["name"],
                     self._account.name,
                 )

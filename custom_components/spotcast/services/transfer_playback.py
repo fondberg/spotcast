@@ -51,6 +51,7 @@ async def async_transfer_playback(hass: HomeAssistant, call: ServiceCall):
 
     playback_state = await account.async_playback_state(force=True)
     call_data = copy_to_dict(call.data)
+    call_data["data"] = call_data.get("data", {})
 
     # check if no active playback
     if playback_state == {} and account.last_playback_state == {}:
@@ -58,10 +59,14 @@ async def async_transfer_playback(hass: HomeAssistant, call: ServiceCall):
             f"Account `{account.name}` has no known or active playback. "
             "Nothing to transfer"
         )
-
-    call_data["spotify_uri"] = None
+    elif playback_state != {}:
+        call_data["spotify_uri"] = None
+    else:
+        call_data = await async_rebuild_playback(call_data, account)
 
     call.data = ReadOnlyDict(call_data)
+
+    LOGGER.warn(call.data)
 
     await async_play_media(hass, call)
 
@@ -82,6 +87,57 @@ async def async_rebuild_playback(
         - dict: the call_data modified with the last known state
             information
     """
-    last_playback_state = account.last_playback_state
-    context_uri = last_playback_state["context"]["uri"]
-    context_type = last_playback_state["context"]["type"]
+    last_playback_state: dict = account.last_playback_state
+    context_uri: str = last_playback_state["context"]["uri"]
+    context_type: str = last_playback_state["context"]["type"]
+    extras = call_data["data"]
+
+    # set the context_uri in the call_data
+    call_data["spotify_uri"] = context_uri
+
+    # set extras if not set by user
+    if extras.get("repeat") is None:
+        extras["repeat"] = last_playback_state["repeat_state"]
+
+    if extras.get("shuffle") is None:
+        extras["shuffle"] = last_playback_state["shuffle_state"]
+
+    if extras.get("position") is None:
+        extras["position"] = last_playback_state["progress_ms"]/1000
+
+    # ensure modification are set in main call data
+    call_data["data"] = extras
+
+    if extras.get("offset") is not None:
+        return call_data
+
+    current_item = last_playback_state["item"]
+    track_index = 0
+
+    # set the offset according to the context type
+    if context_type == "album":
+        try:
+            track_index = await async_track_index(account, current_item["uri"])
+            track_index = track_index[1] - 1
+        except ValueError:
+            pass
+
+    # all remaining case that rely on fetching a list of items and
+    # finding the current uri in the list
+    elif context_type in ("playlist", "collection"):
+
+        tracks = []
+
+        if context_type == "playlist":
+            tracks = await account.async_get_playlist_tracks(context_uri)
+            tracks = [x["uri"] for x in tracks]
+        else:
+            tracks = await account.async_liked_songs()
+
+        try:
+            track_index = tracks.index(current_item["uri"])
+        except ValueError:
+            pass
+
+    call_data["data"]["offset"] = track_index
+    return call_data

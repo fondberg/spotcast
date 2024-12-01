@@ -3,25 +3,47 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, patch, AsyncMock
 
+from homeassistant.config_entries import ConfigEntry
+
 from custom_components.spotcast.services.transfer_playback import (
     async_transfer_playback,
     HomeAssistant,
     ServiceCall,
+    SpotifyAccount,
+    ServiceValidationError,
 )
 
-TEST_MODULE = "custom_components.spotcast.services.transfer_playback"
+from test.services.transfer_playback import TEST_MODULE
 
 
-class TestTransferOfPlayback(IsolatedAsyncioTestCase):
+class TestTransferOfActivePlayback(IsolatedAsyncioTestCase):
 
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.async_play_media")
-    async def asyncSetUp(self, mock_play: AsyncMock):
+    async def asyncSetUp(
+            self,
+            mock_play: AsyncMock,
+            mock_entry: MagicMock,
+            mock_account: AsyncMock,
+    ):
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+        mock_entry.return_value = MagicMock(spec=ConfigEntry)
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
             "call": MagicMock(spec=ServiceCall),
             "play": mock_play,
+            "account": mock_account.return_value,
+            "entry": mock_entry.return_value,
         }
+
+        self.mocks["account"].async_playback_state = AsyncMock(
+            return_value={
+                "device": "foo",
+                "context": "bar"
+            }
+        )
 
         self.mocks["call"].data = {
             "media_player": {
@@ -33,7 +55,7 @@ class TestTransferOfPlayback(IsolatedAsyncioTestCase):
 
         await async_transfer_playback(self.mocks["hass"], self.mocks["call"])
 
-    def test_call_dat_updated(self):
+    def test_call_data_updated(self):
         self.assertEqual(
             self.mocks["call"].data,
             {
@@ -43,6 +65,7 @@ class TestTransferOfPlayback(IsolatedAsyncioTestCase):
                     ]
                 },
                 "spotify_uri": None,
+                "data": {}
             }
 
         )
@@ -55,3 +78,105 @@ class TestTransferOfPlayback(IsolatedAsyncioTestCase):
             )
         except AssertionError:
             self.fail()
+
+
+class TestTransferOfInactivePlayback(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.async_rebuild_playback")
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.async_play_media")
+    async def asyncSetUp(
+            self,
+            mock_play: AsyncMock,
+            mock_entry: MagicMock,
+            mock_account: AsyncMock,
+            mock_rebuild: AsyncMock,
+    ):
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+        mock_entry.return_value = MagicMock(spec=ConfigEntry)
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "call": MagicMock(spec=ServiceCall),
+            "play": mock_play,
+            "account": mock_account.return_value,
+            "entry": mock_entry.return_value,
+            "rebuild": mock_rebuild,
+        }
+
+        self.mocks["account"].async_playback_state = AsyncMock(
+            return_value={}
+        )
+        self.mocks["account"].last_playback_state = {
+            "device": "foo",
+            "context": "bar",
+        }
+
+        self.mocks["rebuild"].return_value = {"context": "modified"}
+
+        self.mocks["call"].data = {
+            "media_player": {
+                "entity_id": [
+                    "media_player.foo"
+                ]
+            }
+        }
+
+        await async_transfer_playback(self.mocks["hass"], self.mocks["call"])
+
+    def test_call_data_properly_modified(self):
+        self.assertEqual(self.mocks["call"].data, {"context": "modified"})
+
+    def test_async_play_media_called(self):
+        try:
+            self.mocks["play"].assert_called()
+        except AssertionError:
+            self.fail()
+
+
+class TestTransferOfMissingPlayback(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.async_rebuild_playback")
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.async_play_media")
+    async def test_error_raised(
+            self,
+            mock_play: AsyncMock,
+            mock_entry: MagicMock,
+            mock_account: AsyncMock,
+            mock_rebuild: AsyncMock,
+    ):
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+        mock_entry.return_value = MagicMock(spec=ConfigEntry)
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "call": MagicMock(spec=ServiceCall),
+            "play": mock_play,
+            "account": mock_account.return_value,
+            "entry": mock_entry.return_value,
+            "rebuild": mock_rebuild,
+        }
+
+        self.mocks["account"].async_playback_state = AsyncMock(
+            return_value={}
+        )
+        self.mocks["account"].last_playback_state = {}
+
+        self.mocks["rebuild"].return_value = {"context": "modified"}
+
+        self.mocks["call"].data = {
+            "media_player": {
+                "entity_id": [
+                    "media_player.foo"
+                ]
+            }
+        }
+
+        with self.assertRaises(ServiceValidationError):
+            await async_transfer_playback(
+                self.mocks["hass"],
+                self.mocks["call"],
+            )
