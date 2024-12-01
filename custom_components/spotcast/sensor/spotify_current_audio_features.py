@@ -54,6 +54,7 @@ class AbstractAudioFeatureSensor(SpotcastSensor):
 
 class AbstractPercentSensor(AbstractAudioFeatureSensor):
     UNITS_OF_MEASURE = "%"
+    _attr_suggested_display_precision = 1
 
     def _cleanup(self, feature: float) -> float:
         return feature * 100
@@ -101,6 +102,7 @@ class CurrentTrackLoudnessSensor(AbstractAudioFeatureSensor):
     FEATURE_NAME = "loudness"
     UNITS_OF_MEASURE = "dB"
     ICON = "mdi:bullhorn"
+    _attr_suggested_display_precision = 1
 
     @property
     def device_class(self) -> SensorDeviceClass:
@@ -181,6 +183,7 @@ class CurrentTrackTempoSensor(AbstractAudioFeatureSensor):
     FEATURE_NAME = "tempo"
     UNITS_OF_MEASURE = "bpm"
     ICON = "mdi:metronome"
+    _attr_suggested_display_precision = 0
 
 
 class CurrentTrackTimeSignatureSensor(AbstractAudioFeatureSensor):
