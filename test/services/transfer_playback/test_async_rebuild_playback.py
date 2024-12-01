@@ -130,7 +130,7 @@ class TestCurrentItemIsPartOfAlbumContext(IsolatedAsyncioTestCase):
             }
         }
 
-        self.mocks["index"].return_value = 4
+        self.mocks["index"].return_value = ("dummy_uri", 5)
 
         self.call_data = {
             "media_player": {
