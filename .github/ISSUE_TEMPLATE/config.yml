@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Spotify Integration
-    about: You are experiencing issue with the Spotify Integration, not a Spotcast service
+    about: If you are experiencing issues with the Spotify Integration (Media Broswing, playback information, etc.). Please open a a ticket with Home Assistant Core. Spotcast and its maintainers are not affiliated and do not work on the official Spotify Integration.
   - name: Spotify Card
     url: https://github.com/mikevanes/spotify-card-v2/issues/new/choose
     about: You are experiencing issues with the Spotify Dashbord Card
