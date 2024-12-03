@@ -66,8 +66,6 @@ async def async_transfer_playback(hass: HomeAssistant, call: ServiceCall):
 
     call.data = ReadOnlyDict(call_data)
 
-    LOGGER.warn(call.data)
-
     await async_play_media(hass, call)
 
 
@@ -130,7 +128,7 @@ async def async_rebuild_playback(
 
         if context_type == "playlist":
             tracks = await account.async_get_playlist_tracks(context_uri)
-            tracks = [x["uri"] for x in tracks]
+            tracks = [x["track"]["uri"] for x in tracks]
         else:
             tracks = await account.async_liked_songs()
 

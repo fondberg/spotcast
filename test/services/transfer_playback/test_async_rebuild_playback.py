@@ -258,9 +258,9 @@ class TestCurrentItemPartOfPlaylist(IsolatedAsyncioTestCase):
 
         self.mocks["account"].async_get_playlist_tracks = AsyncMock(
             return_value=[
-                {"uri": "spotify:track:foo"},
-                {"uri": "spotify:track:bar"},
-                {"uri": "spotify:track:baz"},
+                {"track": {"uri": "spotify:track:foo"}},
+                {"track": {"uri": "spotify:track:bar"}},
+                {"track": {"uri": "spotify:track:baz"}},
             ]
         )
 
@@ -333,9 +333,9 @@ class TestCurrentItemNotPartOfPlaylist(IsolatedAsyncioTestCase):
 
         self.mocks["account"].async_get_playlist_tracks = AsyncMock(
             return_value=[
-                {"uri": "spotify:track:foo"},
-                {"uri": "spotify:track:far"},
-                {"uri": "spotify:track:baz"},
+                {"track": {"uri": "spotify:track:foo"}},
+                {"track": {"uri": "spotify:track:bar"}},
+                {"track": {"uri": "spotify:track:baz"}},
             ]
         )
 
@@ -366,7 +366,7 @@ class TestCurrentItemNotPartOfPlaylist(IsolatedAsyncioTestCase):
                 },
                 "spotify_uri": "spotify:playlist:foo",
                 "data": {
-                    "offset": 0,
+                    "offset": 1,
                     "shuffle": True,
                     "repeat": "context",
                     "position": 5

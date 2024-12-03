@@ -510,7 +510,7 @@ class SpotifyAccount:
             - dict: the playlist details
         """
 
-        playlist_id = uri.rsplit(":", maxsplit=1)[-1]
+        playlist_id = self._id_from_uri(uri)
 
         result = await self.hass.async_add_executor_job(
             self.apis["private"].playlist,
@@ -531,7 +531,7 @@ class SpotifyAccount:
             - dict: the album details
         """
 
-        album_id = uri.rsplit(":", maxsplit=1)[-1]
+        album_id = self._id_from_uri(uri)
 
         result = await self.hass.async_add_executor_job(
             self.apis["private"].album,
@@ -561,12 +561,49 @@ class SpotifyAccount:
 
     async def async_get_playlist_tracks(self, uri: str) -> list[dict]:
         """Retrieves the list of tracks inside a playlist"""
-        playlist_id = uri.rsplit(':', maxsplit=1)[-1]
+        await self.async_ensure_tokens_valid()
+
+        playlist_id = self._id_from_uri(uri)
 
         result = await self._async_pager(
             function=self.apis["private"].playlist_tracks,
             prepends=[playlist_id, None],
             appends=[self.country],
+        )
+
+        return result
+
+    @staticmethod
+    def _id_from_uri(uri: str) -> str:
+        """extracts the id from a uri"""
+        return uri.rsplit(':', maxsplit=1)[-1]
+
+    async def async_get_show_episodes(
+        self,
+        uri: str,
+        limit: int = None
+    ) -> list[dict]:
+        """Retrieves the list of episodes for a podcast show
+
+        Args:
+            - uri(str): the uri of the spotify podcast show to call
+            - limit(int, optional): limit the number of items to
+                retrieve. Retrives all episodes if None. Defaults to
+                None.
+
+        Returns:
+            - list[dict]: list of dictionaries with podcast episodes
+                information
+        """
+        await self.async_ensure_tokens_valid()
+
+        show_id = self._id_from_uri(uri)
+
+        result = await self._async_pager(
+            function=self.apis["private"].show_episodes,
+            prepends=[show_id],
+            appends=[self.country],
+            max_items=limit,
         )
 
         return result
@@ -584,6 +621,7 @@ class SpotifyAccount:
                 data = await self.hass.async_add_executor_job(
                     self.apis["private"].current_playback,
                     self.country,
+                    "episode"
                 )
 
                 if data is None:
