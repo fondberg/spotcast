@@ -1,6 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Spotify Integration
+    url: https://github.com/home-assistant/core/issues/new/choose
     about: You are experiencing issue with the Spotify Integration, not a Spotcast service
   - name: Spotify Card
     url: https://github.com/mikevanes/spotify-card-v2/issues/new/choose
