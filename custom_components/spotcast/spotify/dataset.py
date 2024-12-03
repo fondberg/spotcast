@@ -55,10 +55,22 @@ class Dataset:
         self.expires_at = 0
         self.lock = Lock()
 
-    @property
-    def is_expired(self) -> bool:
-        """Returns True if the dataset is past is cached time"""
-        return time() > self.expires_at or self._data is None
+    def is_expired(self, strict: bool = True) -> bool:
+        """Returns True if the dataset is past is cached time
+
+        Args:
+            - strict(bool, optional): In strict mode, will return
+            expired as soon as the current reported time is passed the
+            expires_at. In non-strict mode, a small buffer is added.
+            Defaults to strict.
+        """
+
+        if strict:
+            expires_at = self.expires_at
+        else:
+            expires_at = self.expires_at + 2
+
+        return time() > expires_at or self._data is None
 
     @property
     def data(self) -> list | dict:
@@ -69,7 +81,7 @@ class Dataset:
             - ExpiredDatasetError: raised if the dataset is expired
                 unless the can_expire flag is set to True
         """
-        if self.is_expired and not self.can_expire:
+        if self.is_expired(strict=False) and not self.can_expire:
             raise ExpiredDatasetError(f"The {self.name} dataset is expired")
 
         return copy_to_dict(self._data)

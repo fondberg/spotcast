@@ -421,7 +421,7 @@ class SpotifyAccount:
         dataset = self._datasets["profile"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing profile dataset")
                 data = await self.hass.async_add_executor_job(
                     self.apis["private"].me
@@ -440,7 +440,7 @@ class SpotifyAccount:
         dataset = self._datasets["devices"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing devices dataset")
                 data = await self.hass.async_add_executor_job(
                     self.apis["public"].devices
@@ -616,7 +616,7 @@ class SpotifyAccount:
         dataset = self._datasets["playback_state"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing playback state dataset")
                 data = await self.hass.async_add_executor_job(
                     self.apis["private"].current_playback,
@@ -685,7 +685,7 @@ class SpotifyAccount:
         dataset = self._datasets["playlists"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing playlists dataset")
 
                 playlists = await self._async_pager(
@@ -873,7 +873,7 @@ class SpotifyAccount:
         dataset = self._datasets["liked_songs"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing liked songs dataset")
 
                 liked_songs = await self._async_pager(
@@ -948,7 +948,7 @@ class SpotifyAccount:
         dataset = self._datasets["categories"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing Browse Categories dataset")
 
                 categories = await self._async_pager(
