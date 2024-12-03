@@ -67,8 +67,9 @@ class TestMessageManagement(TestCase):
 
     def test_unknown_message(self):
 
-        with self.assertRaises(UnknownMessageError):
-            self.controller.receive_message(
-                MagicMock(spec=CastMessage),
-                {"type": "foo"}
-            )
+        result = self.controller.receive_message(
+            MagicMock(spec=CastMessage),
+            {"type": "foo"}
+        )
+
+        self.assertTrue(result)
