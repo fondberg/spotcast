@@ -173,9 +173,8 @@ class SpotifyController(BaseController):
         try:
             return handlers[message_type](_message, data)
         except KeyError as exc:
-            raise UnknownMessageError(
-                f"Received unknown message `{message_type}`",
-            ) from exc
+            LOGGER.error("Received unknown message `%s`", message_type)
+            return True
 
     def _get_info_response_handler(
             self,
@@ -183,7 +182,7 @@ class SpotifyController(BaseController):
             data: dict
     ) -> bool:
         """Handler for the get info response message"""
-        token = self.account.get_token("internal")
+        token = self.account.get_token("private")
 
         headers = {
             "authority": SpotifyController.APP_HOSTNAME,

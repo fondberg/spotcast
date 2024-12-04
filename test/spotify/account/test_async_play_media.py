@@ -6,27 +6,28 @@ from time import time
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
     PlaybackError,
     SpotifyException,
+    Spotify,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestMediaPlayback(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -41,8 +42,8 @@ class TestMediaPlayback(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -61,7 +62,7 @@ class TestMediaPlayback(IsolatedAsyncioTestCase):
     def test_play_media_was_called(self):
         try:
             self.mocks["hass"].async_add_executor_job.assert_called_with(
-                self.account._internal_cont.start_playback,
+                self.account.apis["private"].start_playback,
                 "foo",
                 "spotify:dummy:uri",
                 None,
@@ -74,15 +75,15 @@ class TestMediaPlayback(IsolatedAsyncioTestCase):
 
 class TestMediaPlaybackWithExtras(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -97,8 +98,8 @@ class TestMediaPlaybackWithExtras(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 
@@ -119,7 +120,7 @@ class TestMediaPlaybackWithExtras(IsolatedAsyncioTestCase):
     def test_play_media_was_called(self):
         try:
             self.mocks["hass"].async_add_executor_job.assert_called_with(
-                self.account._spotify.start_playback,
+                self.account.apis["private"].start_playback,
                 "foo",
                 "spotify:dummy:uri",
                 None,
@@ -132,15 +133,15 @@ class TestMediaPlaybackWithExtras(IsolatedAsyncioTestCase):
 
 class TestPlaybackError(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_error_raised(
             self,
             mock_spotify: MagicMock,
     ):
 
         self.mocks = {
-            "internal": MagicMock(spec=InternalSession),
-            "external": MagicMock(spec=OAuth2Session),
+            "internal": MagicMock(spec=PrivateSession),
+            "external": MagicMock(spec=PublicSession),
             "hass": MagicMock(spec=HomeAssistant),
         }
         self.mocks["hass"].loop = MagicMock()
@@ -155,8 +156,8 @@ class TestPlaybackError(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 

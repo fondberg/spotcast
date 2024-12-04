@@ -16,7 +16,7 @@ class TestDataUpdate(TestCase):
         self.assertEqual(self.dataset.data, self.data)
 
     def test_dataset_is_no_longer_expired(self):
-        self.assertFalse(self.dataset.is_expired)
+        self.assertFalse(self.dataset.is_expired())
 
     def test_expires_at_was_changed(self):
         self.assertNotEqual(self.dataset.expires_at, 0)

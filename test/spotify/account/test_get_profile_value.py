@@ -7,18 +7,21 @@ from time import time
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
+    Spotify,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestProfile(TestCase):
 
-    @patch("custom_components.spotcast.spotify.account.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     def setUp(self, mock_spotify: MagicMock):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
 
         self.mock_spotify = mock_spotify
 
@@ -30,8 +33,8 @@ class TestProfile(TestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=MagicMock(spec=HomeAssistant),
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 

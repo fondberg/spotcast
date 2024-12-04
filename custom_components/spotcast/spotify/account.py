@@ -20,8 +20,8 @@ from homeassistant.helpers.device_registry import DeviceInfo, DeviceEntryType
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.sessions import (
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     ConnectionSession,
     async_get_config_entry_implementation,
 )
@@ -114,33 +114,33 @@ class SpotifyAccount:
             "can_expire": False,
         },
         "liked_songs": {
-            "refresh_factor": 4,
+            "refresh_factor": 10,
             "can_expire": False,
         },
         "playlists": {
-            "refresh_factor": 2,
+            "refresh_factor": 10,
             "can_expire": False,
         },
         "profile": {
-            "refresh_factor": 10,
+            "refresh_factor": 20,
             "can_expire": True,
         },
         "categories": {
-            "refresh_factor": 10,
+            "refresh_factor": 20,
             "can_expire": False,
         },
         "playback_state": {
             "refresh_factor": 1/2,
             "can_expire": False,
-        }
+        },
     }
 
     def __init__(
             self,
             entry_id: str,
             hass: HomeAssistant,
-            external_session: OAuth2Session,
-            internal_session: InternalSession,
+            public_session: PublicSession,
+            private_session: PrivateSession,
             is_default: bool = False,
             base_refresh_rate: int = 30
     ):
@@ -163,21 +163,23 @@ class SpotifyAccount:
         self.entry_id = entry_id
         self.hass = hass
         self.sessions: dict[str, ConnectionSession] = {
-            "external": external_session,
-            "internal": internal_session,
+            "public": public_session,
+            "private": private_session,
         }
+        self.apis: dict[str, Spotify] = {}
+
+        for name, session in self.sessions.items():
+            self.apis[name] = Spotify(auth=session.token)
+
         self.is_default = is_default
         self._base_refresh_rate = 30
 
-        self._spotify = Spotify(
-            auth=self.sessions["external"].token["access_token"]
-        )
-
-        self._internal_cont = Spotify(
-            auth=self.sessions["internal"].token
-        )
-
         self._datasets: dict[str, Dataset] = {}
+        self.last_playback_state = {}
+        self.current_item = {
+            "uri": None,
+            "audio_features": {}
+        }
 
         for name, dataset in self.DATASETS.items():
             refresh_rate = dataset["refresh_factor"] * self._base_refresh_rate
@@ -361,7 +363,7 @@ class SpotifyAccount:
             - str: token for the requested session
         """
         await self.sessions[api].async_ensure_token_valid()
-        return self.sessions[api].token
+        return self.sessions[api].clean_token
 
     async def async_ensure_tokens_valid(
             self,
@@ -403,10 +405,7 @@ class SpotifyAccount:
                 raise exc
 
             token = await self.async_get_token(key)
-            if key == "external":
-                self._spotify.set_auth(token["access_token"])
-            if key == "internal":
-                self._internal_cont.set_auth(token)
+            self.apis[key].set_auth(token)
 
     async def async_profile(self, force: bool = False) -> dict:
         """Test the connection and returns a user profile
@@ -424,10 +423,10 @@ class SpotifyAccount:
         dataset = self._datasets["profile"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing profile dataset")
                 data = await self.hass.async_add_executor_job(
-                    self._internal_cont.me
+                    self.apis["private"].me
                 )
                 dataset.update(data)
             else:
@@ -443,10 +442,10 @@ class SpotifyAccount:
         dataset = self._datasets["devices"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing devices dataset")
                 data = await self.hass.async_add_executor_job(
-                    self._spotify.devices
+                    self.apis["public"].devices
                 )
                 dataset.update(data["devices"])
             else:
@@ -477,7 +476,7 @@ class SpotifyAccount:
         )
 
         return await self._async_pager(
-            self._internal_cont.current_user_saved_episodes,
+            self.apis["private"].current_user_saved_episodes,
             appends=[self.country],
             max_items=limit,
         )
@@ -496,7 +495,7 @@ class SpotifyAccount:
         LOGGER.debug("Getting track information for `%s`", uri)
 
         result = await self.hass.async_add_executor_job(
-            self._internal_cont.track,
+            self.apis["private"].track,
             uri,
             self.country
         )
@@ -513,10 +512,10 @@ class SpotifyAccount:
             - dict: the playlist details
         """
 
-        playlist_id = uri.rsplit(":", maxsplit=1)[-1]
+        playlist_id = self._id_from_uri(uri)
 
         result = await self.hass.async_add_executor_job(
-            self._internal_cont.playlist,
+            self.apis["private"].playlist,
             playlist_id,
             None,
             self.country,
@@ -534,10 +533,10 @@ class SpotifyAccount:
             - dict: the album details
         """
 
-        album_id = uri.rsplit(":", maxsplit=1)[-1]
+        album_id = self._id_from_uri(uri)
 
         result = await self.hass.async_add_executor_job(
-            self._internal_cont.album,
+            self.apis["private"].album,
             album_id,
             self.country,
         )
@@ -555,12 +554,61 @@ class SpotifyAccount:
         """
 
         result = await self.hass.async_add_executor_job(
-            self._internal_cont.artist_top_tracks,
+            self.apis["private"].artist_top_tracks,
             uri,
             self.country,
         )
 
         return result["tracks"]
+
+    async def async_get_playlist_tracks(self, uri: str) -> list[dict]:
+        """Retrieves the list of tracks inside a playlist"""
+        await self.async_ensure_tokens_valid()
+
+        playlist_id = self._id_from_uri(uri)
+
+        result = await self._async_pager(
+            function=self.apis["private"].playlist_tracks,
+            prepends=[playlist_id, None],
+            appends=[self.country],
+        )
+
+        return result
+
+    @staticmethod
+    def _id_from_uri(uri: str) -> str:
+        """extracts the id from a uri"""
+        return uri.rsplit(':', maxsplit=1)[-1]
+
+    async def async_get_show_episodes(
+        self,
+        uri: str,
+        limit: int = None
+    ) -> list[dict]:
+        """Retrieves the list of episodes for a podcast show
+
+        Args:
+            - uri(str): the uri of the spotify podcast show to call
+            - limit(int, optional): limit the number of items to
+                retrieve. Retrives all episodes if None. Defaults to
+                None.
+
+        Returns:
+            - list[dict]: list of dictionaries with podcast episodes
+                information
+        """
+        await self.async_ensure_tokens_valid()
+
+        show_id = self._id_from_uri(uri)
+
+        result = await self._async_pager(
+            function=self.apis["private"].show_episodes,
+            prepends=[show_id],
+            appends=[self.country],
+            max_items=limit,
+        )
+
+        return result
 
     async def async_playback_state(self, force: bool = False) -> dict:
         """Returns the current playback state"""
@@ -570,15 +618,24 @@ class SpotifyAccount:
         dataset = self._datasets["playback_state"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing playback state dataset")
                 data = await self.hass.async_add_executor_job(
-                    self._internal_cont.current_playback,
+                    self.apis["private"].current_playback,
                     self.country,
+                    "episode"
                 )
 
                 if data is None:
                     data = {}
+                    self.current_item = {
+                        "uri": None,
+                        "audio_features": {}
+                    }
+
+                else:
+                    data = await self._async_add_audio_features(data)
+                    self.last_playback_state = data
 
                 dataset.update(data)
             else:
@@ -586,11 +643,36 @@ class SpotifyAccount:
 
         return self.playback_state
 
+    async def _async_add_audio_features(self, playback_state: dict) -> dict:
+        """Adds the audio_features to the current playback state"""
+        current_uri = playback_state["item"]["uri"]
+        last_uri = self.current_item["uri"]
+
+        if current_uri != last_uri:
+            audio_features = await self.async_track_features(current_uri)
+            self.current_item["audio_features"] = audio_features
+
+        playback_state["audio_features"] = self.current_item["audio_features"]
+        return playback_state
+
+    async def async_track_features(self, uri: str) -> str:
+        """Returns the track audio features. Returns an empty
+        dictionary if the item doesn't have audio features"""
+        if uri is None or not uri.startswith("spotify:track:"):
+            return {}
+
+        response = await self.hass.async_add_executor_job(
+            self.apis["private"].audio_features,
+            [uri],
+        )
+
+        return response[0]
+
     async def async_playlists_count(self) -> int:
         """Returns the number of user playlist for an account"""
 
         return await self._async_get_count(
-            self._internal_cont.current_user_playlists
+            self.apis["private"].current_user_playlists
         )
 
     async def async_playlists(
@@ -605,11 +687,11 @@ class SpotifyAccount:
         dataset = self._datasets["playlists"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing playlists dataset")
 
                 playlists = await self._async_pager(
-                    self._internal_cont.current_user_playlists,
+                    self.apis["private"].current_user_playlists,
                     max_items=max_items,
                 )
 
@@ -639,7 +721,7 @@ class SpotifyAccount:
             limit = max_items
 
         search_result = await self._async_pager(
-            function=self._internal_cont.search,
+            function=self.apis["private"].search,
             prepends=[query.query_string],
             appends=[query.item_type, self.country],
             limit=limit,
@@ -742,7 +824,7 @@ class SpotifyAccount:
 
         try:
             await self.hass.async_add_executor_job(
-                self._internal_cont.start_playback,
+                self.apis["private"].start_playback,
                 device_id,
                 context_uri,
                 uris,
@@ -773,7 +855,7 @@ class SpotifyAccount:
         )
 
         await self.hass.async_add_executor_job(
-            self._spotify.shuffle,
+            self.apis["private"].shuffle,
             shuffle,
             device_id,
         )
@@ -781,7 +863,7 @@ class SpotifyAccount:
     async def async_liked_songs_count(self) -> int:
         """returns the number of linked songs for an account"""
         return await self._async_get_count(
-            self._internal_cont.current_user_saved_tracks,
+            self.apis["private"].current_user_saved_tracks,
         )
 
     async def async_liked_songs(self, force: bool = False) -> list[str]:
@@ -793,11 +875,11 @@ class SpotifyAccount:
         dataset = self._datasets["liked_songs"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing liked songs dataset")
 
                 liked_songs = await self._async_pager(
-                    self._internal_cont.current_user_saved_tracks,
+                    self.apis["private"].current_user_saved_tracks,
                 )
 
                 dataset.update(liked_songs)
@@ -826,7 +908,7 @@ class SpotifyAccount:
         )
 
         await self.hass.async_add_executor_job(
-            self._spotify.repeat,
+            self.apis["private"].repeat,
             state,
             device_id,
         )
@@ -851,7 +933,7 @@ class SpotifyAccount:
         )
 
         await self.hass.async_add_executor_job(
-            self._spotify.volume,
+            self.apis["private"].volume,
             volume,
             device_id,
         )
@@ -868,11 +950,11 @@ class SpotifyAccount:
         dataset = self._datasets["categories"]
 
         async with dataset.lock:
-            if force or dataset.is_expired:
+            if force or dataset.is_expired():
                 LOGGER.debug("Refreshing Browse Categories dataset")
 
                 categories = await self._async_pager(
-                    self._internal_cont.categories,
+                    self.apis["private"].categories,
                     prepends=[self.country, None],
                     sub_layer="categories",
                     max_items=limit,
@@ -908,7 +990,7 @@ class SpotifyAccount:
         )
 
         playlists = await self._async_pager(
-            self._internal_cont.category_playlists,
+            self.apis["private"].category_playlists,
             prepends=[category_id, self.country],
             sub_layer="playlists",
             max_items=limit,
@@ -1073,7 +1155,7 @@ class SpotifyAccount:
 
         try:
             await self.hass.async_add_executor_job(
-                self._spotify.add_to_queue,
+                self.apis["private"].add_to_queue,
                 uri,
                 device_id,
             )
@@ -1116,17 +1198,17 @@ class SpotifyAccount:
             config_entry=entry,
         )
 
-        external_api = OAuth2Session(hass, entry, oauth_implementation)
-        await external_api.async_ensure_token_valid()
+        public_session = PublicSession(hass, entry, oauth_implementation)
+        await public_session.async_ensure_token_valid()
 
-        internal_api = InternalSession(hass, entry)
-        await internal_api.async_ensure_token_valid()
+        private_session = PrivateSession(hass, entry)
+        await private_session.async_ensure_token_valid()
 
         account = SpotifyAccount(
             entry_id=entry.entry_id,
             hass=hass,
-            external_session=external_api,
-            internal_session=internal_api,
+            public_session=public_session,
+            private_session=private_session,
             **entry.options
         )
 

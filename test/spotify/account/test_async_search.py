@@ -7,8 +7,8 @@ from time import time
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     SearchQuery,
 )
 
@@ -20,8 +20,8 @@ class TestSearchQuery(IsolatedAsyncioTestCase):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "pager": mock_pager,
         }
 
@@ -30,8 +30,8 @@ class TestSearchQuery(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
         )
         self.account._datasets["profile"].expires_at = time() + 999
         self.account._datasets["profile"]._data = {
@@ -56,8 +56,8 @@ class TestHighMaxItems(IsolatedAsyncioTestCase):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "pager": mock_pager,
         }
 
@@ -66,8 +66,8 @@ class TestHighMaxItems(IsolatedAsyncioTestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
             is_default=True
         )
 

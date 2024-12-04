@@ -6,7 +6,8 @@ from homeassistant.components.sensor import (
     SensorStateClass,
     SensorEntityDescription,
     EntityCategory,
-    SensorEntity
+    SensorEntity,
+    SensorDeviceClass,
 )
 
 from custom_components.spotcast.spotify import SpotifyAccount

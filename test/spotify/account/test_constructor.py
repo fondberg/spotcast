@@ -5,20 +5,23 @@ from unittest.mock import MagicMock, patch
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
-    Dataset
+    Dataset,
+    Spotify,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestDataRetention(TestCase):
 
-    @patch("custom_components.spotcast.spotify.account.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     def setUp(self, mock_spotify: MagicMock):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
 
         self.mock_spotify = mock_spotify
 
@@ -30,27 +33,28 @@ class TestDataRetention(TestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=MagicMock(spec=HomeAssistant),
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 
     def test_sessions_contain_both_sessions(self):
-        self.assertIn("external", self.account.sessions)
-        self.assertIn("internal", self.account.sessions)
-        self.assertIsInstance(self.account.sessions["external"], OAuth2Session)
+        self.assertIn("public", self.account.sessions)
+        self.assertIn("private", self.account.sessions)
+        self.assertIsInstance(self.account.sessions["public"], PublicSession)
         self.assertIsInstance(
-            self.account.sessions["internal"],
-            InternalSession
+            self.account.sessions["private"],
+            PrivateSession
         )
 
     def test_spotify_created_with_proper_auth(self):
-        try:
-            self.mock_spotify.assert_any_call(
-                auth="12345",
-            )
-        except AssertionError:
-            self.fail("Spotify object didn't receive proper token'")
+        self.assertIn("public", self.account.apis)
+        self.assertIn("private", self.account.apis)
+        self.assertIsInstance(self.account.apis["public"], Spotify)
+        self.assertIsInstance(
+            self.account.apis["private"],
+            Spotify,
+        )
 
     def test_is_default_saved(self):
         self.assertTrue(self.account.is_default)

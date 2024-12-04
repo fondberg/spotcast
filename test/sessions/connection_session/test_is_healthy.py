@@ -16,6 +16,10 @@ class DummySession(ConnectionSession):
     def token(self):
         raise NotImplementedError
 
+    @property
+    def clean_token(self):
+        raise NotImplementedError
+
 
 class TestIsNotHealthy(TestCase):
 

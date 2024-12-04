@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.spotcast.sessions.internal_session import (
-    InternalSession,
+from custom_components.spotcast.sessions.private_session import (
+    PrivateSession,
     ClientSession,
     ExpiredSpotifyCookiesError,
     TokenRefreshError,
@@ -17,7 +17,7 @@ from custom_components.spotcast.sessions.internal_session import (
 
 class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
 
-    @patch.object(ClientSession, "get")
+    @patch.object(ClientSession, "get", new_callable=MagicMock)
     async def asyncSetUp(self, mock_get: MagicMock):
         mock_hass = MagicMock(spec=HomeAssistant)
         mock_entry = MagicMock(spec=ConfigEntry)
@@ -29,7 +29,7 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
             }
         }
 
-        self.session = InternalSession(mock_hass, mock_entry)
+        self.session = PrivateSession(mock_hass, mock_entry)
 
         mock_get.return_value.__aenter__.return_value.headers = {}
         mock_get.return_value.__aenter__.return_value.status = 200
@@ -71,7 +71,7 @@ class TestExpirationReply(IsolatedAsyncioTestCase):
             }
         }
 
-        self.session = InternalSession(mock_hass, mock_entry)
+        self.session = PrivateSession(mock_hass, mock_entry)
 
     async def async_json_reply(self):
         return {
@@ -80,10 +80,10 @@ class TestExpirationReply(IsolatedAsyncioTestCase):
 
         }
 
-    @patch.object(ClientSession, "get")
+    @patch.object(ClientSession, "get", new_callable=MagicMock)
     async def test_expiration_error_raised(self, mock_get: MagicMock):
         mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": InternalSession.EXPIRED_LOCATION
+            "Location": PrivateSession.EXPIRED_LOCATION
         }
         mock_get.return_value.__aenter__.return_value.status = 302
         mock_get.return_value.__aenter__.return_value.json\
@@ -105,7 +105,7 @@ class TestClientErrors(IsolatedAsyncioTestCase):
             }
         }
 
-        self.session = InternalSession(mock_hass, mock_entry)
+        self.session = PrivateSession(mock_hass, mock_entry)
 
     async def async_json_reply(self):
         return {
@@ -120,11 +120,11 @@ class TestClientErrors(IsolatedAsyncioTestCase):
     def raise_content_error(self):
         raise ContentTypeError(MagicMock(), MagicMock())
 
-    @patch.object(ClientSession, "get")
+    @patch.object(ClientSession, "get", new_callable=MagicMock)
     async def test_token_error_raised(self, mock_get: MagicMock):
 
         mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": InternalSession.EXPIRED_LOCATION
+            "Location": PrivateSession.EXPIRED_LOCATION
         }
         mock_get.return_value.__aenter__.return_value.status = 403
         mock_get.return_value.__aenter__.return_value.ok = False
@@ -134,11 +134,11 @@ class TestClientErrors(IsolatedAsyncioTestCase):
         with self.assertRaises(TokenRefreshError):
             await self.session.async_refresh_token()
 
-    @patch.object(ClientSession, "get")
+    @patch.object(ClientSession, "get", new_callable=MagicMock)
     async def test_none_json_answer(self, mock_get: MagicMock):
 
         mock_get.return_value.__aenter__.return_value.headers = {
-            "Location": InternalSession.EXPIRED_LOCATION
+            "Location": PrivateSession.EXPIRED_LOCATION
         }
         mock_get.return_value.__aenter__.return_value.status = 403
         mock_get.return_value.__aenter__.return_value.ok = False

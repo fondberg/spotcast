@@ -2,7 +2,7 @@
 spotcast custom config data format
 
 Classes:
-    - OAuth2Session
+    - PublicSession
 
 Functions:
     - async_get_config_entry_implementation
@@ -13,11 +13,12 @@ from aiohttp import ClientError
 from asyncio import Lock
 
 from homeassistant.helpers.config_entry_oauth2_flow import (
-    OAuth2Session as ParentOAuth2Session,
+    OAuth2Session,
     client,
     async_oauth2_request,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.config_entry_oauth2_flow import (
     AbstractOAuth2Implementation,
@@ -32,7 +33,7 @@ from custom_components.spotcast.sessions.exceptions import (
 )
 
 
-class OAuth2Session(ParentOAuth2Session, ConnectionSession):
+class PublicSession(OAuth2Session, ConnectionSession):
     """Custom implementation of the OAuth2Session for Spotcast
 
     Properties:
@@ -62,6 +63,11 @@ class OAuth2Session(ParentOAuth2Session, ConnectionSession):
     def token(self) -> dict:
         """Return the token"""
         return cast(dict, self.config_entry.data["external_api"]["token"])
+
+    @property
+    def clean_token(self) -> str:
+        """Returns the token only"""
+        return self.token.get(CONF_ACCESS_TOKEN)
 
     async def async_ensure_token_valid(self) -> None:
         """Ensure that the current token is valid"""

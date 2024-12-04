@@ -1,13 +1,13 @@
 """Module to test async_ensure_token_valid function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, AsyncMock
 from time import time
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.spotcast.sessions.oauth2_session import (
-    OAuth2Session,
+from custom_components.spotcast.sessions.public_session import (
+    PublicSession,
     ConfigEntry,
     AbstractOAuth2Implementation,
     TokenRefreshError,
@@ -32,7 +32,7 @@ class TestTokenIsValid(IsolatedAsyncioTestCase):
             }
         }
 
-        self.session = OAuth2Session(
+        self.session = PublicSession(
             hass=self.mock_hass,
             config_entry=mock_entry,
             implementation=self.mock_implementation
@@ -71,7 +71,7 @@ class TestTokenIsNotValid(IsolatedAsyncioTestCase):
             }
         }
 
-        self.session = OAuth2Session(
+        self.session = PublicSession(
             hass=self.mock_hass,
             config_entry=mock_entry,
             implementation=self.mock_implementation
@@ -113,7 +113,7 @@ class TestTokenFailsToRefresh(IsolatedAsyncioTestCase):
         self.mock_implementation.async_refresh_token\
             .side_effect = ClientError()
 
-        self.session = OAuth2Session(
+        self.session = PublicSession(
             hass=self.mock_hass,
             config_entry=mock_entry,
             implementation=self.mock_implementation

@@ -1,7 +1,7 @@
 """Module to test the async_play_category function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from homeassistant.config_entries import ConfigEntry
 
@@ -20,14 +20,14 @@ class TestCategoryName(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_play_media")
     @patch(f"{TEST_MODULE}.choice", new_callable=MagicMock)
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
             self,
-            mock_account: MagicMock,
+            mock_account: AsyncMock,
             mock_entry: MagicMock,
             mock_choice: MagicMock,
-            mock_play: MagicMock,
+            mock_play: AsyncMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
@@ -99,14 +99,14 @@ class TestCategoryId(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_play_media")
     @patch(f"{TEST_MODULE}.choice", new_callable=MagicMock)
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
             self,
-            mock_account: MagicMock,
+            mock_account: AsyncMock,
             mock_entry: MagicMock,
             mock_choice: MagicMock,
-            mock_play: MagicMock,
+            mock_play: AsyncMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
@@ -178,14 +178,14 @@ class TestCategoryNotFound(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_play_media")
     @patch(f"{TEST_MODULE}.choice", new_callable=MagicMock)
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
     async def test_error_raises(
             self,
-            mock_account: MagicMock,
+            mock_account: AsyncMock,
             mock_entry: MagicMock,
             mock_choice: MagicMock,
-            mock_play: MagicMock,
+            mock_play: AsyncMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
@@ -228,14 +228,14 @@ class TestLimitCategorySize(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_play_media")
     @patch(f"{TEST_MODULE}.choice", new_callable=MagicMock)
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
             self,
-            mock_account: MagicMock,
+            mock_account: AsyncMock,
             mock_entry: MagicMock,
             mock_choice: MagicMock,
-            mock_play: MagicMock,
+            mock_play: AsyncMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)

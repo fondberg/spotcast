@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, patch
 
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     HomeAssistant,
 )
 
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+from test.spotify.account import TEST_MODULE
 
 
 class TestDataRetention(TestCase):
@@ -23,8 +23,8 @@ class TestDataRetention(TestCase):
             mock_coroutine: MagicMock,
     ):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
         mock_hass = MagicMock(spec=HomeAssistant)
         mock_hass.loop = MagicMock()
 
@@ -38,8 +38,8 @@ class TestDataRetention(TestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=mock_hass,
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 

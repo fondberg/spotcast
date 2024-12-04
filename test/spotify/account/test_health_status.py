@@ -7,20 +7,23 @@ from time import time
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
     DeviceInfo,
-    DeviceEntryType
+    DeviceEntryType,
+    Spotify,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestHealthStatus(TestCase):
 
-    @patch("custom_components.spotcast.spotify.account.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
     def setUp(self, mock_spotify: MagicMock):
 
-        mock_internal = MagicMock(spec=InternalSession)
-        mock_external = MagicMock(spec=OAuth2Session)
+        mock_internal = MagicMock(spec=PrivateSession)
+        mock_external = MagicMock(spec=PublicSession)
 
         mock_internal.is_healthy = True
         mock_external.is_healthy = False
@@ -35,8 +38,8 @@ class TestHealthStatus(TestCase):
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=MagicMock(spec=HomeAssistant),
-            external_session=mock_external,
-            internal_session=mock_internal,
+            public_session=mock_external,
+            private_session=mock_internal,
             is_default=True
         )
 
@@ -81,7 +84,7 @@ class TestHealthStatus(TestCase):
         self.assertEqual(
             self.result,
             {
-                "internal": True,
-                "external": False,
+                "public": False,
+                "private": True,
             }
         )

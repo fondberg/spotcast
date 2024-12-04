@@ -18,10 +18,10 @@ class TestTrackSearch(IsolatedAsyncioTestCase):
     @patch(f"{TEST_MODULE}.async_play_media")
     @patch(f"{TEST_MODULE}.async_play_custom_context")
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     async def asyncSetUp(
             self,
-            mock_entry: AsyncMock,
+            mock_entry: MagicMock,
             mock_account: AsyncMock,
             mock_play_media: AsyncMock,
             mock_play_search: AsyncMock,
@@ -77,10 +77,10 @@ class TestAlbumSearch(IsolatedAsyncioTestCase):
     @patch(f"{TEST_MODULE}.async_play_media")
     @patch(f"{TEST_MODULE}.async_play_custom_context")
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    @patch(f"{TEST_MODULE}.get_account_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     async def asyncSetUp(
             self,
-            mock_entry: AsyncMock,
+            mock_entry: MagicMock,
             mock_account: AsyncMock,
             mock_play_media: AsyncMock,
             mock_play_search: AsyncMock,

@@ -18,10 +18,10 @@ TEST_MODULE = "custom_components.spotcast"
 class TestEntryRegistration(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_setup_websocket")
-    @patch.object(SpotifyAccount, "async_from_config_entry", new_callable=AsyncMock)
+    @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
         self,
-        mock_account: MagicMock,
+        mock_account: AsyncMock,
         mock_websocket: AsyncMock,
     ):
 
@@ -73,7 +73,7 @@ class TestEntryRegistration(IsolatedAsyncioTestCase):
 class TestDefaultOptionsSet(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_setup_websocket")
-    @patch.object(SpotifyAccount, "async_from_config_entry", new_callable=AsyncMock)
+    @patch.object(SpotifyAccount, "async_from_config_entry")
     async def asyncSetUp(
         self,
         mock_account: MagicMock,
@@ -123,8 +123,8 @@ class TestDefaultOptionsSet(IsolatedAsyncioTestCase):
 
 class TestTokensErrorAtRefresh(IsolatedAsyncioTestCase):
 
-    @patch.object(SpotifyAccount, "async_from_config_entry", new_callable=AsyncMock)
-    async def test_token_error_raised(self, mock_account: MagicMock):
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    async def test_token_error_raised(self, mock_account: AsyncMock):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
 
@@ -159,8 +159,8 @@ class TestTokensErrorAtRefresh(IsolatedAsyncioTestCase):
 
 class TestTokensErrorAtAccountBuild(IsolatedAsyncioTestCase):
 
-    @patch.object(SpotifyAccount, "async_from_config_entry", new_callable=AsyncMock)
-    async def test_token_error_raised(self, mock_account: MagicMock):
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    async def test_token_error_raised(self, mock_account: AsyncMock):
 
         mock_account.side_effect = TokenRefreshError
 

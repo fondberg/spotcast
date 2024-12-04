@@ -16,7 +16,7 @@ TEST_MODULE = "custom_components.spotcast.services.service_handler"
 
 class TestServiceCall(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.SERVICE_HANDLERS")
+    @patch(f"{TEST_MODULE}.SERVICE_HANDLERS", new_callable=MagicMock)
     async def asyncSetUp(self, mock_handlers: MagicMock):
 
         self.mock_play_media = AsyncMock()

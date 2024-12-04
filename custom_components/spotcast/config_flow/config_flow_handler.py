@@ -21,7 +21,7 @@ from spotipy import Spotify
 
 from custom_components.spotcast import DOMAIN
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.sessions import InternalSession
+from custom_components.spotcast.sessions import PrivateSession
 from custom_components.spotcast.config_flow.option_flow_handler import (
     SpotcastOptionsFlowHandler
 )
@@ -115,14 +115,14 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         entry = MagicMock(spec=ConfigEntry)
         entry.data = data
         spotify = Spotify(auth=external_api["token"]["access_token"])
-        internal_session = InternalSession(self.hass, entry)
+        private_session = PrivateSession(self.hass, entry)
 
         try:
             LOGGER.debug("loading curent user data")
             current_user = await self.hass.async_add_executor_job(
                 spotify.current_user
             )
-            await internal_session.async_ensure_token_valid()
+            await private_session.async_ensure_token_valid()
         except Exception:  # pylint: disable=W0718
             return self.async_abort(reason="connection_error")
 

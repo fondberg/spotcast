@@ -24,6 +24,12 @@ class ConnectionSession(ABC):
         """Retrives the token for the session"""
 
     @property
+    @abstractmethod
+    def clean_token(self) -> str:
+        """returns the currently valid token only, no additional
+        information"""
+
+    @property
     def is_healthy(self) -> bool:
         """Returns True if the session is able to refresh its token"""
         return self._is_healthy

@@ -1,7 +1,7 @@
 """Module to test the constructor of the DeviceManager"""
 
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from custom_components.spotcast.media_player.device_manager import (
     DeviceManager,

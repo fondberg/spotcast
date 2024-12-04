@@ -7,29 +7,30 @@ from time import time
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     HomeAssistant,
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
 )
-TEST_MODULE = "custom_components.spotcast.spotify.account"
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestActivePlayback(TestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     def setUp(self, mock_spotify: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "spotify": mock_spotify.return_value
         }
 
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
         )
 
         self.account._datasets["playback_state"].expires_at = time() + 9999
@@ -47,21 +48,21 @@ class TestActivePlayback(TestCase):
 
 class TestNoPlayback(TestCase):
 
-    @patch(f"{TEST_MODULE}.Spotify")
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     def setUp(self, mock_spotify: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
-            "external": MagicMock(spec=OAuth2Session),
-            "internal": MagicMock(spec=InternalSession),
+            "external": MagicMock(spec=PublicSession),
+            "internal": MagicMock(spec=PrivateSession),
             "spotify": mock_spotify.return_value
         }
 
         self.account = SpotifyAccount(
             entry_id="12345",
             hass=self.mocks["hass"],
-            external_session=self.mocks["external"],
-            internal_session=self.mocks["internal"],
+            public_session=self.mocks["external"],
+            private_session=self.mocks["internal"],
         )
 
         self.account._datasets["playback_state"].expires_at = time() + 9999

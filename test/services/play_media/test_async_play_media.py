@@ -170,6 +170,7 @@ class TestTransferPlayback(IsolatedAsyncioTestCase):
 
 class TestTrackUri(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.async_track_index")
     @patch(f"{TEST_MODULE}.async_random_index")
     @patch(f"{TEST_MODULE}.async_media_player_from_id")
     @patch.object(SpotifyAccount, "async_from_config_entry")
@@ -179,7 +180,8 @@ class TestTrackUri(IsolatedAsyncioTestCase):
         mock_entry: MagicMock,
         mock_account: AsyncMock,
         mock_player: AsyncMock,
-        mock_random: AsyncMock
+        mock_random: AsyncMock,
+        mock_index: AsyncMock,
     ):
 
         mock_entry.return_value = MagicMock()
@@ -193,15 +195,10 @@ class TestTrackUri(IsolatedAsyncioTestCase):
             "account": mock_account.return_value,
             "player": mock_player(),
             "random": mock_random,
+            "index": mock_index,
         }
 
-        self.mocks["account"].async_get_track.return_value = {
-            "album": {
-                "uri": "spotify:album:foo"
-            },
-            "track_number": 5
-        }
-
+        self.mocks["index"].return_value = ("spotify:album:foo", 5)
         self.mocks["call"].data = {
             "spotify_uri": "spotify:track:bar",
             "account": "12345",

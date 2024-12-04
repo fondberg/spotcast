@@ -35,8 +35,8 @@ class TestHealthyAccount(IsolatedAsyncioTestCase):
         }
 
         self.mocks["account"].health_status = {
-            "external": True,
-            "internal": True,
+            "public": True,
+            "private": True,
         }
 
         self.mocks["account"].id = "dummy"
@@ -79,8 +79,8 @@ class TestUnHealthyAccount(IsolatedAsyncioTestCase):
         }
 
         self.mocks["account"].health_status = {
-            "external": False,
-            "internal": False,
+            "public": False,
+            "private": False,
         }
 
         self.mocks["account"].id = "dummy"

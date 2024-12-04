@@ -33,6 +33,10 @@ from custom_components.spotcast.sensor.spotify_account_type_sensor import (
     SpotifyAccountTypeSensor
 )
 
+from custom_components.spotcast.sensor.spotify_current_audio_features import (
+    SENSORS as AUDIO_FEATURES_SENSORS
+)
+
 LOGGER = getLogger(__name__)
 SENSORS = (
     SpotifyDevicesSensor,
@@ -42,6 +46,7 @@ SENSORS = (
     SpotifyProductSensor,
     SpotifyFollowersSensor,
     SpotifyAccountTypeSensor,
+    *AUDIO_FEATURES_SENSORS,
 )
 
 

@@ -11,8 +11,8 @@ from homeassistant.components.system_health import (
 from custom_components.spotcast import __version__, DOMAIN
 from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.sessions import (
-    OAuth2Session,
-    InternalSession,
+    PublicSession,
+    PrivateSession,
 )
 
 LOGGER = getLogger(__name__)
@@ -46,12 +46,12 @@ async def system_health_info(hass: HomeAssistant) -> dict[str]:  # pylint: disab
 
         health_info[f"{base_key} Is Default"] = account.is_default
         health_info[f"{base_key} Public Endpoint"] = \
-            async_check_can_reach_url(hass, OAuth2Session.API_ENDPOINT)
-        health_info[f"{base_key} Public Token"] = health_status["external"]
+            async_check_can_reach_url(hass, PublicSession.API_ENDPOINT)
+        health_info[f"{base_key} Public Token"] = health_status["public"]
         health_info[f"{base_key} Private Endpoint"] = \
-            async_check_can_reach_url(hass, InternalSession.API_ENDPOINT)
+            async_check_can_reach_url(hass, PrivateSession.API_ENDPOINT)
         health_info[f"{base_key} Private Token"] = health_status[
-            "internal"
+            "private"
         ]
 
     return health_info
