@@ -14,11 +14,11 @@ class TestIsExpired(TestCase):
 
     def test_last_refresh_too_old(self):
         self.dataset._data = {}
-        self.assertTrue(self.dataset.is_expired)
+        self.assertTrue(self.dataset.is_expired())
 
     def test_data_missing(self):
         self.dataset.expires_at = time() + 9999
-        self.assertTrue(self.dataset.is_expired)
+        self.assertTrue(self.dataset.is_expired())
 
 
 class TestIsNotExpired(TestCase):
@@ -30,4 +30,4 @@ class TestIsNotExpired(TestCase):
     def test_recent_refresh(self):
         self.dataset.expires_at = time() + 9999
         self.dataset._data = {}
-        self.assertFalse(self.dataset.is_expired)
+        self.assertFalse(self.dataset.is_expired())
