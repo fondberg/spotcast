@@ -1015,29 +1015,33 @@ class SpotifyAccount:
             - list: A list of playlists.
         """
 
-        # Internal method, so that the _get method can be called
-        # As the pager parameters do not allign with the _get parameters
-        # Spotipy _get is defined as: def _get(self, url, args=None, payload=None, **kwargs)
-        def fetch_page(limit, offset):
-            params = {
-                "content_limit": limit,
-                "locale": locale,
-                "platform": "web",
-                "types": "album,playlist,artist,show,station",
-                "limit": limit,
-                "offset": offset,
-            }
-
-            return self._internal_cont._get(url, None, **params)
-
         await self.async_ensure_tokens_valid()
 
         return await self._async_pager(
-            function=fetch_page,
+            function= self._fetch_view,
+            prepends=[url, locale],
             limit=25,  # This is the max amount per call
             max_items=limit,
             sub_layer="content",
         )
+    
+    def _fetch_view(
+        self, 
+        url: str, 
+        locale: str,
+        limit: int, 
+        offset: int,
+    ) -> list:
+        params = {
+            "content_limit": limit,
+            "locale": locale,
+            "platform": "web",
+            "types": "album,playlist,artist,show,station",
+            "limit": limit,
+            "offset": offset,
+        }
+
+        return self.apis["private"]._get(url, None, **params)
     
     async def _async_get_count(
             self,
