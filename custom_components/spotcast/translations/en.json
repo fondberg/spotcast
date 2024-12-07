@@ -1,4 +1,12 @@
 {
+    "common": {
+        "media_player_name": "Media Player",
+        "media_player_desc": "A Single Media Player compatible with Spotcast",
+        "account_name": "Spotify Account",
+        "account_desc": "The id of the Spotify account to use. Takes the default account otherwise.",
+        "data_name": "Data",
+        "data_desc": "Additional modifiers when starting media playback"
+    },
     "config": {
         "step": {
             "internal_api": {
@@ -22,25 +30,76 @@
             }
         }
     },
+    "selectors": {
+        "item_type": {
+            "album": "Album",
+            "artist": "Artist",
+            "playlist": "Playlist",
+            "track": "Track",
+            "episode": "Episode",
+            "audiobook": "Audiobook"
+        },
+        "tags": {
+            "hipster": "Hipster",
+            "new": "New"
+        }
+    },
     "services": {
-        "play_media": {
-            "name": "Play Media",
-            "description": "Play Spotify media on Chromecast devices",
+        "add_to_queue": {
+            "name": "Add to Queue",
+            "description": "Add a list of tracks to the active playback in Spotify",
             "fields": {
-                "media_player": {
-                    "name": "Media Player"
-                },
-                "spotify_uri": {
-                    "name": "URI",
-                    "description": "Supported Spotify URI or URL"
+                "spotify_uris": {
+                    "name": "Spotify URIs",
+                    "description": "A list of track to add to the active playback"
                 },
                 "account": {
-                    "name": "Spotify Account",
-                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                }
+            }
+        },
+        "play_category": {
+            "name": "Playlist from Category",
+            "description": "Plays a random playlist from a Browse Category",
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "category": {
+                    "name": "Category",
+                    "description": "A Category name or ID. A fuzzy match is applied on the name, but an ID must be an exact match."
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
                 },
                 "data": {
-                    "name": "Data",
-                    "description": "Additional modifiers when starting media playback"
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                }
+            }
+        },
+        "play_custom_context": {
+            "name": "Play Custom Context",
+            "description": "Starts playback from a custom list of tracks URIs",
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "items": {
+                    "name": "Items",
+                    "description": "A list of track URIs."
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                },
+                "data": {
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
                 }
             }
         },
@@ -49,22 +108,128 @@
             "description": "Play Spotify DJ playlist on a Chromecast device",
             "fields": {
                 "media_player": {
-                    "name": "Media Player"
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
                 },
                 "account": {
-                    "name": "Spotify Account",
-                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
                 },
                 "data": {
-                    "name": "Data",
-                    "description": "Additional modifiers when starting media playback"
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                }
+            }
+        },
+        "play_from_search": {
+            "name": "Play From Search",
+            "description": "Start playback from a search result",
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "search_term": {
+                    "name": "Search Term",
+                    "description": "The term to search in Spotify Catalog"
+                },
+                "item_type": {
+                    "name": "Item Type",
+                    "description": "The type of item to return from the search result"
+                },
+                "tags": {
+                    "name": "Tags",
+                    "description": "Tags to add to the search query filters"
+                },
+                "filters": {
+                    "name": "Filters",
+                    "description": "Filters to apply to the search query."
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                },
+                "data": {
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                }
+            }
+        },
+        "play_liked_songs": {
+            "name": "Liked Songs Playlist",
+            "description": "Play User's Liked Songs",
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                },
+                "data": {
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                }
+            }
+        },
+        "play_media": {
+            "name": "Play Media",
+            "description": "Play Spotify media on Chromecast devices",
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "spotify_uri": {
+                    "name": "URI",
+                    "description": "Supported Spotify URI or URL"
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                },
+                "data": {
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                }
+            }
+        },
+        "play_saved_episodes": {
+            "name": "Saved Podcast",
+            "description": "Play User's Saved Podcast Episodes",
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                },
+                "data": {
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
                 }
             }
         },
         "transfer_playback": {
             "name": "Transfer Playback",
             "description": "Transfers the Spotify playback to the targeted device",
-            "fields": {}
+            "fields": {
+                "media_player": {
+                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
+                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                },
+                "account": {
+                    "name": "[%key:compoment::spotcast::common::account_name%]",
+                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                },
+                "data": {
+                    "name": "[%key:compoment::spotcast::common::data_name%]",
+                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                }
+            }
         }
     }
 }
