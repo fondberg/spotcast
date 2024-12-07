@@ -34,6 +34,7 @@ from custom_components.spotcast.spotify.exceptions import (
     TokenError,
 )
 
+
 LOGGER = getLogger(__name__)
 
 
@@ -51,7 +52,7 @@ class SpotifyAccount:
 
     Properties:
         - id(str): the identifier of the account
-        - name(str): the dusplay name for the account
+        - name(str): the display name for the account
         - profile(dict): the full profile dictionary of the account
         - country(str): the country code where the account currently
             is.
@@ -86,6 +87,7 @@ class SpotifyAccount:
         - async_liked_songs
         - async_repeat
         - async_set_volume
+        - async_view
 
     Functions:
         - async_from_config_entry
@@ -967,7 +969,7 @@ class SpotifyAccount:
     async def async_category_playlists(
             self,
             category_id: str,
-            limit: int = None,
+            limit: int,
     ) -> list[str]:
         """Fetches the playlist associated with a browse category
 
@@ -996,6 +998,51 @@ class SpotifyAccount:
 
         return playlists
 
+    async def async_view(
+        self,
+        url: str,
+        limit: int,
+        locale: str,
+    ) -> list:
+        """Fetches a view based on url.
+
+        Args:
+            - url(str): The url of the view to fetch (e.g., 'made-for-x').
+            - limit(int): The maximum number of playlists to retrieve.
+            - locale(str): The locale for the request (optional).
+
+        Returns:
+            - list: A list of playlists.
+        """
+
+        await self.async_ensure_tokens_valid()
+
+        return await self._async_pager(
+            function= self._fetch_view,
+            prepends=[url, locale],
+            limit=25,  # This is the max amount per call
+            max_items=limit,
+            sub_layer="content",
+        )
+    
+    def _fetch_view(
+        self, 
+        url: str, 
+        locale: str,
+        limit: int, 
+        offset: int,
+    ) -> list:
+        params = {
+            "content_limit": limit,
+            "locale": locale,
+            "platform": "web",
+            "types": "album,playlist,artist,show,station",
+            "limit": limit,
+            "offset": offset,
+        }
+
+        return self.apis["private"]._get(url, None, **params)
+    
     async def _async_get_count(
             self,
             function: callable,
