@@ -54,7 +54,10 @@ Spotcast is compatible with any version since 2024.11.0.
 ### Setup
 
 > [!WARNING]
-> It is highly recommended to set a separate Spotify App for Spotcast, especially for multiple accounts. Spotcast + Spotify Integration can lead to high API request if all combined in the same Authentication Application
+> It is highly recommended to set a separate Spotify App for Spotcast, especially for multiple accounts. Spotcast + Spotify Integration can lead to high API request if all combined in the same Authentication Application.
+
+> [!WARNING]
+> If you need to update your application credentials (changed in secret, new Spotify Application). Please follow [these instructions](https://www.home-assistant.io/integrations/application_credentials/)
 
 There are 2 steps for the setup of an account with spotcast
 
