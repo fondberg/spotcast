@@ -13,7 +13,9 @@ from homeassistant.helpers import config_validation as cv
 import voluptuous as vol
 
 
-from custom_components.spotcast.media_player import SpotifyDevice
+from custom_components.spotcast.media_player.exceptions import (
+    MissingActiveDeviceError,
+)
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.utils import get_account_entry
 from custom_components.spotcast.spotify.utils import url_to_uri
@@ -80,18 +82,17 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
 
     if entity_id is not None:
         LOGGER.debug("Getting %s from home assistant", entity_id)
+    else:
+        LOGGER.debug("Getting active device for account `%s`", account.name)
+
+    try:
         media_player = await async_media_player_from_id(
             hass=hass,
             account=account,
             entity_id=entity_id
         )
-    elif (playback_state := await account.async_playback_state(force=True))\
-            != {}:
-        media_player = SpotifyDevice(account, playback_state["device"])
-    else:
-        raise ServiceValidationError(
-            "No active playback available. Provide a target"
-        )
+    except MissingActiveDeviceError as exc:
+        raise ServiceValidationError(str(exc)) from exc
 
     LOGGER.info(
         "Playing `%s` on `%s` for account `%s`",

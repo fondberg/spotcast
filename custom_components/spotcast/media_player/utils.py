@@ -17,6 +17,7 @@ from homeassistant.components.cast.helpers import ChromeCastZeroconf
 from custom_components.spotcast.media_player.exceptions import (
     MediaPlayerNotFoundError,
     UnknownIntegrationError,
+    MissingActiveDeviceError,
 )
 from custom_components.spotcast.media_player import (
     MediaPlayer,
@@ -38,9 +39,23 @@ PLAYER_TYPES = (
 async def async_media_player_from_id(
     hass: HomeAssistant,
     account: SpotifyAccount,
-    entity_id: str,
+    entity_id: str = None,
 ) -> MediaPlayer:
-    """Retrives an entity from the entity_id"""
+    """Retrives an entity from the entity_id
+
+    Args:
+        - hass(HomeAssistant): the Home Assistant instance
+        - account(SpotifyAccount): the account linked to the request
+        - entity_id(str, optional): the entity_id of the media player
+            to retrieve. Defaults to the active device of the account
+
+    Returns:
+        - MediaPlayer: the media player linked to the entity id
+            provided
+    """
+
+    if entity_id is None:
+        return await async_active_device(account)
 
     for player_type in PLAYER_TYPES:
 
@@ -67,6 +82,33 @@ async def async_media_player_from_id(
     raise MediaPlayerNotFoundError(
         f"Could not find `{entity_id}` in the managed integrations",
     )
+
+
+async def async_active_device(account: SpotifyAccount) -> SpotifyDevice:
+    """Returns the currently active device for the spotify account.
+    Raises an error if there are no active playback
+
+    Args:
+        - account(SpotifyAccount): the account to look for an active
+            device
+
+    Returns:
+        - SpotifyDevice: the media player instance of the active
+            device
+
+    Raises:
+        - MissingActiveDeviceError: raised when no active playback exist
+    """
+    playback_state = await account.async_playback_state(force=True)
+
+    if playback_state == {}:
+        raise MissingActiveDeviceError(
+            "No active playback available. A target must be provided"
+        )
+
+    media_player = SpotifyDevice(account, playback_state["device"])
+
+    return media_player
 
 
 async def async_entities_from_integration(
