@@ -180,7 +180,7 @@ play_custom_context:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:
