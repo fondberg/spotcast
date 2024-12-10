@@ -85,6 +85,7 @@ class SpotifyAccount:
         - async_apply_extras
         - async_shuffle
         - async_liked_songs
+        - async_like_media
         - async_repeat
         - async_set_volume
         - async_view
@@ -887,6 +888,16 @@ class SpotifyAccount:
                 LOGGER.debug("Using cached liked songs dataset")
 
         return self.liked_songs
+    
+    async def async_like_media(self, uris: list[str]):
+        """Adds a list of uris to the user's liked songs
+        """
+        await self.async_ensure_tokens_valid()
+
+        return await self.hass.async_add_executor_job(
+            self.apis["private"].current_user_saved_tracks_add,
+            uris
+        )
 
     async def async_repeat(
         self,
