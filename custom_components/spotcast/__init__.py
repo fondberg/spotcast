@@ -10,7 +10,6 @@ Constants:
 """
 
 from logging import getLogger
-import asyncio
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
