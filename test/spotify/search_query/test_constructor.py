@@ -10,7 +10,7 @@ class TestDataRetention(TestCase):
     def setUp(self):
         self.query = SearchQuery(
             "Finger To the Bone",
-            item_type="track",
+            item_types="track",
             filters={
                 "artist": "Brown Bird",
                 "album": "Salt For Salt"
@@ -19,7 +19,7 @@ class TestDataRetention(TestCase):
         )
 
     def test_item_types_saved(self):
-        self.assertEqual(self.query.item_type, "track")
+        self.assertEqual(self.query.item_types, ["track"])
 
     def test_search_saved(self):
         self.assertEqual(self.query.search, "Finger To the Bone")
@@ -39,7 +39,7 @@ class TestDefaults(TestCase):
     def setUp(self):
         self.query = SearchQuery(
             "Finger To the Bone",
-            item_type="track",
+            item_types="track",
         )
 
     def test_filters_saved(self):

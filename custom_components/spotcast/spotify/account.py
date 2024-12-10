@@ -703,9 +703,15 @@ class SpotifyAccount:
     async def async_search(
             self,
             query: SearchQuery,
-            max_items: int = 20
+            limit: int = 20,
     ) -> list[dict]:
-        """Makes a search query and returns the result"""
+        """Makes a search query and returns the result
+
+        Args:
+            - query(SearchQuery): The search query to run
+            - limit(int, optional): The maximum amount of item to
+                retrieve in each category. Defaults to 20.
+        """
         await self.async_ensure_tokens_valid()
         LOGGER.debug(
             "Getting Search Result `%s` for account `%s`",
@@ -713,21 +719,22 @@ class SpotifyAccount:
             self.name,
         )
 
-        limit = 50
-
-        if max_items < limit:
-            limit = max_items
-
-        search_result = await self._async_pager(
-            function=self.apis["private"].search,
-            prepends=[query.query_string],
-            appends=[query.item_type, self.country],
-            limit=limit,
-            sub_layer=f"{query.item_type}s",
-            max_items=max_items,
+        search_result = await self.hass.async_add_executor_job(
+            self.apis["private"].search,
+            query.query_string,
+            limit,
+            0,
+            query.item_types_string,
+            self.country,
         )
 
-        return search_result
+        result = {}
+
+        for item_type in query.item_types:
+            key = f"{item_type}s"
+            result[key] = search_result[key]["items"]
+
+        return result
 
     async def async_wait_for_device(self, device_id: str, timeout: int = 12):
         """Asycnhronously wait for a device to become available
