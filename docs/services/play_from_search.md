@@ -10,7 +10,8 @@ data:
     media_player:
         entity_id: media_player.foo
     search_term: Taman Shud
-    item_type: track
+    item_types:
+        - track
     filters:
         artist: The Drones
         album: Feelin Kinda Free
@@ -26,9 +27,11 @@ Let the user select a compatible device on which to start the playback. **_Must 
 
 ### `search_term` (str)
 
-*optional*
-
 A generic search term that could be for any type of items
+
+### item_types (list[str])
+
+A list of item types to look for in the search query.
 
 ### `tags` (list[str])
 

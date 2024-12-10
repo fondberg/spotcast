@@ -234,12 +234,20 @@ play_from_search:
       selector:
         text:
           multiline: false
-    item_type:
+          required: true
+    item_types:
       name: Item Type
       description: The type of item to return from the search result
       example: album
+      required: true
+      default:
+        - album
+        - artist
+        - playlist
+        - track
       selector:
         select:
+          multiple: true
           options:
             - label: Album
               value: album
