@@ -55,10 +55,8 @@ async def async_transfer_playback(hass: HomeAssistant, call: ServiceCall):
 
     # check if no active playback
     if playback_state == {} and account.last_playback_state == {}:
-        raise ServiceValidationError(
-            f"Account `{account.name}` has no known or active playback. "
-            "Nothing to transfer"
-        )
+        LOGGER.warning("No known playback state. Defaults back to liked songs")
+        call_data["spotify_uri"] = account.liked_songs_uri
     elif playback_state != {}:
         call_data["spotify_uri"] = None
     else:
