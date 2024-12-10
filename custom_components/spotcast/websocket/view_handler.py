@@ -61,7 +61,7 @@ async def async_view_handler(
         {
             "id": playlist.get("id", None),
             "name": playlist["name"],
-            "href": playlist["href"],
+            "uri": playlist["uri"],
             "description": playlist.get("description", None),
             "icon": playlist["images"][0]["url"]
             if "images" in playlist and len(playlist["images"]) > 0

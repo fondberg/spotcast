@@ -47,7 +47,7 @@ async def async_tracks_handler(
         {
             "id": track["track"]["id"],
             "name": track["track"]["name"],
-            "href": track["track"]["href"],
+            "uri": track["track"]["uri"],
             "album": track["track"].get("album", None),
             "artists": track["track"].get("artists", None),
         }
