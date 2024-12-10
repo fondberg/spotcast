@@ -147,14 +147,13 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
 
         await self.async_set_unique_id(current_user["id"])
 
-        self._abort_if_unique_id_configured()
-
         if self.source == SOURCE_REAUTH:
             self._abort_if_unique_id_mismatch(reason="reauth_account_mismatch")
             return self.async_update_reload_and_abort(
-                self._get_reauth_entry(), title=name, data=data
+                self._get_reauth_entry(), title=name, data=self.data
             )
 
+        self._abort_if_unique_id_configured()
         current_entries = self.hass.config_entries.async_entries(DOMAIN)
 
         options = {
