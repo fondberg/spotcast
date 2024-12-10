@@ -11,7 +11,7 @@ class TestQueryStrValue(TestCase):
 
         self.query = SearchQuery(
             search="foo",
-            item_type="track",
+            item_types="track",
             filters={
                 "artist": "bar",
                 "album": "baz",
@@ -32,7 +32,7 @@ class TestQueryWithEnptyFiltersAndTags(TestCase):
 
         self.query = SearchQuery(
             search="foo",
-            item_type="track",
+            item_types="track",
         )
 
     def test_expected_query_string_received(self):
