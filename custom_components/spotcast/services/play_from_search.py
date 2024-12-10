@@ -93,6 +93,8 @@ async def async_play_from_search(hass: HomeAssistant, call: ServiceCall):
     query = SearchQuery(search_term, item_types, filters, tags)
     search_result = await account.async_search(query, limit)
 
+    LOGGER.warn(search_result)
+
     call_data = copy_to_dict(call.data)
 
     # remove unwanted items from call data
@@ -137,10 +139,12 @@ def get_best_candidate(
 
     for key in ITEM_TYPE_PRIORITY:
 
-        if key not in search_result:
+        if key not in search_result or len(search_result[key]) == 0:
             continue
 
         items = search_result[key]
+
+        LOGGER.warn(key, items)
 
         candidate = items[0]["name"]
         ratio = fuzz.partial_ratio(search_term, candidate)
