@@ -6,28 +6,23 @@ from homeassistant.components.websocket_api import ActiveConnection
 from custom_components.spotcast.utils import get_account_entry, search_account
 from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.utils import websocket_wrapper
-from custom_components.spotcast.spotify.utils import select_image_url
 
-ENDPOINT = "spotcast/view"
+ENDPOINT = "spotcast/tracks"
 SCHEMA = vol.Schema(
     {
         vol.Required("id"): cv.positive_int,
         vol.Required("type"): ENDPOINT,
-        vol.Required("url"): cv.string,
-        vol.Optional("limit"): cv.positive_int,
-        vol.Optional("locale"): cv.string,
-        vol.Optional("platform"): cv.string,
-        vol.Optional("types"): cv.string,
+        vol.Required("playlistId"): cv.string,
         vol.Optional("account"): cv.string,
     }
 )
 
 
 @websocket_wrapper
-async def async_view_handler(
+async def async_tracks_handler(
     hass: HomeAssistant, connection: ActiveConnection, msg: dict
 ):
-    """Gets a list of playlists from a specified account.
+    """Gets the tracks of a playlist
 
     Args:
         - hass (HomeAssistant): The Home Assistant instance.
@@ -35,9 +30,7 @@ async def async_view_handler(
         - msg (dict): The message received through the WebSocket API.
     """
     account_id = msg.get("account")
-    url = msg.get("url")
-    limit = msg.get("limit", 10)
-    locale = msg.get("locale", "en_US")
+    playlistId = msg.get("playlistId")
 
     account: SpotifyAccount
 
@@ -48,33 +41,24 @@ async def async_view_handler(
     else:
         account = search_account(hass, account_id)
 
-    # prepend views/ to the url
-    url = f"views/{url}"
+    raw_tracks = await account.async_get_playlist_tracks(uri=playlistId)
 
-    raw_playlists = await account.async_view(
-        url=url,
-        limit=limit,
-        locale=locale,
-    )
-
-    formatted_playlists = [
+    formatted_tracks = [
         {
-            "id": playlist.get("id", None),
-            "name": playlist["name"],
-            "href": playlist["href"],
-            "description": playlist.get("description", None),
-            "icon": playlist["images"][0]["url"]
-            if "images" in playlist and len(playlist["images"]) > 0
-            else None,
+            "id": track["track"]["id"],
+            "name": track["track"]["name"],
+            "href": track["track"]["href"],
+            "album": track["track"].get("album", None),
+            "artists": track["track"].get("artists", None),
         }
-        for playlist in raw_playlists
+        for track in raw_tracks
     ]
 
     connection.send_result(
         msg["id"],
         {
-            "total": len(formatted_playlists),
+            "total": len(formatted_tracks),
             "account": account_id,
-            "playlists": formatted_playlists,
+            "tracks": formatted_tracks,
         },
     )

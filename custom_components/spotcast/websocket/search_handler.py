@@ -59,6 +59,7 @@ async def async_search_handler(
             "id": result.get("id", None),
             "name": result["name"],
             "href": result["href"],
+            "description": result.get("description", None),
             "icon": result["images"][0]["url"]
             if "images" in result and len(result["images"]) > 0
             else None,
