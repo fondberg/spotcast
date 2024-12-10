@@ -890,13 +890,16 @@ class SpotifyAccount:
         return self.liked_songs
     
     async def async_like_media(self, uris: list[str]):
-        """Adds a list of uris to the user's liked songs
-        """
+        """Adds a list of uris to the user's liked songs"""
         await self.async_ensure_tokens_valid()
 
+        dataset = self._datasets["liked_songs"]
+        async with dataset.lock:
+            dataset.last_updated = 0  # Force expiration
+            LOGGER.debug("Expired liked_songs dataset after adding new likes")
+
         return await self.hass.async_add_executor_job(
-            self.apis["private"].current_user_saved_tracks_add,
-            uris
+            self.apis["private"].current_user_saved_tracks_add, uris
         )
 
     async def async_repeat(
