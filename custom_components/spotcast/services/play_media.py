@@ -88,6 +88,10 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     elif (playback_state := await account.async_playback_state(force=True))\
             != {}:
         media_player = SpotifyDevice(account, playback_state["device"])
+    else:
+        raise ServiceValidationError(
+            "No active playback available. Provide a target"
+        )
 
     LOGGER.info(
         "Playing `%s` on `%s` for account `%s`",
