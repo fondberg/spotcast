@@ -97,10 +97,6 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             LOGGER.debug("Adding external api to entry data")
             self.data["external_api"] = data
 
-        if self._import_data is not None:
-            self.data["internal_api"] = self._import_data
-            self._import_data = None
-
         if "internal_api" not in self.data:
             return self.async_show_form(
                 step_id="internal_api",
@@ -114,17 +110,32 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         # purpose of InternalSession
         entry = MagicMock(spec=ConfigEntry)
         entry.data = data
-        spotify = Spotify(auth=external_api["token"]["access_token"])
         private_session = PrivateSession(self.hass, entry)
 
         try:
             LOGGER.debug("loading curent user data")
-            current_user = await self.hass.async_add_executor_job(
-                spotify.current_user
-            )
             await private_session.async_ensure_token_valid()
-        except Exception:  # pylint: disable=W0718
+            accounts: dict[str, Spotify] = {
+                "public": Spotify(auth=external_api["token"]["access_token"]),
+                "private": Spotify(auth=private_session.token)
+            }
+
+            profiles = {}
+
+            for key, account in accounts.items():
+                profiles[key] = await self.hass.async_add_executor_job(
+                    account.current_user
+                )
+
+        except Exception as exc:  # pylint: disable=W0718
             return self.async_abort(reason="connection_error")
+
+        ids = [x["id"] for x in profiles.values()]
+
+        if ids[0] != ids[1]:
+            return self.async_abort(reason="public_private_accounts_mismatch")
+
+        current_user = profiles["public"]
 
         name = external_api["id"] = current_user["id"]
         display_name = current_user.get("display_name")
@@ -135,6 +146,8 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         self.data["name"] = name
 
         await self.async_set_unique_id(current_user["id"])
+
+        self._abort_if_unique_id_configured()
 
         if self.source == SOURCE_REAUTH:
             self._abort_if_unique_id_mismatch(reason="reauth_account_mismatch")
