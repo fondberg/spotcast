@@ -13,6 +13,7 @@ from homeassistant.helpers import config_validation as cv
 import voluptuous as vol
 
 
+from custom_components.spotcast.media_player import SpotifyDevice
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.utils import get_account_entry
 from custom_components.spotcast.spotify.utils import url_to_uri
@@ -28,7 +29,7 @@ from custom_components.spotcast.services.utils import (
 LOGGER = getLogger(__name__)
 
 PLAY_MEDIA_SCHEMA = vol.Schema({
-    vol.Required("media_player"): cv.ENTITY_SERVICE_FIELDS,
+    vol.Optional("media_player"): cv.ENTITY_SERVICE_FIELDS,
     vol.Required("spotify_uri"): url_to_uri,
     vol.Optional("account"): cv.string,
     vol.Optional("data"): EXTRAS_SCHEMA,
@@ -51,7 +52,10 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
         extras = {}
 
     entry = get_account_entry(hass, account_id)
-    entity_id = entity_from_target_selector(hass, media_players)
+    entity_id = None
+
+    if media_players is not None:
+        entity_id = entity_from_target_selector(hass, media_players)
 
     LOGGER.debug("Loading Spotify Account for User `%s`", account_id)
     account = await SpotifyAccount.async_from_config_entry(
@@ -74,8 +78,16 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     elif extras.get("random", False):
         extras["offset"] = await async_random_index(account, uri)
 
-    LOGGER.debug("Getting %s from home assistant", entity_id)
-    media_player = await async_media_player_from_id(hass, account, entity_id)
+    if entity_id is not None:
+        LOGGER.debug("Getting %s from home assistant", entity_id)
+        media_player = await async_media_player_from_id(
+            hass=hass,
+            account=account,
+            entity_id=entity_id
+        )
+    elif (playback_state := await account.async_playback_state(force=True))\
+            != {}:
+        media_player = SpotifyDevice(account, playback_state["device"])
 
     LOGGER.info(
         "Playing `%s` on `%s` for account `%s`",

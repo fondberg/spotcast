@@ -25,7 +25,7 @@ from custom_components.spotcast.services.utils import (
 LOGGER = getLogger(__name__)
 
 PLAY_LIKED_SONGS_SCHEMA = vol.Schema({
-    vol.Required("media_player"): cv.ENTITY_SERVICE_FIELDS,
+    vol.Optional("media_player"): cv.ENTITY_SERVICE_FIELDS,
     vol.Optional("account"): cv.string,
     vol.Optional("data"): EXTRAS_SCHEMA,
 })

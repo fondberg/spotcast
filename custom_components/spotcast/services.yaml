@@ -4,7 +4,7 @@ play_media:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:
@@ -38,7 +38,7 @@ play_dj:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:
@@ -92,7 +92,7 @@ play_liked_songs:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:
@@ -119,7 +119,7 @@ play_saved_episodes:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:
@@ -146,7 +146,7 @@ play_category:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:
@@ -219,7 +219,7 @@ play_from_search:
   fields:
     media_player:
       name: Media Player
-      required: true
+      required: false
       selector:
         target:
           entity:

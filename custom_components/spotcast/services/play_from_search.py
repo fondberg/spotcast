@@ -29,7 +29,7 @@ from custom_components.spotcast.utils import (
 LOGGER = getLogger(__name__)
 
 PLAY_FROM_SEARCH_SCHEMA = vol.Schema({
-    vol.Required("media_player"): cv.ENTITY_SERVICE_FIELDS,
+    vol.Optional("media_player"): cv.ENTITY_SERVICE_FIELDS,
     vol.Required("search_term"): cv.string,
     vol.Required("item_types"): vol.All(
         cv.ensure_list,

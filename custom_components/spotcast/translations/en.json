@@ -1,12 +1,4 @@
 {
-    "common": {
-        "media_player_name": "Media Player",
-        "media_player_desc": "A Single Media Player compatible with Spotcast",
-        "account_name": "Spotify Account",
-        "account_desc": "The id of the Spotify account to use. Takes the default account otherwise.",
-        "data_name": "Data",
-        "data_desc": "Additional modifiers when starting media playback"
-    },
     "config": {
         "step": {
             "internal_api": {
@@ -54,8 +46,8 @@
                     "description": "A list of track to add to the active playback"
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 }
             }
         },
@@ -64,20 +56,20 @@
             "description": "Plays a random playlist from a Browse Category",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "category": {
                     "name": "Category",
                     "description": "A Category name or ID. A fuzzy match is applied on the name, but an ID must be an exact match."
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -86,20 +78,20 @@
             "description": "Starts playback from a custom list of tracks URIs",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "items": {
                     "name": "Items",
                     "description": "A list of track URIs."
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -108,16 +100,16 @@
             "description": "Play Spotify DJ playlist on a Chromecast device",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -126,8 +118,8 @@
             "description": "Start playback from a search result",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "search_term": {
                     "name": "Search Term",
@@ -146,12 +138,12 @@
                     "description": "Filters to apply to the search query."
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -160,16 +152,16 @@
             "description": "Play User's Liked Songs",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -178,20 +170,20 @@
             "description": "Play Spotify media on Chromecast devices",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "spotify_uri": {
                     "name": "URI",
                     "description": "Supported Spotify URI or URL"
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -200,16 +192,16 @@
             "description": "Play User's Saved Podcast Episodes",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         },
@@ -218,16 +210,16 @@
             "description": "Transfers the Spotify playback to the targeted device",
             "fields": {
                 "media_player": {
-                    "name": "[%key:compoment::spotcast::common::media_player_name%]",
-                    "description": "[%key:compoment::spotcast::common::media_player_desc%]"
+                    "name": "Target",
+                    "description": "A Single Media Player compatible with Spotcast"
                 },
                 "account": {
-                    "name": "[%key:compoment::spotcast::common::account_name%]",
-                    "description": "[%key:compoment::spotcast::common::account_desc%]"
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
                 },
                 "data": {
-                    "name": "[%key:compoment::spotcast::common::data_name%]",
-                    "description": "[%key:compoment::spotcast::common::data_desc%]"
+                    "name": "Data",
+                    "description": "Additional modifiers when starting media playback"
                 }
             }
         }
