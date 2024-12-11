@@ -117,7 +117,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             await private_session.async_ensure_token_valid()
             accounts: dict[str, Spotify] = {
                 "public": Spotify(auth=external_api["token"]["access_token"]),
-                "private": Spotify(auth=private_session.token)
+                "private": Spotify(auth=private_session.clean_token)
             }
 
             profiles = {}

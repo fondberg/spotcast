@@ -1,13 +1,16 @@
+"""Module for the search websocket api endpoint"""
+
 import voluptuous as vol
 from custom_components.spotcast.spotify.search_query import SearchQuery
 from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
-from custom_components.spotcast.utils import get_account_entry, search_account
-from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.utils import websocket_wrapper
 from custom_components.spotcast.spotify.utils import select_image_url
+from custom_components.spotcast.websocket.utils import (
+    websocket_wrapper,
+    async_get_account,
+)
 
 ENDPOINT = "spotcast/search"
 SCHEMA = vol.Schema(
@@ -15,7 +18,8 @@ SCHEMA = vol.Schema(
         vol.Required("id"): cv.positive_int,
         vol.Required("type"): ENDPOINT,
         vol.Required("query"): cv.string,
-        vol.Optional("searchType"): cv.string,  # Playlist or song, default playlist
+        # Playlist or song, default playlist
+        vol.Optional("searchType"): cv.string,
         vol.Optional("limit"): cv.positive_int,
         vol.Optional("account"): cv.string,
     }
@@ -24,54 +28,53 @@ SCHEMA = vol.Schema(
 
 @websocket_wrapper
 async def async_search_handler(
-    hass: HomeAssistant, connection: ActiveConnection, msg: dict
+    hass: HomeAssistant,
+    connection: ActiveConnection,
+    msg: dict,
 ):
     """Searches for playlists or tracks.
 
     Args:
         - hass (HomeAssistant): The Home Assistant instance.
-        - connection (ActiveConnection): The active WebSocket connection.
+        - connection (ActiveConnection): The active WebSocket
+            connection.
         - msg (dict): The message received through the WebSocket API.
     """
     account_id = msg.get("account")
     query = msg.get("query")
-    searchType = msg.get("searchType", "playlist")
+    search_type = msg.get("searchType", "playlist")
     limit = msg.get("limit", 10)
 
-    account: SpotifyAccount
+    account = await async_get_account(hass, account_id)
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
-
-    query = SearchQuery(search=query, item_type=searchType)
+    query = SearchQuery(search=query, item_types=search_type)
 
     results = await account.async_search(
         query,
         limit,
     )
 
-    formatted_results = [
-        {
-            "id": result.get("id", None),
-            "name": result["name"],
-            "uri": result["uri"],
-            "description": result.get("description", None),
-            "icon": result["images"][0]["url"]
-            if "images" in result and len(result["images"]) > 0
-            else None,
-        }
-        for result in results
-    ]
+    results = results[f"{search_type}s"]
+
+    formatted_results = []
+
+    for item in results:
+
+        images = item.get("images", [])
+
+        formatted_results.append({
+            "id": item.get("id"),
+            "name": item.get("name"),
+            "uri": item.get("uri"),
+            "description": item.get("description"),
+            "icon": select_image_url(images),
+        })
 
     connection.send_result(
         msg["id"],
         {
             "total": len(formatted_results),
-            "account": account_id,
-            f"{searchType}s": formatted_results,
+            "account": account.id,
+            f"{search_type}s": formatted_results,
         },
     )

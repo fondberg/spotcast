@@ -11,7 +11,7 @@ from homeassistant.helpers import config_validation as cv
 import voluptuous as vol
 
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.utils import get_account_entry, search_account
+from custom_components.spotcast.utils import get_account_entry
 from custom_components.spotcast.spotify.utils import url_to_uri
 
 LOGGER = getLogger(__name__)
@@ -27,11 +27,11 @@ async def async_like_media(hass: HomeAssistant, call: ServiceCall):
     uris = call.data.get("spotify_uris")
     account_id = call.data.get("account")
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
+    entry = get_account_entry(hass, account_id)
+    LOGGER.debug("Loading Spotify Account for User `%s`", account_id)
+    account = await SpotifyAccount.async_from_config_entry(
+        hass=hass,
+        entry=entry
+    )
 
     await account.async_like_media(uris)

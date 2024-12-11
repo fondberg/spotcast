@@ -895,19 +895,22 @@ class SpotifyAccount:
                 LOGGER.debug("Using cached liked songs dataset")
 
         return self.liked_songs
-    
+
     async def async_like_media(self, uris: list[str]):
         """Adds a list of uris to the user's liked songs"""
         await self.async_ensure_tokens_valid()
 
         dataset = self._datasets["liked_songs"]
+
+        # Force expire the liked_songs dataset
         async with dataset.lock:
-            dataset.last_updated = 0  # Force expiration
+            dataset.expires_at = 0
             LOGGER.debug("Expired liked_songs dataset after adding new likes")
 
-        return await self.hass.async_add_executor_job(
-            self.apis["private"].current_user_saved_tracks_add, uris
-        )
+            await self.hass.async_add_executor_job(
+                self.apis["private"].current_user_saved_tracks_add,
+                uris,
+            )
 
     async def async_repeat(
         self,
@@ -990,7 +993,7 @@ class SpotifyAccount:
     async def async_category_playlists(
             self,
             category_id: str,
-            limit: int,
+            limit: int = None,
     ) -> list[str]:
         """Fetches the playlist associated with a browse category
 
@@ -1022,15 +1025,18 @@ class SpotifyAccount:
     async def async_view(
         self,
         url: str,
-        limit: int,
         locale: str,
-    ) -> list:
+        limit: int = None,
+    ) -> list[dict]:
         """Fetches a view based on url.
 
         Args:
-            - url(str): The url of the view to fetch (e.g., 'made-for-x').
-            - limit(int): The maximum number of playlists to retrieve.
+            - url(str): The url of the view to fetch (e.g.,
+                'made-for-x').
             - locale(str): The locale for the request (optional).
+            - limit(int, None): The maximum number of playlists to
+                retrieve. If None, retrieves all items. Defaults to
+                None.
 
         Returns:
             - list: A list of playlists.
@@ -1039,20 +1045,34 @@ class SpotifyAccount:
         await self.async_ensure_tokens_valid()
 
         return await self._async_pager(
-            function= self._fetch_view,
+            function=self._fetch_view,
             prepends=[url, locale],
             limit=25,  # This is the max amount per call
             max_items=limit,
             sub_layer="content",
         )
-    
+
     def _fetch_view(
-        self, 
-        url: str, 
+        self,
+        url: str,
         locale: str,
-        limit: int, 
-        offset: int,
-    ) -> list:
+        limit: int = 25,
+        offset: int = 0,
+    ) -> dict:
+        """Retrieve a page from a view
+
+        Args:
+            - url(str): the endpoint to retrieve
+            - locale(str): an ISO-639-2 language code
+            - limit(int, optional): the maximum number of item to
+                retrieve in each call. Defaults to 25.
+            - offset(int, optional): the starting index from which to
+                retrieve elements. Defaults to 0.
+
+        Returns:
+            - dict: an api reply containing the content of a view
+        """
+
         params = {
             "content_limit": limit,
             "locale": locale,
@@ -1062,8 +1082,8 @@ class SpotifyAccount:
             "offset": offset,
         }
 
-        return self.apis["private"]._get(url, None, **params)
-    
+        return self.apis["private"]._get(url, params)
+
     async def _async_get_count(
             self,
             function: callable,
