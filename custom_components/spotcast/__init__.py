@@ -10,7 +10,6 @@ Constants:
 """
 
 from logging import getLogger
-import asyncio
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -26,7 +25,7 @@ from custom_components.spotcast.config_flow.option_flow_handler import (
     DEFAULT_OPTIONS
 )
 
-__version__ = "5.0.0-b15"
+__version__ = "5.0.0-b16"
 
 
 LOGGER = getLogger(__name__)

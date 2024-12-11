@@ -5,10 +5,11 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
-from custom_components.spotcast.utils import get_account_entry, search_account
 from custom_components.spotcast.utils import fuzzy_match
-from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.websocket.utils import (
+    websocket_wrapper,
+    async_get_account,
+)
 
 ENDPOINT = "spotcast/playlists"
 SCHEMA = vol.Schema({
@@ -38,14 +39,8 @@ async def async_get_playlists(
     account_id = msg.get("account")
     category = msg.get("category")
     limit = msg.get("limit")
-    account: SpotifyAccount
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
+    account = await async_get_account(hass, account_id)
 
     if category == "user":
         playlists = await account.async_playlists(max_items=limit, force=True)
@@ -64,7 +59,7 @@ async def async_get_playlists(
         msg["id"],
         {
             "total": len(playlists),
-            "account": account_id,
+            "account": account.id,
             "category": category["id"],
             "playlists": playlists
         },

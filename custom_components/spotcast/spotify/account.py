@@ -706,9 +706,15 @@ class SpotifyAccount:
     async def async_search(
             self,
             query: SearchQuery,
-            max_items: int = 20
+            limit: int = 20,
     ) -> list[dict]:
-        """Makes a search query and returns the result"""
+        """Makes a search query and returns the result
+
+        Args:
+            - query(SearchQuery): The search query to run
+            - limit(int, optional): The maximum amount of item to
+                retrieve in each category. Defaults to 20.
+        """
         await self.async_ensure_tokens_valid()
         LOGGER.debug(
             "Getting Search Result `%s` for account `%s`",
@@ -716,21 +722,22 @@ class SpotifyAccount:
             self.name,
         )
 
-        limit = 50
-
-        if max_items < limit:
-            limit = max_items
-
-        search_result = await self._async_pager(
-            function=self.apis["private"].search,
-            prepends=[query.query_string],
-            appends=[query.item_type, self.country],
-            limit=limit,
-            sub_layer=f"{query.item_type}s",
-            max_items=max_items,
+        search_result = await self.hass.async_add_executor_job(
+            self.apis["private"].search,
+            query.query_string,
+            limit,
+            0,
+            query.item_types_string,
+            self.country,
         )
 
-        return search_result
+        result = {}
+
+        for item_type in query.item_types:
+            key = f"{item_type}s"
+            result[key] = search_result[key]["items"]
+
+        return result
 
     async def async_wait_for_device(self, device_id: str, timeout: int = 12):
         """Asycnhronously wait for a device to become available
@@ -888,19 +895,22 @@ class SpotifyAccount:
                 LOGGER.debug("Using cached liked songs dataset")
 
         return self.liked_songs
-    
+
     async def async_like_media(self, uris: list[str]):
         """Adds a list of uris to the user's liked songs"""
         await self.async_ensure_tokens_valid()
 
         dataset = self._datasets["liked_songs"]
+
+        # Force expire the liked_songs dataset
         async with dataset.lock:
-            dataset.last_updated = 0  # Force expiration
+            dataset.expires_at = 0
             LOGGER.debug("Expired liked_songs dataset after adding new likes")
 
-        return await self.hass.async_add_executor_job(
-            self.apis["private"].current_user_saved_tracks_add, uris
-        )
+            await self.hass.async_add_executor_job(
+                self.apis["private"].current_user_saved_tracks_add,
+                uris,
+            )
 
     async def async_repeat(
         self,
@@ -983,7 +993,7 @@ class SpotifyAccount:
     async def async_category_playlists(
             self,
             category_id: str,
-            limit: int,
+            limit: int = None,
     ) -> list[str]:
         """Fetches the playlist associated with a browse category
 
@@ -1015,15 +1025,20 @@ class SpotifyAccount:
     async def async_view(
         self,
         url: str,
-        limit: int,
-        locale: str,
-    ) -> list:
+        language: str = None,
+        limit: int = None,
+    ) -> list[dict]:
         """Fetches a view based on url.
 
         Args:
-            - url(str): The url of the view to fetch (e.g., 'made-for-x').
-            - limit(int): The maximum number of playlists to retrieve.
-            - locale(str): The locale for the request (optional).
+            - url(str): The url of the view to fetch (e.g.,
+                'made-for-x').
+            - language(str, optional): The ISO-639-1 language code to
+                show the view in. If None, defaults to en_US. Default
+                is None.
+            - limit(int, optional): The maximum number of playlists to
+                retrieve. If None, retrieves all items. Defaults to
+                None.
 
         Returns:
             - list: A list of playlists.
@@ -1031,21 +1046,37 @@ class SpotifyAccount:
 
         await self.async_ensure_tokens_valid()
 
+        locale = None if language is None else f"{language}_{self.country}"
+
         return await self._async_pager(
-            function= self._fetch_view,
+            function=self._fetch_view,
             prepends=[url, locale],
             limit=25,  # This is the max amount per call
             max_items=limit,
             sub_layer="content",
         )
-    
+
     def _fetch_view(
-        self, 
-        url: str, 
+        self,
+        url: str,
         locale: str,
-        limit: int, 
-        offset: int,
-    ) -> list:
+        limit: int = 25,
+        offset: int = 0,
+    ) -> dict:
+        """Retrieve a page from a view
+
+        Args:
+            - url(str): the endpoint to retrieve
+            - locale(str): an ISO-639-2 language code
+            - limit(int, optional): the maximum number of item to
+                retrieve in each call. Defaults to 25.
+            - offset(int, optional): the starting index from which to
+                retrieve elements. Defaults to 0.
+
+        Returns:
+            - dict: an api reply containing the content of a view
+        """
+
         params = {
             "content_limit": limit,
             "locale": locale,
@@ -1055,8 +1086,8 @@ class SpotifyAccount:
             "offset": offset,
         }
 
-        return self.apis["private"]._get(url, None, **params)
-    
+        return self.apis["private"]._get(url, params)
+
     async def _async_get_count(
             self,
             function: callable,

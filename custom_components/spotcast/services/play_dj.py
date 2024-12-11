@@ -23,7 +23,7 @@ from custom_components.spotcast.utils import copy_to_dict
 LOGGER = getLogger(__name__)
 
 PLAY_DJ_SCHEMA = vol.Schema({
-    vol.Required("media_player"): cv.ENTITY_SERVICE_FIELDS,
+    vol.Optional("media_player"): cv.ENTITY_SERVICE_FIELDS,
     vol.Optional("account"): cv.string,
     vol.Optional("data"): EXTRAS_SCHEMA,
 })

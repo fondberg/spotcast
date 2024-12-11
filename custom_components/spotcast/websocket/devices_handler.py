@@ -5,9 +5,10 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
-from custom_components.spotcast.utils import get_account_entry, search_account
-from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.websocket.utils import (
+    websocket_wrapper,
+    async_get_account,
+)
 
 ENDPOINT = "spotcast/devices"
 SCHEMA = vol.Schema({
@@ -33,14 +34,8 @@ async def async_get_devices(
     """
 
     account_id = msg.get("account")
-    account: SpotifyAccount
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
+    account = await async_get_account(hass, account_id)
 
     devices = await account.async_devices(force=True)
 
@@ -48,7 +43,7 @@ async def async_get_devices(
         msg["id"],
         {
             "total": len(devices),
-            "account": account_id,
+            "account": account.id,
             "devices": devices
         },
     )

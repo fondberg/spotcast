@@ -28,3 +28,7 @@ class MissingDeviceTypeError(MediaPlayerError):
 
 class UnknownIntegrationError(MediaPlayerError):
     """The integration specified is not known for spotcast"""
+
+
+class MissingActiveDeviceError(MediaPlayerError):
+    """No Active device found for the account provided"""

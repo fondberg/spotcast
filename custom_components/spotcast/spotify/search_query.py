@@ -37,23 +37,23 @@ class SearchQuery:
     def __init__(
             self,
             search: str,
-            item_type: str,
+            item_types: str | list[str],
             filters: dict[str, str] = None,
             tags: list[str] = None,
     ):
 
-        if filters is None:
-            filters = {}
-
-        if tags is None:
-            tags = []
+        filters = {} if filters is None else filters
+        tags = [] if tags is None else tags
+        item_types = item_types if isinstance(item_types, list) else [
+            item_types
+        ]
 
         self.raise_on_invalid_filters(filters)
         self.raise_on_invalid_tags(tags)
-        self.raise_on_invalid_item_type(item_type)
+        self.raise_on_invalid_item_type(item_types)
 
         self.search = search
-        self.item_type = item_type
+        self.item_types = item_types
         self.filters = filters
         self.tags = tags
 
@@ -73,15 +73,22 @@ class SearchQuery:
 
         return query
 
+    @property
+    def item_types_string(self) -> str:
+        """Returns the string for the item_types to search"""
+        return ','.join(self.item_types)
+
     @classmethod
-    def raise_on_invalid_item_type(cls, item_type: str):
+    def raise_on_invalid_item_type(cls, item_types: list[str]):
         """Raises an InvalidItemTypeError if an invalid item time
         was provided"""
-        if item_type not in cls.ALLOWED_ITEM_TYPE:
-            raise InvalidItemTypeError(
-                f"`{item_type}` is not a valid item type. Must be part of "
-                f"{cls.ALLOWED_ITEM_TYPE}"
-            )
+
+        for item_type in item_types:
+            if item_type not in cls.ALLOWED_ITEM_TYPE:
+                raise InvalidItemTypeError(
+                    f"`{item_type}` is not a valid item type. Must be part of "
+                    f"{cls.ALLOWED_ITEM_TYPE}"
+                )
 
     @classmethod
     def raise_on_invalid_filters(cls, filters: dict[str, str]):

@@ -141,7 +141,7 @@ class TestTransferOfMissingPlayback(IsolatedAsyncioTestCase):
     @patch.object(SpotifyAccount, "async_from_config_entry")
     @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.async_play_media")
-    async def test_error_raised(
+    async def asyncSetUp(
             self,
             mock_play: AsyncMock,
             mock_entry: MagicMock,
@@ -166,6 +166,7 @@ class TestTransferOfMissingPlayback(IsolatedAsyncioTestCase):
         self.mocks["account"].last_playback_state = {}
 
         self.mocks["rebuild"].return_value = {"context": "modified"}
+        self.mocks["account"].liked_songs_uri = "spotify:user:foo:collection"
 
         self.mocks["call"].data = {
             "media_player": {
@@ -175,8 +176,21 @@ class TestTransferOfMissingPlayback(IsolatedAsyncioTestCase):
             }
         }
 
-        with self.assertRaises(ServiceValidationError):
-            await async_transfer_playback(
-                self.mocks["hass"],
-                self.mocks["call"],
-            )
+        await async_transfer_playback(
+            self.mocks["hass"],
+            self.mocks["call"],
+        )
+
+    def test_play_media_called_with_liked_songs_uri(self):
+        self.assertEqual(
+            self.mocks["call"].data,
+            {
+                "media_player": {
+                    "entity_id": [
+                        "media_player.foo"
+                    ]
+                },
+                "spotify_uri": "spotify:user:foo:collection",
+                "data": {}
+            },
+        )

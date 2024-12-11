@@ -3,16 +3,17 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
-from custom_components.spotcast.utils import get_account_entry, search_account
-from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.websocket.utils import (
+    websocket_wrapper,
+    async_get_account,
+)
 
 ENDPOINT = "spotcast/tracks"
 SCHEMA = vol.Schema(
     {
         vol.Required("id"): cv.positive_int,
         vol.Required("type"): ENDPOINT,
-        vol.Required("playlistId"): cv.string,
+        vol.Required("playlist_id"): cv.string,
         vol.Optional("account"): cv.string,
     }
 )
@@ -30,35 +31,31 @@ async def async_tracks_handler(
         - msg (dict): The message received through the WebSocket API.
     """
     account_id = msg.get("account")
-    playlistId = msg.get("playlistId")
+    playlist_id = msg.get("playlist_id")
 
-    account: SpotifyAccount
+    account = await async_get_account(hass, account_id)
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
+    tracks = await account.async_get_playlist_tracks(uri=playlist_id)
 
-    raw_tracks = await account.async_get_playlist_tracks(uri=playlistId)
+    formatted_tracks = []
 
-    formatted_tracks = [
-        {
-            "id": track["track"]["id"],
-            "name": track["track"]["name"],
-            "uri": track["track"]["uri"],
-            "album": track["track"].get("album", None),
-            "artists": track["track"].get("artists", None),
-        }
-        for track in raw_tracks
-    ]
+    for track in tracks:
+
+        track = track["track"]
+
+        formatted_tracks.append({
+            "id": track.get("id"),
+            "name": track.get("name"),
+            "uri": track.get("uri"),
+            "album": track.get("album"),
+            "artists": track.get("artists")
+        })
 
     connection.send_result(
         msg["id"],
         {
             "total": len(formatted_tracks),
-            "account": account_id,
+            "account": account.id,
             "tracks": formatted_tracks,
         },
     )
