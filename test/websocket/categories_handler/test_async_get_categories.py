@@ -3,13 +3,11 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, patch, AsyncMock
 
-from homeassistant.config_entries import ConfigEntry
-
+from custom_components.spotcast.spotify.account import SpotifyAccount
 from custom_components.spotcast.websocket.categories_handler import (
     async_get_categories,
     HomeAssistant,
     ActiveConnection,
-    SpotifyAccount,
 )
 
 TEST_MODULE = "custom_components.spotcast.websocket.categories_handler"
@@ -58,23 +56,22 @@ CATEGORIES = [
 
 class TestDevicesRetrieval(IsolatedAsyncioTestCase):
 
-    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
-    @patch.object(SpotifyAccount, "async_from_config_entry")
-    async def asyncSetUp(self, mock_account: AsyncMock, mock_entry: MagicMock):
+    @patch(f"{TEST_MODULE}.async_get_account")
+    async def asyncSetUp(self, mock_account: AsyncMock):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
-        mock_entry.return_value = MagicMock(spec=ConfigEntry)
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
             "connection": MagicMock(spec=ActiveConnection),
             "account": mock_account.return_value,
-            "entry": mock_entry.return_value,
         }
 
-        self.mocks["entry"].entry_id = "12345"
-        self.mocks["account"].async_categories = AsyncMock()
-        self.mocks["account"].async_categories.return_value = CATEGORIES
+        self.mocks["account"].id = "12345"
+        self.mocks["account"].async_categories = AsyncMock(
+            return_value=CATEGORIES
+        )
+
         await async_get_categories(
             self.mocks["hass"],
             self.mocks["connection"],
@@ -108,62 +105,6 @@ class TestDevicesRetrieval(IsolatedAsyncioTestCase):
                             "name": "Metal"
                         },
                     ]
-                }
-            )
-        except AssertionError:
-            self.fail()
-
-
-class TestAccountSearch(IsolatedAsyncioTestCase):
-
-    @patch(f"{TEST_MODULE}.search_account", new_callable=MagicMock)
-    async def asyncSetUp(self, mock_account: MagicMock):
-
-        mock_account.return_value = MagicMock(spec=SpotifyAccount)
-
-        self.mocks = {
-            "hass": MagicMock(spec=HomeAssistant),
-            "connection": MagicMock(spec=ActiveConnection),
-            "account": mock_account.return_value,
-        }
-
-        self.mocks["account"].async_categories = AsyncMock()
-        self.mocks["account"].async_categories.return_value = CATEGORIES
-        await async_get_categories(
-            self.mocks["hass"],
-            self.mocks["connection"],
-            {
-                "id": 1,
-                "type": "spotcast/devices",
-                "account": "12345",
-            }
-        )
-
-    def test_proper_result_sent(self):
-        try:
-            self.mocks["connection"].send_result.assert_called_with(
-                1,
-                {
-                    "total": 3,
-                    "account": "12345",
-                    "categories": [
-                        {
-                            "id": "foo",
-                            "icon": "https://t.scdn.co/images/foo.jpeg",
-                            "name": "Made For You"
-                        },
-                        {
-                            "id": "bar",
-                            "icon": "https://t.scdn.co/images/bar.jpeg",
-                            "name": "Discover"
-                        },
-                        {
-                            "id": "baz",
-                            "icon": "https://t.scdn.co/images/baz.jpeg",
-                            "name": "Metal"
-                        },
-                    ]
-
                 }
             )
         except AssertionError:

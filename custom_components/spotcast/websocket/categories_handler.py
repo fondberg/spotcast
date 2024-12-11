@@ -5,10 +5,11 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.components.websocket_api import ActiveConnection
 
-from custom_components.spotcast.utils import get_account_entry, search_account
-from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.utils import websocket_wrapper
 from custom_components.spotcast.spotify.utils import select_image_url
+from custom_components.spotcast.websocket.utils import (
+    websocket_wrapper,
+    async_get_account,
+)
 
 ENDPOINT = "spotcast/categories"
 SCHEMA = vol.Schema({
@@ -36,14 +37,8 @@ async def async_get_categories(
 
     account_id = msg.get("account")
     limit = msg.get("limit")
-    account: SpotifyAccount
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
+    account = await async_get_account(hass, account_id)
 
     raw_categories = await account.async_categories(limit=limit)
 
@@ -61,7 +56,7 @@ async def async_get_categories(
         msg["id"],
         {
             "total": len(categories),
-            "account": account_id,
+            "account": account.id,
             "categories": categories
         },
     )

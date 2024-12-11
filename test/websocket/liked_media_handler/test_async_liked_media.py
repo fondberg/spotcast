@@ -1,19 +1,19 @@
-"""Module to test the async_get_devices function"""
+"""Module to test the async_liked_media function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, AsyncMock, patch
 
 from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.devices_handler import (
-    async_get_devices,
+from custom_components.spotcast.websocket.liked_media_handler import (
+    async_liked_media,
     HomeAssistant,
     ActiveConnection,
 )
 
-TEST_MODULE = "custom_components.spotcast.websocket.devices_handler"
+from test.websocket.liked_media_handler import TEST_MODULE
 
 
-class TestDevicesRetrieval(IsolatedAsyncioTestCase):
+class TestBasicLikedMediaRequest(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.async_get_account")
     async def asyncSetUp(self, mock_account: AsyncMock):
@@ -26,20 +26,15 @@ class TestDevicesRetrieval(IsolatedAsyncioTestCase):
             "account": mock_account.return_value,
         }
 
+        self.mocks["account"].async_liked_songs = AsyncMock(
+            return_value=["foo", "bar", "baz"]
+        )
         self.mocks["account"].id = "12345"
-        self.mocks["account"].async_devices = AsyncMock(return_value=[
-            "foo",
-            "bar",
-            "baz",
-        ])
 
-        await async_get_devices(
+        await async_liked_media(
             self.mocks["hass"],
             self.mocks["connection"],
-            {
-                "id": 1,
-                "type": "spotcast/devices",
-            }
+            {"id": 1},
         )
 
     def test_proper_result_sent(self):
@@ -49,7 +44,7 @@ class TestDevicesRetrieval(IsolatedAsyncioTestCase):
                 {
                     "total": 3,
                     "account": "12345",
-                    "devices": ["foo", "bar", "baz"]
+                    "tracks": ["foo", "bar", "baz"],
                 }
             )
         except AssertionError:

@@ -5,9 +5,10 @@ from homeassistant.components.websocket_api import ActiveConnection
 import voluptuous as vol
 from homeassistant.helpers import config_validation as cv
 
-from custom_components.spotcast.utils import get_account_entry, search_account
-from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.websocket.utils import websocket_wrapper
+from custom_components.spotcast.websocket.utils import (
+    websocket_wrapper,
+    async_get_account,
+)
 
 ENDPOINT = "spotcast/player"
 SCHEMA = vol.Schema({
@@ -33,21 +34,15 @@ async def async_get_playback(
     """
 
     account_id = msg.get("account")
-    account: SpotifyAccount
 
-    if account_id is None:
-        entry = get_account_entry(hass)
-        account_id = entry.entry_id
-        account = await SpotifyAccount.async_from_config_entry(hass, entry)
-    else:
-        account = search_account(hass, account_id)
+    account = await async_get_account(hass, account_id)
 
     playback_state = await account.async_playback_state(force=True)
 
     connection.send_result(
         msg["id"],
         {
-            "account": account_id,
+            "account": account.id,
             "state": playback_state,
         },
     )
