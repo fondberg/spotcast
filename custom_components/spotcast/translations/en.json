@@ -51,6 +51,20 @@
                 }
             }
         },
+        "like_media": {
+            "name": "Like Media",
+            "description": "Add a list of media to your Spotify Library",
+            "fields": {
+                "spotify_uris": {
+                    "name": "Spotify URIs",
+                    "description": "A list of track to add to the active playback"
+                },
+                "account": {
+                    "name": "Spotify Account",
+                    "description": "The id of the Spotify account to use. Takes the default account otherwise."
+                }
+            }
+        },
         "play_category": {
             "name": "Playlist from Category",
             "description": "Plays a random playlist from a Browse Category",

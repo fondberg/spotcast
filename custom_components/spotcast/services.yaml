@@ -301,7 +301,29 @@ add_to_queue:
   fields:
     spotify_uris:
       name: Spotify URIs
-      description: A list of spotify URIs
+      description: A list of Spotify URIs
+      required: true
+      selector:
+        object:
+          uris:
+            - name: URIs
+              selector:
+                text:
+                  multiline: false
+    account:
+      name: Spotify Account
+      description: The id of the spotify account to use. Takes the default account otherwise
+      required: false
+      selector:
+        config_entry:
+          integration: spotcast
+like_media:
+  name: Like Media
+  description: Save a list of Media to your Spotify Library
+  fields:
+    spotify_uris:
+      name: Spotify URIs
+      description: A list of Spotify URIs
       required: true
       selector:
         object:
