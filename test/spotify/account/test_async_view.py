@@ -44,7 +44,7 @@ class TestPlaylistRetrieval(IsolatedAsyncioTestCase):
         try:
             self.mocks["pager"].assert_called_with(
                 function=self.account._fetch_view,
-                prepends=["foo", "fr"],
+                prepends=["foo", "fr_CA"],
                 limit=25,
                 max_items=None,
                 sub_layer="content",

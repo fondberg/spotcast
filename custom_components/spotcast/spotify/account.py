@@ -1025,7 +1025,7 @@ class SpotifyAccount:
     async def async_view(
         self,
         url: str,
-        locale: str,
+        language: str = None,
         limit: int = None,
     ) -> list[dict]:
         """Fetches a view based on url.
@@ -1033,8 +1033,10 @@ class SpotifyAccount:
         Args:
             - url(str): The url of the view to fetch (e.g.,
                 'made-for-x').
-            - locale(str): The locale for the request (optional).
-            - limit(int, None): The maximum number of playlists to
+            - language(str, optional): The ISO-639-1 language code to
+                show the view in. If None, defaults to en_US. Default
+                is None.
+            - limit(int, optional): The maximum number of playlists to
                 retrieve. If None, retrieves all items. Defaults to
                 None.
 
@@ -1043,6 +1045,8 @@ class SpotifyAccount:
         """
 
         await self.async_ensure_tokens_valid()
+
+        locale = None if language is None else f"{language}_{self.country}"
 
         return await self._async_pager(
             function=self._fetch_view,
