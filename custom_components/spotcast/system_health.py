@@ -53,5 +53,6 @@ async def system_health_info(hass: HomeAssistant) -> dict[str]:  # pylint: disab
         health_info[f"{base_key} Private Token"] = health_status[
             "private"
         ]
+        health_info[f"{base_key} Product"] = account.product
 
     return health_info
