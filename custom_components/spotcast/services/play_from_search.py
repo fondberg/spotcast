@@ -11,14 +11,10 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.util.read_only_dict import ReadOnlyDict
 import voluptuous as vol
 from rapidfuzz import fuzz
-from rapidfuzz.utils import default_process as fuzz_processing
 
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.services.play_media import async_play_media
-from custom_components.spotcast.services.play_custom_context import (
-    async_play_custom_context
-)
 from custom_components.spotcast.services.utils import EXTRAS_SCHEMA
 from custom_components.spotcast.spotify.search_query import SearchQuery
 from custom_components.spotcast.utils import (
@@ -93,8 +89,6 @@ async def async_play_from_search(hass: HomeAssistant, call: ServiceCall):
     query = SearchQuery(search_term, item_types, filters, tags)
     search_result = await account.async_search(query, limit)
 
-    LOGGER.warn(search_result)
-
     call_data = copy_to_dict(call.data)
 
     # remove unwanted items from call data
@@ -143,8 +137,6 @@ def get_best_candidate(
             continue
 
         items = search_result[key]
-
-        LOGGER.warn(key, items)
 
         candidate = items[0]["name"]
         ratio = fuzz.partial_ratio(search_term, candidate)
