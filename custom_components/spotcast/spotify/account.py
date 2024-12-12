@@ -643,8 +643,11 @@ class SpotifyAccount:
 
     async def _async_add_audio_features(self, playback_state: dict) -> dict:
         """Adds the audio_features to the current playback state"""
-        current_uri = playback_state["item"]["uri"]
+        current_uri = playback_state.get("item", {}).get("uri")
         last_uri = self.current_item["uri"]
+
+        if current_uri is None:
+            return playback_state
 
         if current_uri != last_uri:
             audio_features = await self.async_track_features(current_uri)
@@ -823,7 +826,6 @@ class SpotifyAccount:
                     device_id,
                     True,
                 )
-                return
             except SpotifyException as exc:
                 raise PlaybackError(exc.msg) from exc
 
