@@ -33,7 +33,9 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
         }
 
         self.mocks["account"].base_refresh_rate = 30
-
+        self.mocks["hass"].config_entries.async_get_known_entry = MagicMock(
+            return_value=self.mocks["entry"]
+        )
         self.mocks["hass"].data = {
             "spotcast": {
                 "12345": {
@@ -42,8 +44,9 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
         self.handler._options = None
+        self.handler.handler = "foo"
         self.handler.hass = self.mocks["hass"]
         self.handler.set_base_refresh_rate = MagicMock()
         self.handler.set_default_user = MagicMock()
@@ -89,6 +92,9 @@ class TestWithoutDefaultSet(IsolatedAsyncioTestCase):
 
         self.mocks["account"].base_refresh_rate = 30
 
+        self.mocks["hass"].config_entries.async_get_known_entry = MagicMock(
+            return_value=self.mocks["entry"]
+        )
         self.mocks["hass"].data = {
             "spotcast": {
                 "12345": {
@@ -97,9 +103,10 @@ class TestWithoutDefaultSet(IsolatedAsyncioTestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
         self.handler._options = None
         self.handler.hass = self.mocks["hass"]
+        self.handler.handler = "foo"
         self.handler.set_base_refresh_rate = MagicMock()
         self.handler.set_default_user = MagicMock()
 

@@ -14,7 +14,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.components.spotify.config_flow import SpotifyFlowHandler
 from homeassistant.config_entries import (
     ConfigFlowResult,
-    OptionsFlowWithConfigEntry,
+    OptionsFlow,
     ConfigEntry,
     FlowResult,
     SOURCE_REAUTH,
@@ -35,7 +35,7 @@ DEFAULT_OPTIONS = MappingProxyType({
 })
 
 
-class SpotcastOptionsFlowHandler(OptionsFlowWithConfigEntry):
+class SpotcastOptionsFlowHandler(OptionsFlow):
     """Handles option configuration via the Integration page"""
 
     SCHEMAS = {
@@ -310,4 +310,4 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     ) -> SpotcastOptionsFlowHandler:
         """Tells Home Assistant this integration supports configuration
         options"""
-        return SpotcastOptionsFlowHandler(config_entry)
+        return SpotcastOptionsFlowHandler()

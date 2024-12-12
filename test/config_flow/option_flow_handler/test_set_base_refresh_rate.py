@@ -35,6 +35,9 @@ class TestSettingRefreshRate(TestCase):
 
         self.mocks["account"].base_refresh_rate = 30
 
+        self.mocks["hass"].config_entries.async_get_known_entry = MagicMock(
+            return_value=self.mocks["entry"]
+        )
         self.mocks["hass"].data = {
             "spotcast": {
                 "12345": {
@@ -43,8 +46,9 @@ class TestSettingRefreshRate(TestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
         self.handler._options = None
+        self.handler.handler = "foo"
         self.handler._options = self.mocks["entry"].options
         self.handler.hass = self.mocks["hass"]
         self.handler.set_base_refresh_rate(15)
@@ -78,6 +82,9 @@ class TestSameRefreshRate(TestCase):
         }
 
         self.mocks["account"].base_refresh_rate = 30
+        self.mocks["hass"].config_entries.async_get_known_entry = MagicMock(
+            return_value=self.mocks["entry"]
+        )
 
         self.mocks["hass"].data = {
             "spotcast": {
@@ -87,8 +94,9 @@ class TestSameRefreshRate(TestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
         self.handler._options = None
+        self.handler.handler = "foo"
         self.handler._options = self.mocks["entry"].options
         self.handler.hass = self.mocks["hass"]
         self.handler.set_base_refresh_rate(30)

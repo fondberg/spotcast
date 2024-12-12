@@ -47,6 +47,9 @@ class TestUserSwitchToDefault(TestCase):
         }
         self.mocks["other_entry"].options = self.mocks["other_entry"]._options
 
+        self.mocks["hass"].config_entries.async_get_known_entry = MagicMock(
+            return_value=self.mocks["entry"]
+        )
         self.mocks["hass"].data = {
             "spotcast": {
                 "12345": {
@@ -84,8 +87,9 @@ class TestUserSwitchToDefault(TestCase):
             self.mocks["third_entry"],
         ]
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
         self.handler._options = None
+        self.handler.handler = "foo"
         self.handler._options = self.mocks["entry"].options
         self.handler.hass = self.mocks["hass"]
 
