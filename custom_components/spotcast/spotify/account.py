@@ -815,6 +815,18 @@ class SpotifyAccount:
         """
         await self.async_ensure_tokens_valid()
 
+        if context_uri is None and (uris == [] or uris is None):
+            LOGGER.info("transfering playback to device `%s`", device_id)
+            try:
+                await self.hass.async_add_executor_job(
+                    self.apis["private"].transfer_playback,
+                    device_id,
+                    True,
+                )
+                return
+            except SpotifyException as exc:
+                raise PlaybackError(exc.msg) from exc
+
         LOGGER.info(
             "Starting playback of `%s` on device `%s`",
             context_uri,
