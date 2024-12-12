@@ -305,11 +305,6 @@ add_to_queue:
       required: true
       selector:
         object:
-          uris:
-            - name: URIs
-              selector:
-                text:
-                  multiline: false
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
@@ -327,11 +322,6 @@ like_media:
       required: true
       selector:
         object:
-          uris:
-            - name: URIs
-              selector:
-                text:
-                  multiline: false
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise

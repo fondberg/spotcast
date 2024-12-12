@@ -8,8 +8,7 @@
                 },
                 "description": "Go to [Spotify](open.spotify.com) and log in. Then get the `sp_dc` and `sp_key` from the developpper console. See [this tutorial](https://github.com/fondberg/spotcast/blob/dev/docs/config/obtaining_sp_dc_and_sp_key.md) for more information"
             }
-        },
-        "title": "Spotcast"
+        }
     },
     "options": {
         "step": {
@@ -24,16 +23,20 @@
     },
     "selector": {
         "item_type": {
-            "album": "Album",
-            "artist": "Artist",
-            "playlist": "Playlist",
-            "track": "Track",
-            "episode": "Episode",
-            "audiobook": "Audiobook"
+            "options": {
+                "album": "Album",
+                "artist": "Artist",
+                "playlist": "Playlist",
+                "track": "Track",
+                "episode": "Episode",
+                "audiobook": "Audiobook"
+            }
         },
         "tags": {
-            "hipster": "Hipster",
-            "new": "New"
+            "options": {
+                "hipster": "Hipster",
+                "new": "New"
+            }
         }
     },
     "services": {
