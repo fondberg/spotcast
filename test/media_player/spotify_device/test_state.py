@@ -74,7 +74,7 @@ class TestUnavailable(TestCase):
             }
         )
 
-        self.device._is_unavailable = True
+        self.device.is_unavailable = True
 
     def test_state_is_on(self):
         self.assertEqual(self.device.state, STATE_UNAVAILABLE)

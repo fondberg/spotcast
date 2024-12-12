@@ -35,9 +35,6 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         - name(str): the name as reported by Spotify
         - icon(str): the icon of the device based on the state
         - state(str): the current state of the device
-
-    Methods:
-        - async_update
     """
 
     INTEGRATION = DOMAIN
@@ -51,17 +48,18 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
             - device_data(dict): the information related to device
                 provided by the Spotify API
         """
-        self._device_data: dict = device_data
+        self.device_data: dict = device_data
+        self._attr_extra_state_attributes = self.device_data
         self._account: SpotifyAccount = account
         self.entity_id = self._define_entity_id()
-        self._is_unavailable = False
-        self._playback_state: dict = {}
+        self.is_unavailable = False
+        self.playback_state: dict = {}
 
         self.device_info = DeviceInfo(
             identifiers={(DOMAIN, self.id)},
             manufacturer="Spotify AB",
-            model=f"Spotify Connect {self._device_data['type']}",
-            name=f"Spotcast - {self.name} ({self._account.name})",
+            model=f"Spotify Connect {self.device_data['type']}",
+            name=self.name,
         )
 
     @property
@@ -72,12 +70,12 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
     @property
     def id(self) -> str:
         """The Spotify Device id from the API"""
-        return self._device_data["id"]
+        return self.device_data["id"]
 
     @property
     def name(self):
         """The name of the device as reported by Spotify"""
-        name = self._device_data["name"]
+        name = self.device_data["name"]
         return f"Spotcast ({self._account.name}) - {name}"
 
     @property
@@ -87,11 +85,12 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
         icon_map = {
             "Computer": "mdi:laptop",
             "Smartphone": "mdi:cellphone",
+            "web_player": "mdi:web",
             "*": "mdi:speaker"
         }
 
         try:
-            icon = icon_map[self._device_data["type"]]
+            icon = icon_map[self.device_data["type"]]
         except KeyError:
             icon = icon_map["*"]
 
@@ -104,10 +103,10 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
     def state(self):
         """The current state of the player"""
 
-        if self._is_unavailable:
+        if self.is_unavailable:
             return STATE_UNAVAILABLE
 
-        is_active = self._device_data["is_active"]
+        is_active = self.device_data["is_active"]
 
         return STATE_ON if is_active else STATE_OFF
 
@@ -116,7 +115,7 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
 
         removals = "()"
 
-        name: str = self._device_data["name"]
+        name: str = self.device_data["name"]
 
         name = name.lower()
         name = name.replace(" ", "_")

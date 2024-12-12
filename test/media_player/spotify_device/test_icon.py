@@ -31,11 +31,11 @@ class TestComputerDevice(TestCase):
         self.assertEqual(self.device.icon, "mdi:laptop")
 
     def test_device_inactive(self):
-        self.device._device_data["is_active"] = False
+        self.device.device_data["is_active"] = False
         self.assertEqual(self.device.icon, "mdi:laptop-off")
 
     def test_device_unavailable(self):
-        self.device._is_unavailable = True
+        self.device.is_unavailable = True
         self.assertEqual(self.device.icon, "mdi:laptop")
 
 
@@ -61,11 +61,11 @@ class TestSmartphoneDevice(TestCase):
         self.assertEqual(self.device.icon, "mdi:cellphone")
 
     def test_device_inactive(self):
-        self.device._device_data["is_active"] = False
+        self.device.device_data["is_active"] = False
         self.assertEqual(self.device.icon, "mdi:cellphone-off")
 
     def test_device_unavailable(self):
-        self.device._is_unavailable = True
+        self.device.is_unavailable = True
         self.assertEqual(self.device.icon, "mdi:cellphone")
 
 
@@ -91,9 +91,9 @@ class TestUnknownDevice(TestCase):
         self.assertEqual(self.device.icon, "mdi:speaker")
 
     def test_device_inactive(self):
-        self.device._device_data["is_active"] = False
+        self.device.device_data["is_active"] = False
         self.assertEqual(self.device.icon, "mdi:speaker-off")
 
     def test_device_unavailable(self):
-        self.device._is_unavailable = True
+        self.device.is_unavailable = True
         self.assertEqual(self.device.icon, "mdi:speaker")
