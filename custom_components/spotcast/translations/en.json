@@ -22,7 +22,7 @@
             }
         }
     },
-    "selectors": {
+    "selector": {
         "item_type": {
             "album": "Album",
             "artist": "Artist",
