@@ -195,11 +195,6 @@ play_custom_context:
       required: true
       selector:
         object:
-          tracks:
-            - name: Track
-              selector:
-                text:
-                  multiline: false
     account:
       name: Spotify Account
       description: The id of the spotify account to use. Takes the default account otherwise
@@ -231,10 +226,10 @@ play_from_search:
       name: Search Term
       description: The term to search in Spotify Catalog
       example: Joy as an Act of Resistance.
+      required: true
       selector:
         text:
           multiline: false
-          required: true
     item_types:
       name: Item Type
       description: The type of item to return from the search result
