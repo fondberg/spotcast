@@ -2,6 +2,15 @@ name: Run Linter Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+      - release/*
+    paths-ignore:
+      - docs/*
+      - "*.md"
+  pull_request:
 
 jobs:
   Linter:

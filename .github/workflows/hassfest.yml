@@ -1,9 +1,11 @@
 name: Validate with hassfest
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+      - dev
       - release/*
     paths-ignore:
       - docs/*
