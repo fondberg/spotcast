@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
 from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.config_flow.option_flow_handler import (
+from custom_components.spotcast.config_flow import (
     SpotcastOptionsFlowHandler,
 )
 
