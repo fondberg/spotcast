@@ -826,6 +826,7 @@ class SpotifyAccount:
                     device_id,
                     True,
                 )
+                return
             except SpotifyException as exc:
                 raise PlaybackError(exc.msg) from exc
 
