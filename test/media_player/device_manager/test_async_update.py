@@ -138,7 +138,7 @@ class TestUnavailableDevice(IsolatedAsyncioTestCase):
             "1234": MagicMock(spec=SpotifyDevice)
         }
 
-        self.device_manager.unavailable_devices["1234"]._is_unavailable = True
+        self.device_manager.unavailable_devices["1234"].is_unavailable = True
 
         await self.device_manager.async_update()
 
@@ -147,7 +147,7 @@ class TestUnavailableDevice(IsolatedAsyncioTestCase):
 
     def test_device_was_set_to_available(self):
         self.assertFalse(
-            self.device_manager.tracked_devices["1234"]._is_unavailable
+            self.device_manager.tracked_devices["1234"].is_unavailable
         )
 
     def test_device_removed_from_unavailable(self):
@@ -193,7 +193,7 @@ class TestCurrentlyPlayingDevice(IsolatedAsyncioTestCase):
         await self.device_manager.async_update()
 
     async def test_device_playback_updated(self):
-        self.device_manager.tracked_devices["1234"]._playback_state = {
+        self.device_manager.tracked_devices["1234"].playback_state = {
             "device": {
                 "id": "1234",
             },

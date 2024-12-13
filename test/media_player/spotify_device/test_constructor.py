@@ -27,7 +27,7 @@ class TestDataRetention(TestCase):
 
     def test_device_data_is_retained(self):
         self.assertEqual(
-            self.device._device_data,
+            self.device.device_data,
             {"id": "12345", "name": "dummy_device", "type": "dummy"},
         )
 
@@ -41,4 +41,4 @@ class TestDataRetention(TestCase):
         )
 
     def test_is_unavailable_set_to_false(self):
-        self.assertFalse(self.device._is_unavailable)
+        self.assertFalse(self.device.is_unavailable)

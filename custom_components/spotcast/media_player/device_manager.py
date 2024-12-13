@@ -57,6 +57,9 @@ class DeviceManager:
 
         for id, device in current_devices.items():
 
+            if device["name"].startswith("Web Player"):
+                device["type"] = "web_player"
+
             if device["type"] in self.IGNORE_DEVICE_TYPES:
                 LOGGER.debug(
                     "Ignoring player `%s` of type `%s`",
@@ -75,7 +78,7 @@ class DeviceManager:
                     self._account.name,
                 )
                 self.tracked_devices[id] = self.unavailable_devices.pop(id)
-                self.tracked_devices[id]._is_unavailable = False
+                self.tracked_devices[id].is_unavailable = False
 
             elif (
                 id not in self.tracked_devices
@@ -106,16 +109,22 @@ class DeviceManager:
                 )
                 remove.append(id)
                 entity = self.tracked_devices[id]
-                entity._is_unavailable = True
+                entity.is_unavailable = True
             else:
                 LOGGER.debug("Updating device info for `%s`", device.name)
-                device._device_data = current_devices[id]
+                device.device_data = current_devices[id]
 
                 if device.id == playing_id:
                     LOGGER.debug("Feeding playback state to `%s`", device.name)
-                    device._playback_state = playback_state
+                    device.playback_state = playback_state
                 else:
-                    device._playback_state = {}
+                    device.playback_state = {}
 
         for id in remove:
-            self.unavailable_devices[id] = self.tracked_devices.pop(id)
+
+            device = self.tracked_devices.pop(id)
+
+            if device.device_data["type"] == "web_player":
+                device.async_remove(force_remove=True)
+            else:
+                self.unavailable_devices[id] = device
