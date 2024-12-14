@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from custom_components.spotcast.config_flow.config_flow_handler import (
+from custom_components.spotcast.config_flow import (
     SpotcastFlowHandler
 )
 

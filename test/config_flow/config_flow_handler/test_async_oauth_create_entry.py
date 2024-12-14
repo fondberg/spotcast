@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import AbortFlow
 
-from custom_components.spotcast.config_flow.config_flow_handler import (
+from custom_components.spotcast.config_flow import (
     SpotcastFlowHandler,
     SOURCE_REAUTH,
     Spotify,
