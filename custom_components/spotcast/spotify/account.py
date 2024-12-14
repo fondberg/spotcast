@@ -34,6 +34,7 @@ from custom_components.spotcast.spotify.exceptions import (
     TokenError,
 )
 
+
 LOGGER = getLogger(__name__)
 
 
@@ -51,7 +52,7 @@ class SpotifyAccount:
 
     Properties:
         - id(str): the identifier of the account
-        - name(str): the dusplay name for the account
+        - name(str): the display name for the account
         - profile(dict): the full profile dictionary of the account
         - country(str): the country code where the account currently
             is.
@@ -84,8 +85,10 @@ class SpotifyAccount:
         - async_apply_extras
         - async_shuffle
         - async_liked_songs
+        - async_like_media
         - async_repeat
         - async_set_volume
+        - async_view
 
     Functions:
         - async_from_config_entry
@@ -908,6 +911,22 @@ class SpotifyAccount:
 
         return self.liked_songs
 
+    async def async_like_media(self, uris: list[str]):
+        """Adds a list of uris to the user's liked songs"""
+        await self.async_ensure_tokens_valid()
+
+        dataset = self._datasets["liked_songs"]
+
+        # Force expire the liked_songs dataset
+        async with dataset.lock:
+            dataset.expires_at = 0
+            LOGGER.debug("Expired liked_songs dataset after adding new likes")
+
+            await self.hass.async_add_executor_job(
+                self.apis["private"].current_user_saved_tracks_add,
+                uris,
+            )
+
     async def async_repeat(
         self,
         state: str,
@@ -1017,6 +1036,72 @@ class SpotifyAccount:
         )
 
         return playlists
+
+    async def async_view(
+        self,
+        url: str,
+        language: str = None,
+        limit: int = None,
+    ) -> list[dict]:
+        """Fetches a view based on url.
+
+        Args:
+            - url(str): The url of the view to fetch (e.g.,
+                'made-for-x').
+            - language(str, optional): The ISO-639-1 language code to
+                show the view in. If None, defaults to en_US. Default
+                is None.
+            - limit(int, optional): The maximum number of playlists to
+                retrieve. If None, retrieves all items. Defaults to
+                None.
+
+        Returns:
+            - list: A list of playlists.
+        """
+
+        await self.async_ensure_tokens_valid()
+
+        locale = None if language is None else f"{language}_{self.country}"
+
+        return await self._async_pager(
+            function=self._fetch_view,
+            prepends=[url, locale],
+            limit=25,  # This is the max amount per call
+            max_items=limit,
+            sub_layer="content",
+        )
+
+    def _fetch_view(
+        self,
+        url: str,
+        locale: str,
+        limit: int = 25,
+        offset: int = 0,
+    ) -> dict:
+        """Retrieve a page from a view
+
+        Args:
+            - url(str): the endpoint to retrieve
+            - locale(str): an ISO-639-2 language code
+            - limit(int, optional): the maximum number of item to
+                retrieve in each call. Defaults to 25.
+            - offset(int, optional): the starting index from which to
+                retrieve elements. Defaults to 0.
+
+        Returns:
+            - dict: an api reply containing the content of a view
+        """
+
+        params = {
+            "content_limit": limit,
+            "locale": locale,
+            "platform": "web",
+            "types": "album,playlist,artist,show,station",
+            "limit": limit,
+            "offset": offset,
+        }
+
+        return self.apis["private"]._get(url, params)
 
     async def _async_get_count(
             self,

@@ -2,6 +2,15 @@ name: Run Unit Tests
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+      - release/*
+    paths-ignore:
+      - docs/*
+      - "*.md"
+  pull_request:
 
 jobs:
   Test:
