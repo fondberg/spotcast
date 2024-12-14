@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
 from custom_components.spotcast.spotify.account import SpotifyAccount
-from custom_components.spotcast.config_flow.option_flow_handler import (
+from custom_components.spotcast.config_flow import (
     SpotcastOptionsFlowHandler,
 )
 
@@ -34,6 +34,10 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
 
         self.mocks["account"].base_refresh_rate = 30
 
+        self.mocks["hass"].config_entries.async_get_known_entry = MagicMock(
+            return_value=self.mocks["entry"]
+        )
+
         self.mocks["hass"].data = {
             "spotcast": {
                 "12345": {
@@ -42,8 +46,9 @@ class TestWithDefaultSet(IsolatedAsyncioTestCase):
             }
         }
 
-        self.handler = SpotcastOptionsFlowHandler(self.mocks["entry"])
+        self.handler = SpotcastOptionsFlowHandler()
         self.handler._options = None
+        self.handler.handler = "foo"
         self.handler.hass = self.mocks["hass"]
         self.handler.async_show_form = MagicMock()
 

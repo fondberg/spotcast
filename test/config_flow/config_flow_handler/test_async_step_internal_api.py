@@ -3,7 +3,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
-from custom_components.spotcast.config_flow.config_flow_handler import (
+from custom_components.spotcast.config_flow import (
     SpotcastFlowHandler
 )
 

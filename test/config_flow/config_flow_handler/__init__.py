@@ -1,1 +1,1 @@
-TEST_MODULE = "custom_components.spotcast.config_flow.config_flow_handler"
+TEST_MODULE = "custom_components.spotcast.config_flow"
