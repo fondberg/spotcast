@@ -509,6 +509,8 @@ class SpotifyAccount:
         Returns:
             - dict: the playlist details
         """
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Fetching information from playlist `%s`", uri)
 
         playlist_id = self._id_from_uri(uri)
 
@@ -530,6 +532,8 @@ class SpotifyAccount:
         Returns:
             - dict: the album details
         """
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Fetching information for album `%s`", uri)
 
         album_id = self._id_from_uri(uri)
 
@@ -550,6 +554,8 @@ class SpotifyAccount:
         Returns:
             - list[dict]: the list of top songes for an artist
         """
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Fetching Top Tracks for artist `%s`", uri)
 
         result = await self.hass.async_add_executor_job(
             self.apis["private"].artist_top_tracks,
@@ -562,6 +568,7 @@ class SpotifyAccount:
     async def async_get_playlist_tracks(self, uri: str) -> list[dict]:
         """Retrieves the list of tracks inside a playlist"""
         await self.async_ensure_tokens_valid()
+        LOGGER.debug("Fetching tracks from playlist `%s`", uri)
 
         playlist_id = self._id_from_uri(uri)
 
@@ -596,14 +603,26 @@ class SpotifyAccount:
                 information
         """
         await self.async_ensure_tokens_valid()
-
-        show_id = self._id_from_uri(uri)
+        LOGGER.debug("Fetching episodes from show `%s`", uri)
 
         result = await self._async_pager(
             function=self.apis["private"].show_episodes,
-            prepends=[show_id],
+            prepends=[uri],
             appends=[self.country],
             max_items=limit,
+        )
+
+        return result
+
+    async def async_get_episode(self, uri: str) -> str:
+        """Retrieves the information of a podcast episode"""
+        await self.async_ensure_tokens_valid()
+        LOGGER.debug("Fetching information from episode `%s`")
+
+        result = await self.hass.async_add_executor_job(
+            self.apis["private"].episode,
+            uri,
+            self.country,
         )
 
         return result

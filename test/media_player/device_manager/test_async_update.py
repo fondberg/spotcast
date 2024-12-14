@@ -46,6 +46,47 @@ class TestNewDevices(IsolatedAsyncioTestCase):
             self.fail()
 
 
+class TestNewWebPlayer(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mock_account = MagicMock(spec=SpotifyAccount)
+        self.mock_callack = MagicMock(spec=AddEntitiesCallback)
+
+        self.mock_account.async_devices = AsyncMock(
+            return_value=[
+                {
+                    "id": "1234",
+                    "name": "Web Player (Dummy)",
+                    "type": "Computer",
+                }
+            ]
+        )
+
+        self.device_manager = DeviceManager(
+            self.mock_account,
+            self.mock_callack,
+        )
+
+        await self.device_manager.async_update()
+
+    def test_device_added_to_tracked(self):
+        self.assertEqual(len(self.device_manager.tracked_devices), 1)
+        self.assertIn("1234", self.device_manager.tracked_devices)
+
+    def test_device_class_changed_to_web_player(self):
+        self.assertEqual(
+            self.device_manager.tracked_devices["1234"].device_data["type"],
+            "web_player",
+        )
+
+    def test_entity_was_added(self):
+        try:
+            self.mock_callack.assert_called()
+        except AssertionError:
+            self.fail()
+
+
 class TestIgnoredDevice(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
@@ -209,6 +250,10 @@ class TestRemovedDevice(IsolatedAsyncioTestCase):
 
         self.mock_account = MagicMock(spec=SpotifyAccount)
         self.mock_callack = MagicMock(spec=AddEntitiesCallback)
+        self.mock_device = MagicMock(spec=SpotifyDevice)
+        self.mock_device.device_data = {
+            "type": "Computer"
+        }
 
         self.mock_account.async_devices = AsyncMock(return_value=[])
         self.mock_account.async_playback_state = AsyncMock()
@@ -220,7 +265,7 @@ class TestRemovedDevice(IsolatedAsyncioTestCase):
         )
 
         self.device_manager.tracked_devices = {
-            "1234": MagicMock(spec=SpotifyDevice)
+            "1234": self.mock_device
         }
 
         await self.device_manager.async_update()
@@ -230,3 +275,40 @@ class TestRemovedDevice(IsolatedAsyncioTestCase):
 
     def test_device_added_to_unavailable_devices(self):
         self.assertIn("1234", self.device_manager.unavailable_devices)
+
+
+class TestRemovedWebPlayer(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mock_account = MagicMock(spec=SpotifyAccount)
+        self.mock_callack = MagicMock(spec=AddEntitiesCallback)
+        self.mock_device = MagicMock(spec=SpotifyDevice)
+
+        self.mock_account.async_devices = AsyncMock(return_value=[])
+        self.mock_account.async_playback_state = AsyncMock()
+        self.mock_account.async_playback_state.return_value = {}
+
+        self.device_manager = DeviceManager(
+            self.mock_account,
+            self.mock_callack,
+        )
+
+        self.device_manager.tracked_devices = {
+            "1234": self.mock_device
+        }
+
+        self.device_manager.tracked_devices["1234"].device_data = {
+            "type": "web_player"
+        }
+
+        await self.device_manager.async_update()
+
+    def test_device_removed_from_tracked(self):
+        self.assertEqual(len(self.device_manager.tracked_devices), 0)
+
+    def test_device_removed_from_hass(self):
+        try:
+            self.mock_device.async_remove.assert_called()
+        except AssertionError:
+            self.fail()

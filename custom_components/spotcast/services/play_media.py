@@ -69,14 +69,23 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     if uri is None:
         pass
     elif uri.startswith("spotify:track:"):
-
         uri, index = await async_track_index(account, uri)
         LOGGER.debug(
             "Switching context to song's album `%s`, with offset %d",
             uri,
             index,
         )
-        extras["offset"] = index - 1
+        extras["offset"] = index
+
+    elif uri.startswith("spotify:episode:"):
+        uri, index = await async_episode_index(account, uri)
+        LOGGER.debug(
+            "Switching context to episode's show `%s`, with offset %d",
+            uri,
+            index,
+        )
+        extras["offset"] = index
+
     elif extras.get("random", False):
         extras["offset"] = await async_random_index(account, uri)
 
@@ -105,6 +114,32 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     await account.async_apply_extras(media_player.id, extras)
 
 
+async def async_episode_index(
+        account: SpotifyAccount,
+        uri: str
+) -> tuple[str, int]:
+    """Returns the uri of a show and the index that would play the uri
+    provided in the context of the podcast show
+
+    Args:
+        - account(SpotifyAccount): The account used to fetch episode
+            information
+        - uri(str): A show URI
+
+    Returns:
+        - tuple[str, int]: A tuple containing the show uri of the
+            episode and its index in the show.
+    """
+    episode_info = await account.async_get_episode(uri)
+    show_uri = episode_info["show"]["uri"]
+
+    show_episodes = await account.async_get_show_episodes(show_uri)
+
+    show_episodes = [x["uri"] for x in show_episodes]
+
+    return show_uri, show_episodes.index(uri)
+
+
 async def async_track_index(
     account: SpotifyAccount,
     uri: str
@@ -127,13 +162,13 @@ async def async_track_index(
 
     # returns track number, when part of album
     if track_info["disc_number"] == 1:
-        return album_uri, track_info["track_number"]
+        return album_uri, track_info["track_number"] - 1
 
     album_info = await account.async_get_album(album_uri)
 
     album_songs = [x["uri"] for x in album_info["tracks"]["items"]]
 
-    return album_uri, album_songs.index(uri) + 1
+    return album_uri, album_songs.index(uri)
 
 
 async def async_random_index(account: SpotifyAccount, uri: str) -> int:
