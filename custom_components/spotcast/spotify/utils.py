@@ -18,6 +18,14 @@ def select_image_url(images: list[dict]) -> str:
 
     for image in images:
 
+        width = image.get("width")
+        height = image.get("height")
+
+        # assume top image best fit when no size provided
+        if any(x is None for x in (width, height)):
+            image_url = image["url"]
+            break
+
         area = image["width"] * image["height"]
 
         if area > max_area:

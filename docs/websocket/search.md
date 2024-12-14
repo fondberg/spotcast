@@ -9,7 +9,7 @@ Search for playlists or tracks based on a query.
     "id": 7,
     "type": "spotcast/search",
     "query": "rock",
-    "searchType": "playlist",
+    "search_type": "playlist",
     "limit": 10,
     "account": "01JDG07KSBTYWZGJSBJ1EW6XEF"
 }

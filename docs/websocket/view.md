@@ -24,8 +24,6 @@ The endpoint of the websocket to reach. Must be `spotcast/view`
 
 ### `name` (str)
 
-### `name` (str)
-
 The name of the view to retrieve playlists for. This could represent different types of views, including **featured**, **recently-played** and **Discover Weekly**. You can view all available options in the Spotify API (token needed) [here](https://api.spotify.com/v1/views/personalized-recommendations).
 
 ### `account` (str)

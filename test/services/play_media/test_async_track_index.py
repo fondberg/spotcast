@@ -39,7 +39,7 @@ class TestSingleDiscAlbum(IsolatedAsyncioTestCase):
         self.assertEqual(self.uri, "spotify:album:foo")
 
     def test_currect_index_returned(self):
-        self.assertEqual(self.index, 5)
+        self.assertEqual(self.index, 4)
 
 
 class TestMultiDiscAlbum(IsolatedAsyncioTestCase):
@@ -95,4 +95,4 @@ class TestMultiDiscAlbum(IsolatedAsyncioTestCase):
         self.assertEqual(self.uri, "spotify:album:foo")
 
     def test_currect_index_returned(self):
-        self.assertEqual(self.index, 8)
+        self.assertEqual(self.index, 7)

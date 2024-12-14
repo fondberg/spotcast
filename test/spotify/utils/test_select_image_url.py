@@ -31,3 +31,25 @@ class TestImageSelection(TestCase):
 
     def test_correct_image_selected(self):
         self.assertEqual(self.result, "http://image.com/1")
+
+
+class TestImageWithoutSize(TestCase):
+
+    def setUp(self):
+
+        self.images = [
+            {
+                "url": "http://image.com/2",
+            },
+            {
+                "url": "http://image.com/1",
+            },
+            {
+                "url": "http://image.com/3",
+            }
+        ]
+
+        self.result = select_image_url(self.images)
+
+    def test_correct_image_selected(self):
+        self.assertEqual(self.result, "http://image.com/2")

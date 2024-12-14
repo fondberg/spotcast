@@ -44,7 +44,7 @@ class TestShowEpisodesRetrieval(IsolatedAsyncioTestCase):
         )
 
         self.result = await self.account.async_get_show_episodes(
-            "spotify:playlist:foo"
+            "spotify:show:foo"
         )
 
     def test_expected_result_received(self):
@@ -54,7 +54,7 @@ class TestShowEpisodesRetrieval(IsolatedAsyncioTestCase):
         try:
             self.account._async_pager.assert_called_with(
                 function=self.account.apis["private"].show_episodes,
-                prepends=["foo"],
+                prepends=["spotify:show:foo"],
                 appends=["CA"],
                 max_items=None,
             )

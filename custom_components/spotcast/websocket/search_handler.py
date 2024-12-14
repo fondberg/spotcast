@@ -19,7 +19,7 @@ SCHEMA = vol.Schema(
         vol.Required("type"): ENDPOINT,
         vol.Required("query"): cv.string,
         # Playlist or song, default playlist
-        vol.Optional("searchType"): cv.string,
+        vol.Optional("search_type"): cv.string,
         vol.Optional("limit"): cv.positive_int,
         vol.Optional("account"): cv.string,
     }
@@ -42,7 +42,7 @@ async def async_search_handler(
     """
     account_id = msg.get("account")
     query = msg.get("query")
-    search_type = msg.get("searchType", "playlist")
+    search_type = msg.get("search_type", "playlist")
     limit = msg.get("limit", 10)
 
     account = await async_get_account(hass, account_id)

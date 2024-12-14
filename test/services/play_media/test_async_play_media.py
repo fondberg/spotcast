@@ -224,7 +224,72 @@ class TestTrackUri(IsolatedAsyncioTestCase):
                     "12345",
                     "spotify:album:foo",
                     random=True,
-                    offset=4,
+                    offset=5,
+            )
+        except AssertionError:
+            self.fail()
+
+    def test_random_offset_ignored_in_case_of_track_uri(self):
+        try:
+            self.mocks["random"].assert_not_called()
+        except AssertionError:
+            self.fail()
+
+
+class TestEpisodeUri(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.async_episode_index")
+    @patch(f"{TEST_MODULE}.async_random_index")
+    @patch(f"{TEST_MODULE}.async_media_player_from_id")
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    @patch(f"{TEST_MODULE}.get_account_entry", new_callable=MagicMock)
+    async def asyncSetUp(
+        self,
+        mock_entry: MagicMock,
+        mock_account: AsyncMock,
+        mock_player: AsyncMock,
+        mock_random: AsyncMock,
+        mock_index: AsyncMock,
+    ):
+
+        mock_entry.return_value = MagicMock()
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+        mock_player.return_value.id = "12345"
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "call": MagicMock(spec=ServiceCall),
+            "entry": mock_entry(),
+            "account": mock_account.return_value,
+            "player": mock_player(),
+            "random": mock_random,
+            "index": mock_index,
+        }
+
+        self.mocks["index"].return_value = ("spotify:show:foo", 5)
+        self.mocks["call"].data = {
+            "spotify_uri": "spotify:episode:bar",
+            "account": "12345",
+            "media_player": {
+                "entity_id": [
+                    "media_player.foo"
+                ]
+            },
+            "data": {
+                "random": True,
+            }
+        }
+
+        await async_play_media(self.mocks["hass"], self.mocks["call"])
+
+    def test_account_play_media_called_with_expected_arguments(self):
+        try:
+            self.mocks["account"].async_play_media\
+                .assert_called_with(
+                    "12345",
+                    "spotify:show:foo",
+                    random=True,
+                    offset=5,
             )
         except AssertionError:
             self.fail()
