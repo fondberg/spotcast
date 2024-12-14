@@ -5,10 +5,10 @@ Classes:
     - ExpiredSpotifyCookiesError
 """
 
-from homeassistant.exceptions import HomeAssistantError
+from custom_components.spotcast.spotify.exceptions import TokenError
 
 
-class TokenRefreshError(HomeAssistantError):
+class TokenRefreshError(TokenError):
     """Raised when a token refresh fails"""
 
 

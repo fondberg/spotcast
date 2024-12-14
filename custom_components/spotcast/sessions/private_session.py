@@ -9,7 +9,8 @@ Classes:
 
 from time import time
 from asyncio import Lock
-from aiohttp import ClientSession, ContentTypeError
+from aiohttp import ClientSession
+from aiohttp.client_exceptions import ContentTypeError
 from types import MappingProxyType
 from logging import getLogger
 
@@ -163,6 +164,7 @@ class PrivateSession(ConnectionSession):
                         "sp_dc and sp_key are likely expired",
                         location
                     )
+                    self._is_healthy = False
                     raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
 
                 try:
