@@ -85,22 +85,35 @@ Always `result` on a successful request.
 
 The result of the transaction.
 
-#### `total` (int)
-
-The total number of results retrieved.
-
-#### `account` (str)
-
-The account used in the query.
-
-#### `playlists` (list[dict])
-
-A list of search results based on the search type. The key name will change depending on the search type and could be `playlists`, `tracks`, `albums`, or `artists`.
-
-- `id` (str): The unique ID for the result. For playlists, this will be the Spotify playlist ID. For tracks, it will be the Spotify track ID. For albums or artists, it will be the corresponding Spotify ID.
-- `name` (str): The name of the playlist, track, album, or artist.
-- `uri` (str): The Spotify URI for the playlist, track, album, or artist. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
-- `description` (str): A description of the playlist, track, album, or artist, if available.
-- `icon` (str): A URL to an image associated with the playlist, track, album, or artist, if available.
-
+> #### `total` (int)
+> 
+> The total number of results retrieved.
+> 
+> #### `account` (str)
+> 
+> The account used in the query.
+> 
+> #### `playlists` (list[dict])
+> 
+> A list of search results based on the search type. The key name will change depending on the search type and could be `playlists`, `tracks`, `albums`, or `artists`.
+> 
+> > ##### `id` (str)
+> > 
+> > The unique ID for the result. For playlists, this will be the Spotify playlist ID. For tracks, it will be the Spotify track ID. For albums or artists, it will be the corresponding Spotify ID.
+> > 
+> > ##### `name` (str)
+> > 
+> > The name of the playlist, track, album, or artist.
+> > 
+> > ##### `uri` (str)
+> > 
+> > The Spotify URI for the playlist, track, album, or artist. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
+> > 
+> > ##### `description` (str)
+> > 
+> > A description of the playlist, track, album, or artist, if available.
+> > 
+> > ##### `icon` (str)
+> > 
+> > A URL to an image associated with the playlist, track, album, or artist, if available.
 

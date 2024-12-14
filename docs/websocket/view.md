@@ -81,20 +81,34 @@ Always `result` on a successful request.
 
 The result of the transaction.
 
-#### `total` (int)
-
-The total number of playlists retrieved.
-
-#### `account` (str)
-
-The account used in the query.
-
-#### `playlists` (list[dict])
-
-List of playlists retrieved based on the specified view. Each playlist includes:
-
-- **`id` (str):** Spotify's unique ID for the playlist.
-- **`name` (str):** The name of the playlist.
-- **`uri` (str):** Spotify URI for the playlist. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
-- **`description` (str):** A short description of the playlist.
-- **`icon` (str):** A URL to the playlist's icon or image.
+> #### `total` (int)
+>
+> The total number of playlists retrieved.
+>
+> #### `account` (str)
+>
+> The account used in the query.
+>
+> #### `playlists` (list[dict])
+>
+> List of playlists retrieved based on the specified view. Each playlist includes:
+>
+> > ##### `id` (str)
+> > 
+> > Spotify's unique ID for the playlist.
+> > 
+> > ##### `name` (str)
+> > 
+> > The name of the playlist.
+> > 
+> > ##### `uri` (str)
+> > 
+> > Spotify URI for the playlist. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
+> > 
+> > ##### `description` (str)
+> > 
+> > A short description of the playlist.
+> > 
+> > ##### `icon` (str)
+> > 
+> > A URL to the playlist's icon or image.

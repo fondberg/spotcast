@@ -56,14 +56,14 @@ Always `result` on a successful request.
 
 The result of the transaction.
 
-#### `total` (int)
-
-The total number of liked media (tracks) retrieved.
-
-#### `account` (str)
-
-The account used in the query.
-
-#### `tracks` (list[str])
-
-List of Spotify URIs of the liked media (tracks) retrieved. Each entry in the list is a string representing a Spotify track URI. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
+> #### `total` (int)
+> 
+> The total number of liked media (tracks) retrieved.
+>
+> #### `account` (str)
+> 
+> The account used in the query.
+> 
+> #### `tracks` (list[str])
+> 
+> List of Spotify URIs of the liked media (tracks) retrieved. Each entry in the list is a string representing a Spotify track URI. Refer to [URI Format](https://developer.spotify.com/documentation/> web-api/concepts/spotify-uris-ids) for details.

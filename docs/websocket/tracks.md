@@ -8,7 +8,7 @@ Provides the list of tracks from a specified playlist.
 {
     "id": 15,
     "type": "spotcast/tracks",
-    "playlist_id": "37i9dQZF1DXcBWIGoYBM5M" or "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M",
+    "playlist_id": "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M",
     "account": "01JDG07KSBTYWZGJSBJ1EW6XEF"
 }
 ```
@@ -67,24 +67,35 @@ Always `result` on a successful request.
 
 The result of the transaction.
 
-#### `total` (int)
-
-The total number of tracks retrieved.
-
-#### `account` (str)
-
-The account used in the query.
-
-#### `tracks` (list[dict])
-
-List of tracks retrieved from the specified playlist. Each track includes:
-
-- **`id` (str):** Spotify's unique ID for the track.
-- **`name` (str):** The name of the track.
-- **`uri` (str):** Spotify URI for the track. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
-- **`album` (dict):** Information about the album the track belongs to. Refer to [Get playlist tracks](https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks) for details.
-- **`artists` (list[dict]):** List of artists who contributed to the track. Refer to [Get playlist tracks](https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks) for details.
-  
-
-
+> #### `total` (int)
+>
+> The total number of tracks retrieved.
+>
+> #### `account` (str)
+>
+> The account used in the query.
+>
+> #### `tracks` (list[dict])
+>
+> List of tracks retrieved from the specified playlist. Each track includes:
+>
+> > ##### `id` (str)
+> > 
+> > Spotify's unique ID for the track.
+> > 
+> > ##### `name` (str)
+> > 
+> > The name of the track.
+> > 
+> > ##### `uri` (str)
+> > 
+> > Spotify URI for the track. Refer to [URI Format](https://developer.spotify.com/documentation/web-api/concepts/spotify-uris-ids) for details.
+> > 
+> > ##### `album` (dict)
+> > 
+> > Information about the album the track belongs to. Refer to [Get playlist tracks](https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks) for details.
+> > 
+> > ##### `artists` (list[dict])
+> > 
+> > List of artists who contributed to the track. Refer to [Get playlist tracks](https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks) for details.
 

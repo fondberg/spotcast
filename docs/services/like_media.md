@@ -12,7 +12,7 @@ data:
         - spotify:track:2dbJ0mn0vTVz6mc3rk2t77
     account: 01JDG07KSBTYWZGJSBJ1EW6XEF
 ```
-### `spotify_uris` (list of str)
+### `spotify_uris` (list[str])
 
 A list of Spotify URIs or URLs to be liked. These can represent various types of content, including tracks, albums, or playlists.
 
