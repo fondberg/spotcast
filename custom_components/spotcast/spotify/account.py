@@ -33,6 +33,7 @@ from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
     TokenError,
 )
+from custom_components.spotcast.sessions.exceptions import InternalServerError
 
 
 LOGGER = getLogger(__name__)

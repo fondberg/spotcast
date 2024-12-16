@@ -13,13 +13,16 @@ from logging import getLogger
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.const import Platform
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.services import ServiceHandler
 from custom_components.spotcast.services.const import SERVICE_SCHEMAS
-from custom_components.spotcast.sessions.exceptions import TokenRefreshError
+from custom_components.spotcast.sessions.exceptions import (
+    TokenRefreshError,
+    InternalServerError,
+)
 from custom_components.spotcast.websocket import async_setup_websocket
 from custom_components.spotcast.config_flow import DEFAULT_OPTIONS
 
@@ -56,7 +59,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry=entry,
         )
     except TokenRefreshError as exc:
-        raise ConfigEntryAuthFailed from exc
+        raise ConfigEntryAuthFailed() from exc
+    except InternalServerError as exc:
+        raise ConfigEntryNotReady(f"{exc.code} - {exc.message}") from exc
 
     LOGGER.info(
         "Loaded spotify account `%s`. Set as default: %s",

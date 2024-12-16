@@ -26,6 +26,7 @@ from custom_components.spotcast.sessions.connection_session import (
 from custom_components.spotcast.sessions.exceptions import (
     TokenRefreshError,
     ExpiredSpotifyCookiesError,
+    InternalServerError,
 )
 
 LOGGER = getLogger(__name__)
@@ -166,6 +167,12 @@ class PrivateSession(ConnectionSession):
                     )
                     self._is_healthy = False
                     raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
+
+                if (response.status >= 500 and response.status < 600):
+                    raise InternalServerError(
+                        response.status,
+                        await response.text()
+                    )
 
                 try:
                     data = await response.json()
