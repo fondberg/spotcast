@@ -1,7 +1,7 @@
 """Module to test the async_update function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock, patch
 
 from custom_components.spotcast.media_player.device_manager import (
     DeviceManager,
@@ -279,27 +279,35 @@ class TestRemovedDevice(IsolatedAsyncioTestCase):
 
 class TestRemovedWebPlayer(IsolatedAsyncioTestCase):
 
-    async def asyncSetUp(self):
+    @patch.object(DeviceManager, "remove_device")
+    async def asyncSetUp(self, mock_remove):
 
-        self.mock_account = MagicMock(spec=SpotifyAccount)
-        self.mock_callack = MagicMock(spec=AddEntitiesCallback)
-        self.mock_device = MagicMock(spec=SpotifyDevice)
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount),
+            "callback": MagicMock(spec=AddEntitiesCallback),
+            "device": MagicMock(spec=SpotifyDevice),
+            "remove": mock_remove,
+        }
 
-        self.mock_account.async_devices = AsyncMock(return_value=[])
-        self.mock_account.async_playback_state = AsyncMock()
-        self.mock_account.async_playback_state.return_value = {}
+        self.mocks["account"].async_devices = AsyncMock(return_value=[])
+        self.mocks["account"].async_playback_state = AsyncMock()
+        self.mocks["account"].async_playback_state.return_value = {}
 
         self.device_manager = DeviceManager(
-            self.mock_account,
-            self.mock_callack,
+            self.mocks["account"],
+            self.mocks["callback"],
         )
 
         self.device_manager.tracked_devices = {
-            "1234": self.mock_device
+            "1234": self.mocks["device"]
         }
 
         self.device_manager.tracked_devices["1234"].device_data = {
             "type": "web_player"
+        }
+
+        self.device_manager.tracked_devices["1234"].device_info = {
+            "identifiers": {("spotcast", "1234")}
         }
 
         await self.device_manager.async_update()
@@ -309,6 +317,12 @@ class TestRemovedWebPlayer(IsolatedAsyncioTestCase):
 
     def test_device_removed_from_hass(self):
         try:
-            self.mock_device.async_remove.assert_called()
+            self.mocks["device"].async_remove.assert_called()
+        except AssertionError:
+            self.fail()
+
+    def test_remove_device_called(self):
+        try:
+            self.mocks["remove"].assert_called()
         except AssertionError:
             self.fail()

@@ -127,12 +127,14 @@ class DeviceManager:
 
             if device.device_data["type"] == "web_player":
                 device.async_remove(force_remove=True)
-                device.device_info["identifiers"]
+                self.remove_device(device.device_info["identifiers"])
             else:
                 self.unavailable_devices[id] = device
 
-    async def async_remove_device(
-            self, identifiers: set[tuple[str, str]]):
+    def remove_device(
+            self,
+            identifiers: set[tuple[str, str]]
+    ):
         """Removes a device from the device registry"""
 
         device_registry = async_get_dr(self._account.hass)
