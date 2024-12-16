@@ -8,6 +8,7 @@ Classes:
 from logging import getLogger
 
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.device_registry import async_get as async_get_dr
 
 from custom_components.spotcast.media_player import (
     SpotifyDevice,
@@ -126,5 +127,19 @@ class DeviceManager:
 
             if device.device_data["type"] == "web_player":
                 device.async_remove(force_remove=True)
+                device.device_info["identifiers"]
             else:
                 self.unavailable_devices[id] = device
+
+    async def async_remove_device(
+            self, identifiers: set[tuple[str, str]]):
+        """Removes a device from the device registry"""
+
+        device_registry = async_get_dr(self._account.hass)
+        device_entry = device_registry.async_get_device(identifiers)
+
+        if device_entry is None:
+            raise KeyError(f"No device found for identifiers `{identifiers}`")
+
+        device_registry.async_remove_device(device_entry.id)
+        LOGGER.info("Removed Device `%s`. No Longer reported", device_entry.id)
