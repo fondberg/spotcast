@@ -1,7 +1,7 @@
 """Module to test the async_refresh_token function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from homeassistant.core import HomeAssistant
 
@@ -11,7 +11,8 @@ from custom_components.spotcast.sessions.private_session import (
     ExpiredSpotifyCookiesError,
     TokenRefreshError,
     ConfigEntry,
-    ContentTypeError
+    ContentTypeError,
+    InternalServerError,
 )
 
 
@@ -89,6 +90,39 @@ class TestExpirationReply(IsolatedAsyncioTestCase):
         mock_get.return_value.__aenter__.return_value.json\
             .return_value = await self.async_json_reply()
         with self.assertRaises(ExpiredSpotifyCookiesError):
+            await self.session.async_refresh_token()
+
+
+class TestInternalServerError(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+        mock_hass = MagicMock(spec=HomeAssistant)
+        mock_entry = MagicMock(spec=ConfigEntry)
+
+        mock_entry.data = {
+            "internal_api": {
+                "sp_dc": "foo",
+                "sp_key": "bar",
+            }
+        }
+
+        self.session = PrivateSession(mock_hass, mock_entry)
+
+    async def async_json_reply(self):
+        return {
+            "accessToken": "boo",
+            "accessTokenExpirationTimestampMs": 12345.67,
+
+        }
+
+    @patch.object(ClientSession, "get", new_callable=MagicMock)
+    async def test_expiration_error_raised(self, mock_get: MagicMock):
+
+        mock_response = mock_get.return_value.__aenter__.return_value
+
+        mock_response.status = 503
+        mock_response.text = AsyncMock(return_value="Dummy Error")
+        with self.assertRaises(InternalServerError):
             await self.session.async_refresh_token()
 
 

@@ -9,6 +9,8 @@ from custom_components.spotcast import (
     ConfigEntry,
     TokenRefreshError,
     ConfigEntryAuthFailed,
+    InternalServerError,
+    ConfigEntryNotReady,
 )
 from custom_components.spotcast.spotify import SpotifyAccount
 
@@ -151,6 +153,42 @@ class TestTokensErrorAtRefresh(IsolatedAsyncioTestCase):
             .async_register = self.mocks["register_service"]
 
         with self.assertRaises(ConfigEntryAuthFailed):
+            await async_setup_entry(
+                self.mocks["hass"],
+                self.mocks["entry"],
+            )
+
+
+class TestGatewayError(IsolatedAsyncioTestCase):
+
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    async def test_token_error_raised(self, mock_account: AsyncMock):
+
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "account": mock_account.return_value,
+            "entry": MagicMock(spec=ConfigEntry),
+            "forward_entry": AsyncMock(),
+            "register_service": MagicMock(),
+        }
+
+        self.mocks["account"].async_ensure_tokens_valid = AsyncMock()
+        self.mocks["account"].async_ensure_tokens_valid\
+            .side_effect = InternalServerError(503, "Dummy Error")
+
+        self.mocks["hass"].data = {}
+        self.mocks["entry"].entry_id = "foo"
+        self.mocks["entry"].options = {}
+        self.mocks["account"].is_default = True
+        self.mocks["hass"].config_entries\
+            .async_forward_entry_setups = self.mocks["forward_entry"]
+        self.mocks["hass"].services = MagicMock()
+        self.mocks["hass"].services\
+            .async_register = self.mocks["register_service"]
+
+        with self.assertRaises(ConfigEntryNotReady):
             await async_setup_entry(
                 self.mocks["hass"],
                 self.mocks["entry"],

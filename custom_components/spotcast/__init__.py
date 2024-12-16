@@ -54,25 +54,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     from custom_components.spotcast.spotify.account import SpotifyAccount  # pylint: disable=C0415
 
     try:
+
         account = await SpotifyAccount.async_from_config_entry(
             hass=hass,
             entry=entry,
         )
+
+        LOGGER.info(
+            "Loaded spotify account `%s`. Set as default: %s",
+            account.id,
+            account.is_default
+        )
+
+        await account.async_ensure_tokens_valid()
+
     except TokenRefreshError as exc:
         raise ConfigEntryAuthFailed() from exc
     except InternalServerError as exc:
         raise ConfigEntryNotReady(f"{exc.code} - {exc.message}") from exc
-
-    LOGGER.info(
-        "Loaded spotify account `%s`. Set as default: %s",
-        account.id,
-        account.is_default
-    )
-
-    try:
-        await account.async_ensure_tokens_valid()
-    except TokenRefreshError as exc:
-        raise ConfigEntryAuthFailed from exc
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

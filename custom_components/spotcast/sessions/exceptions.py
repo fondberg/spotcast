@@ -27,4 +27,4 @@ class InternalServerError(HomeAssistantError):
         self.code = code
         self.message = message
 
-        super.__init__(message)
+        super().__init__(message)
