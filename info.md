@@ -1,7 +1,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/images/logo/white/64.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/images/logo/dark_gray/64.png">
-  <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="./assets/images/logo/green/64.png">
+  <img alt="Spotcast" src="https://raw.githubusercontent.com/fondberg/spotcast/refs/heads/dev/assets/images/logo/green/64.png">
 </picture>
 
 ------------------------------------------------------------------------------
