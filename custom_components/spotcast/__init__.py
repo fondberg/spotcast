@@ -26,7 +26,7 @@ from custom_components.spotcast.sessions.exceptions import (
 from custom_components.spotcast.websocket import async_setup_websocket
 from custom_components.spotcast.config_flow import DEFAULT_OPTIONS
 
-__version__ = "5.0.0-b18"
+__version__ = "5.0.0-b19"
 
 
 LOGGER = getLogger(__name__)
