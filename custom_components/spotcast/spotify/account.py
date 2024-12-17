@@ -33,7 +33,10 @@ from custom_components.spotcast.spotify.exceptions import (
     PlaybackError,
     TokenError,
 )
-from custom_components.spotcast.sessions.exceptions import InternalServerError
+from custom_components.spotcast.sessions.exceptions import (
+    InternalServerError,
+    UpstreamServerNotready,
+)
 
 
 LOGGER = getLogger(__name__)
@@ -372,7 +375,7 @@ class SpotifyAccount:
             skip_profile: bool = False,
             reauth_on_fail: bool = True,
     ):
-        """Ensures the token are valid
+        """Ensures the token are valid.
 
         Args:
             - skip_profile(bool, optional): set True to skip the

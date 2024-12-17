@@ -13,6 +13,10 @@ from homeassistant.components.binary_sensor import (
 from homeassistant.const import STATE_OK, STATE_PROBLEM
 from requests.exceptions import ReadTimeout
 
+from custom_components.spotcast.sessions.exceptions import (
+    UpstreamServerNotready,
+    TokenError,
+)
 from custom_components.spotcast.binary_sensor.abstract_binary_sensor import (
     SpotcastBinarySensor
 )
@@ -40,7 +44,12 @@ class SpotifyProfileMalfunctionBinarySensor(SpotcastBinarySensor):
 
         try:
             profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout) as exc:
+        except (
+                ReadTimeoutError,
+                ReadTimeout,
+                UpstreamServerNotready,
+                TokenError,
+        ) as exc:
             LOGGER.error(exc)
             self._attr_state = STATE_PROBLEM
             return

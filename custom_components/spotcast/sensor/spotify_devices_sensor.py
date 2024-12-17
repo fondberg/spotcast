@@ -11,6 +11,9 @@ from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
+from custom_components.spotcast.sessions.exceptions import (
+    UpstreamServerNotready,
+)
 
 LOGGER = getLogger(__name__)
 
@@ -35,7 +38,7 @@ class SpotifyDevicesSensor(SpotcastSensor):
         """Updates the available devices asynchronously"""
         try:
             devices = await self.account.async_devices()
-        except (ReadTimeoutError, ReadTimeout):
+        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
             self._attr_state = STATE_UNKNOWN
             self._attributes["devices"] = []
             return

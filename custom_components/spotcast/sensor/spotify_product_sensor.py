@@ -10,6 +10,9 @@ from urllib3.exceptions import ReadTimeoutError
 from homeassistant.const import STATE_UNKNOWN
 from requests.exceptions import ReadTimeout
 
+from custom_components.spotcast.sessions.exceptions import (
+    UpstreamServerNotready
+)
 from custom_components.spotcast.sensor.abstract_sensor import (
     SpotcastSensor,
     EntityCategory,
@@ -37,7 +40,7 @@ class SpotifyProductSensor(SpotcastSensor):
 
         try:
             profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout):
+        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
             LOGGER.warning(
                 "Failed to update Spotify Product sensor. Sensor know "
                 "unavailable"

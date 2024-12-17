@@ -14,6 +14,7 @@ class TestDataUpdate(IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.account = MagicMock(spec=SpotifyAccount)
         self.account.is_default = True
+        self.account.entry_id = "1234"
         self.sensor = IsDefaultBinarySensor(self.account)
         await self.sensor.async_update()
 

@@ -12,6 +12,9 @@ from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
 from custom_components.spotcast.utils import copy_to_dict
+from custom_components.spotcast.sessions.exceptions import (
+    UpstreamServerNotready
+)
 
 LOGGER = getLogger(__name__)
 
@@ -37,7 +40,7 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
 
         try:
             count = await self.account.async_playlists_count()
-        except (ReadTimeoutError, ReadTimeout):
+        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
             self._attr_state = STATE_UNKNOWN
             return
 

@@ -28,3 +28,8 @@ class InternalServerError(HomeAssistantError):
         self.message = message
 
         super().__init__(message)
+
+
+class UpstreamServerNotready(HomeAssistantError):
+    """Raised when the upstream server is not ready to receive
+    communication again"""

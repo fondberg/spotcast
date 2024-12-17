@@ -23,10 +23,14 @@ from homeassistant.config_entries import ConfigEntry
 from custom_components.spotcast.sessions.connection_session import (
     ConnectionSession,
 )
+from custom_components.spotcast.sessions.retry_supervisor import (
+    RetrySupervisor,
+)
 from custom_components.spotcast.sessions.exceptions import (
     TokenRefreshError,
     ExpiredSpotifyCookiesError,
     InternalServerError,
+    UpstreamServerNotready,
 )
 
 LOGGER = getLogger(__name__)
@@ -98,6 +102,7 @@ class PrivateSession(ConnectionSession):
         self._expires_at = 0
         self._token_lock = Lock()
         self._is_healthy = False
+        self.supervisor = RetrySupervisor()
 
     @property
     def token(self) -> str:
@@ -122,9 +127,15 @@ class PrivateSession(ConnectionSession):
         sp_key = internal_api["sp_key"]
         return {"sp_dc": sp_dc, "sp_key": sp_key}
 
-    async def async_ensure_token_valid(self) -> None:
-        """Ensure the current token is valid or gets a new one"""
+    async def async_ensure_token_valid(self) -> bool:
+        """Ensure the current token is valid or gets a new one. Returns
+        True if the refcresh worked or False if it didn't
+        """
         async with self._token_lock:
+
+            if not self.supervisor.is_ready:
+                raise UpstreamServerNotready("Server not ready for refresh")
+
             if self.valid_token:
                 return
 
@@ -169,6 +180,11 @@ class PrivateSession(ConnectionSession):
                     raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
 
                 if (response.status >= 500 and response.status < 600):
+                    self.supervisor._is_healthy = False
+                    self.supervisor.log_message(
+                        f"{response.status} - {await response.text()}"
+                    )
+
                     raise InternalServerError(
                         response.status,
                         await response.text()
@@ -190,6 +206,7 @@ class PrivateSession(ConnectionSession):
             self._access_token = data[self.TOKEN_KEY]
             self._expires_at = int(data[self.EXPIRATION_KEY]) // 1000
             self._is_healthy = True
+            self.supervisor.is_healthy = True
 
             return {
                 "access_token": self._access_token,

@@ -8,7 +8,9 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.spotcast.sessions.private_session import (
     PrivateSession,
-    ConfigEntry
+    ConfigEntry,
+    RetrySupervisor,
+    UpstreamServerNotready,
 )
 
 
@@ -55,3 +57,18 @@ class TestTokenIsNotValid(IsolatedAsyncioTestCase):
             mock_refresh.assert_called_once()
         except AssertionError:
             self.fail("refresh_token was called")
+
+
+class TestUpstreamNotReady(IsolatedAsyncioTestCase):
+
+    async def test_error_raised(self):
+        mock_hass = MagicMock(spec=HomeAssistant)
+        mock_entry = MagicMock(spec=ConfigEntry)
+        mock_supervisor = MagicMock(spec=RetrySupervisor)
+
+        self.session = PrivateSession(mock_hass, mock_entry)
+        self.session.supervisor = mock_supervisor
+        mock_supervisor.is_ready = False
+
+        with self.assertRaises(UpstreamServerNotready):
+            await self.session.async_ensure_token_valid()
