@@ -185,7 +185,7 @@ class SpotifyController(BaseController):
         token = self.account.get_token("private")
 
         headers = {
-            "authority": SpotifyController.APP_HOSTNAME,
+            "authority": self.APP_HOSTNAME,
             "authorization": f"Bearer {token}",
             "content-type": "text/plain;charset=UTF-8",
         }
@@ -197,7 +197,7 @@ class SpotifyController(BaseController):
 
         response: Response = post(
             url=(
-                f"https://{SpotifyController.APP_HOSTNAME}/device-auth/v1"
+                f"https://{self.APP_HOSTNAME}/device-auth/v1"
                 "/refresh"
             ),
             headers=headers,
@@ -215,7 +215,7 @@ class SpotifyController(BaseController):
         content = response.json()
 
         self.send_message({
-            "type": SpotifyController.TYPE_ADD_USER,
+            "type": self.TYPE_ADD_USER,
             "payload": {
                 "blob": content["accessToken"],
                 "tokenType": "accessToken"
