@@ -7,9 +7,9 @@ Functions:
 from logging import getLogger
 
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.util.read_only_dict import ReadOnlyDict
+from homeassistant.exceptions import ServiceValidationError
 import voluptuous as vol
 
 
@@ -117,6 +117,9 @@ async def async_rebuild_playback(
             track_index = track_index[1] - 1
         except ValueError:
             pass
+    # change the context to the episode if context is show
+    elif context_type == "show":
+        call_data["spotify_uri"] = current_item["uri"]
 
     # all remaining case that rely on fetching a list of items and
     # finding the current uri in the list
