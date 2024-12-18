@@ -603,3 +603,30 @@ class TestUnknownContentType(IsolatedAsyncioTestCase):
             self.mocks["index"].assert_not_called()
         except AssertionError:
             self.fail()
+
+
+class TestShowContext(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount)
+        }
+
+        self.mocks["account"].last_playback_state = {
+            "context": {
+                "uri": "spotify:show:foo",
+                "type": "show"
+            },
+            "item": {
+                "uri": "spotify:episode:bar"
+            },
+            "repeat_state": "context",
+            "shuffle_state": False,
+            "progress_ms": 2000,
+        }
+
+        self.result = await async_rebuild_playback({}, self.mocks["account"])
+
+    def test_context_changed_to_episode(self):
+        self.assertEqual(self.result["spotify_uri"], "spotify:episode:bar")

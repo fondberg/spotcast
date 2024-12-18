@@ -86,7 +86,7 @@ async def async_rebuild_playback(
     last_playback_state: dict = account.last_playback_state
     context_uri: str = last_playback_state["context"]["uri"]
     context_type: str = last_playback_state["context"]["type"]
-    extras = call_data["data"]
+    extras = call_data.get("data", {})
 
     # set the context_uri in the call_data
     call_data["spotify_uri"] = context_uri
