@@ -52,9 +52,11 @@ async def async_transfer_playback(hass: HomeAssistant, call: ServiceCall):
     playback_state = await account.async_playback_state(force=True)
     call_data = copy_to_dict(call.data)
     call_data["data"] = call_data.get("data", {})
+    last_uri_context = account.last_playback_state.get(
+        "context", {}).get("uri")
 
     # check if no active playback
-    if playback_state == {} and account.last_playback_state == {}:
+    if playback_state == {} and last_uri_context is None:
         LOGGER.warning("No known playback state. Defaults back to liked songs")
         call_data["spotify_uri"] = account.liked_songs_uri
     elif playback_state != {}:

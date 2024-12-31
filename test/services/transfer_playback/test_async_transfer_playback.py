@@ -45,6 +45,8 @@ class TestTransferOfActivePlayback(IsolatedAsyncioTestCase):
             }
         )
 
+        self.mocks["account"].last_playback_state = {}
+
         self.mocks["call"].data = {
             "media_player": {
                 "entity_id": [
@@ -110,7 +112,7 @@ class TestTransferOfInactivePlayback(IsolatedAsyncioTestCase):
         )
         self.mocks["account"].last_playback_state = {
             "device": "foo",
-            "context": "bar",
+            "context": {"uri": "bar"},
         }
 
         self.mocks["rebuild"].return_value = {"context": "modified"}
