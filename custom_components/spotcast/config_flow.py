@@ -199,29 +199,33 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Step for importing a config entry from yaml to ui"""
         LOGGER.info("Importing YAML configuration for Spotcast")
-        LOGGER.warn("In import step")
 
-        self.context["import_data"] = {
+        self._import_data = {
             "sp_dc": import_config.get("sp_dc"),
             "sp_key": import_config.get("sp_key"),
         }
 
         # Notify the user to remove YAML configuration
-        self.hass.async_create_task(
-            self.hass.services.async_call(
-                "persistent_notification",
-                "create",
-                {
-                    "title": "Spotcast - YAML Configuration Import",
-                    "message": (
-                        "Your YAML configuration for Spotcast has been "
-                        "imported. To avoid issues on future reboots, please "
-                        "remove the YAML configuration from your "
-                        "`configuration.yaml` file."
-                    ),
-                    "notification_id": f"{DOMAIN}_yaml_import",
-                },
-            )
+        LOGGER.warning(
+            "Spotcast YAML configuration is deprecated. The main profile has "
+            "been imported to UI config entry. Please remove the YAML "
+            "configuration for Spotcast from your `configuration.yaml` file "
+            "for future reboot"
+        )
+
+        await self.hass.services.async_call(
+            "persistent_notification",
+            "create",
+            {
+                "title": "Spotcast - YAML Configuration Import",
+                "message": (
+                    "Your YAML configuration for Spotcast has been "
+                    "imported. To avoid issues on future reboots, please "
+                    "remove the YAML configuration from your "
+                    "`configuration.yaml` file."
+                ),
+                "notification_id": f"{DOMAIN}_yaml_import",
+            },
         )
 
         return self.async_show_form(
@@ -244,14 +248,12 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Create an entry for Spotify."""
 
-        LOGGER.warn(self.context)
-
         if "external_api" not in self.data:
             LOGGER.debug("Adding external api to entry data")
             self.data["external_api"] = data
 
-        if "import_data" in self.context:
-            self.data["internal_api"] = self.context["import_data"].copy()
+        if self._import_data is not None:
+            self.data["internal_api"] = self._import_data.copy()
             LOGGER.debug("Adding internal API details from YAML import")
 
         if "internal_api" not in self.data:
