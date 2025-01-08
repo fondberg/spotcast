@@ -205,6 +205,25 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             "sp_dc": import_config.get("sp_dc"),
             "sp_key": import_config.get("sp_key"),
         }
+
+        # Notify the user to remove YAML configuration
+        self.hass.async_create_task(
+            self.hass.services.async_call(
+                "persistent_notification",
+                "create",
+                {
+                    "title": "Spotcast - YAML Configuration Import",
+                    "message": (
+                        "Your YAML configuration for Spotcast has been "
+                        "imported. To avoid issues on future reboots, please "
+                        "remove the YAML configuration from your "
+                        "`configuration.yaml` file."
+                    ),
+                    "notification_id": f"{DOMAIN}_yaml_import",
+                },
+            )
+        )
+
         return self.async_show_form(
             step_id="pick_implementation",
             data_schema=vol.Schema({}),
