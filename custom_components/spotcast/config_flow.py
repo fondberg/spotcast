@@ -49,7 +49,7 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
 
     async def async_step_init(
         self,
-        user_input: dict[str] | None = None
+        user_input: dict[str] | None = None,
     ) -> FlowResult:
         """Initial Step for the Option Configuration Flow"""
 
@@ -193,6 +193,46 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         """Extra data to append to authorization url"""
         return {"scope": ",".join(SpotifyAccount.SCOPE)}
 
+    async def async_step_import(
+        self,
+        import_config: dict
+    ) -> ConfigFlowResult:
+        """Step for importing a config entry from yaml to ui"""
+        LOGGER.info("Importing YAML configuration for Spotcast")
+
+        self._import_data = {
+            "sp_dc": import_config.get("sp_dc"),
+            "sp_key": import_config.get("sp_key"),
+        }
+
+        # Notify the user to remove YAML configuration
+        LOGGER.warning(
+            "Spotcast YAML configuration is deprecated. The main profile has "
+            "been imported to UI config entry. Please remove the YAML "
+            "configuration for Spotcast from your `configuration.yaml` file "
+            "for future reboot"
+        )
+
+        await self.hass.services.async_call(
+            "persistent_notification",
+            "create",
+            {
+                "title": "Spotcast - YAML Configuration Import",
+                "message": (
+                    "Your YAML configuration for Spotcast has been "
+                    "imported. To avoid issues on future reboots, please "
+                    "remove the YAML configuration from your "
+                    "`configuration.yaml` file."
+                ),
+                "notification_id": f"{DOMAIN}_yaml_import",
+            },
+        )
+
+        return self.async_show_form(
+            step_id="pick_implementation",
+            data_schema=vol.Schema({}),
+        )
+
     async def async_step_internal_api(
             self,
             user_input: dict[str]
@@ -212,6 +252,10 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             LOGGER.debug("Adding external api to entry data")
             self.data["external_api"] = data
 
+        if self._import_data is not None:
+            self.data["internal_api"] = self._import_data.copy()
+            LOGGER.debug("Adding internal API details from YAML import")
+
         if "internal_api" not in self.data:
             return self.async_show_form(
                 step_id="internal_api",
@@ -224,7 +268,7 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
         # create a mock config able to mimmick a config entry for the
         # purpose of InternalSession
         entry = MagicMock(spec=ConfigEntry)
-        entry.data = data
+        entry.data = self.data
         private_session = PrivateSession(self.hass, entry)
 
         try:

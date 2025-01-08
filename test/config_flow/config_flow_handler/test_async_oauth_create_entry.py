@@ -125,6 +125,73 @@ class TestInternalApiProvided(IsolatedAsyncioTestCase):
             self.fail()
 
 
+class TestImportingFromYAMLConfig(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.PrivateSession", new_callable=MagicMock)
+    async def asyncSetUp(
+        self,
+        mock_private: MagicMock,
+        mock_spotify: MagicMock,
+    ):
+
+        mock_private.return_value = MagicMock(spec=PrivateSession)
+        mock_spotify.return_value = MagicMock(spec=Spotify)
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "private": mock_private.return_value,
+            "spotify": mock_spotify.return_value,
+        }
+
+        self.mocks["private"].token = "23456"
+        self.mocks["hass"].async_add_executor_job = AsyncMock(return_value={
+            "id": "foo",
+            "display_name": "User Name"
+        })
+
+        self.data = {
+            "external_api": {
+                "token": {
+                    "access_token": "12345"
+                }
+            }
+        }
+
+        self.handler = SpotcastFlowHandler()
+        self.handler.hass = self.mocks["hass"]
+        self.handler.data = self.data
+        self.handler._import_data = {"sp_dc": "foo", "sp_key": "bar"}
+        self.handler.async_set_unique_id = AsyncMock()
+        self.handler.async_create_entry = MagicMock()
+        self.mocks["hass"].config_entries.async_entries.return_value = []
+
+        self.result = await self.handler.async_oauth_create_entry({})
+
+    def test_entry_properly_setup(self):
+        try:
+            self.handler.async_create_entry(
+                title="User Name",
+                data={
+                    "external_api": {
+                        "token": {
+                            "access_token": "12345"
+                        }
+                    },
+                    "internal_api": {
+                        "sp_dc": "foo",
+                        "sp_key": "bar"
+                    }
+                },
+                options={
+                    "is_default": True,
+                    "base_refresh_rate": 30,
+                }
+            )
+        except AssertionError:
+            self.fail()
+
+
 class TestFailedToGetProfile(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
