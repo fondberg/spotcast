@@ -157,7 +157,6 @@ class PrivateSession(ConnectionSession):
             - TokenError: raised if an error occured when getting the
                 token
         """
-
         async with ClientSession(cookies=self.cookies) as session:
             async with session.get(
                 self.REQUEST_URL,
