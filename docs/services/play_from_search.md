@@ -5,7 +5,7 @@ Starts playing the top result of a search in Spotify. Either starts playing the 
 ## Action
 
 ```yaml
-action: spotcast.play_from search
+action: spotcast.play_from_search
 data:
     media_player:
         entity_id: media_player.foo

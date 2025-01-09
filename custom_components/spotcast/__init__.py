@@ -12,7 +12,7 @@ Constants:
 from logging import getLogger
 
 from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, SOURCE_IMPORT
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.const import Platform
 
@@ -26,7 +26,7 @@ from custom_components.spotcast.sessions.exceptions import (
 from custom_components.spotcast.websocket import async_setup_websocket
 from custom_components.spotcast.config_flow import DEFAULT_OPTIONS
 
-__version__ = "5.0.0-b19"
+__version__ = "5.0.0-b22"
 
 
 LOGGER = getLogger(__name__)
@@ -35,6 +35,35 @@ PLATFORMS = [
     Platform.BINARY_SENSOR,
     Platform.MEDIA_PLAYER,
 ]
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Yaml base setup. Triggers config flow import"""
+
+    try:
+        yaml_config = config[DOMAIN]
+    except KeyError:
+        return True
+
+    # ensure minimal format required for import
+    for key in ("sp_dc", "sp_key"):
+        if key not in yaml_config:
+            LOGGER.error(
+                "Missing key `%s` in Spotcast configuration. Import to UI "
+                "impossible. Aborting",
+                key
+            )
+            return False
+
+    hass.async_create_task(
+        hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_IMPORT},
+            data=yaml_config,
+        )
+    )
+
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

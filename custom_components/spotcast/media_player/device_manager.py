@@ -55,6 +55,29 @@ class DeviceManager:
 
         current_devices = await self._account.async_devices()
         current_devices = {x["id"]: x for x in current_devices}
+        remove = []
+
+        # remove no longer available devices first
+        for id, device in self.tracked_devices.items():
+            if id not in current_devices:
+                LOGGER.info(
+                    "Marking device `%s` unavailable for account `%s`",
+                    device.name,
+                    self._account.name
+                )
+                remove.append(id)
+                entity = self.tracked_devices[id]
+                entity.is_unavailable = True
+
+        for id in remove:
+
+            device = self.tracked_devices.pop(id)
+
+            if device.device_data["type"] == "web_player":
+                device.async_remove(force_remove=True)
+                self.remove_device(device.device_info["identifiers"])
+            else:
+                self.unavailable_devices[id] = device
 
         for id, device in current_devices.items():
 
@@ -96,40 +119,19 @@ class DeviceManager:
 
         playback_state = await self._account.async_playback_state()
         playing_id = None
-        remove = []
 
         if "device" in playback_state:
             playing_id = playback_state["device"]["id"]
 
         for id, device in self.tracked_devices.items():
-            if id not in current_devices:
-                LOGGER.info(
-                    "Marking device `%s` unavailable for account `%s`",
-                    device.name,
-                    self._account.name
-                )
-                remove.append(id)
-                entity = self.tracked_devices[id]
-                entity.is_unavailable = True
+            LOGGER.debug("Updating device info for `%s`", device.name)
+            device.device_data = current_devices[id]
+
+            if device.id == playing_id:
+                LOGGER.debug("Feeding playback state to `%s`", device.name)
+                device.playback_state = playback_state
             else:
-                LOGGER.debug("Updating device info for `%s`", device.name)
-                device.device_data = current_devices[id]
-
-                if device.id == playing_id:
-                    LOGGER.debug("Feeding playback state to `%s`", device.name)
-                    device.playback_state = playback_state
-                else:
-                    device.playback_state = {}
-
-        for id in remove:
-
-            device = self.tracked_devices.pop(id)
-
-            if device.device_data["type"] == "web_player":
-                device.async_remove(force_remove=True)
-                self.remove_device(device.device_info["identifiers"])
-            else:
-                self.unavailable_devices[id] = device
+                device.playback_state = {}
 
     def remove_device(
             self,
