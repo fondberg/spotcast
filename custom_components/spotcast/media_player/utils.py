@@ -202,13 +202,17 @@ async def async_build_from_type(
         media_player.register_handler(spotify_controller)
         await account.async_playback_state()
 
-        if need_to_quit_app(media_player, account.active_device):
+        do_quit = need_to_quit_app(media_player, account.active_device)
+        running_spotify = media_player.app_id == spotify_controller.APP_ID
+
+        if do_quit:
             media_player.quit_app()
 
-        await hass.async_add_executor_job(
-            spotify_controller.launch_app,
-            media_player,
-        )
+        if not running_spotify or do_quit:
+            await hass.async_add_executor_job(
+                spotify_controller.launch_app,
+                media_player,
+            )
 
         return media_player
 
