@@ -39,6 +39,11 @@ class DeviceManager:
         "CastAudio",
     )
 
+    DELETE_ON_UNAVAILABLE = (
+        "Web Player",
+        "Echo Speaker",
+    )
+
     def __init__(
         self,
         account: SpotifyAccount,
@@ -73,7 +78,7 @@ class DeviceManager:
 
             device = self.tracked_devices.pop(id)
 
-            if device.device_data["type"] == "web_player":
+            if device.device_data["type"] in self.DELETE_ON_UNAVAILABLE:
                 device.async_remove(force_remove=True)
                 self.remove_device(device.device_info["identifiers"])
             else:
@@ -81,8 +86,7 @@ class DeviceManager:
 
         for id, device in current_devices.items():
 
-            if device["name"].startswith("Web Player"):
-                device["type"] = "web_player"
+            device["type"] = self.clean_device_type(device)
 
             if device["type"] in self.IGNORE_DEVICE_TYPES:
                 LOGGER.debug(
@@ -147,3 +151,20 @@ class DeviceManager:
 
         device_registry.async_remove_device(device_entry.id)
         LOGGER.info("Removed Device `%s`. No Longer reported", device_entry.id)
+
+    @staticmethod
+    def clean_device_type(device: dict) -> str:
+        """Returns a clean device type based on the device data from
+        Spotify. Used to identify more specific device types requiring
+        special handling"""
+
+        device_type: str = device["type"]
+
+        if device["name"].startswith("Web Player"):
+            return "Web Player"
+
+        if device["id"][-7:-1] == "_amzn_":
+            return "Echo Speaker"
+
+        # return the device type back if no special case found
+        return device_type

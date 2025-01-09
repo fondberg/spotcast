@@ -77,7 +77,7 @@ class TestNewWebPlayer(IsolatedAsyncioTestCase):
     def test_device_class_changed_to_web_player(self):
         self.assertEqual(
             self.device_manager.tracked_devices["1234"].device_data["type"],
-            "web_player",
+            "Web Player",
         )
 
     def test_entity_was_added(self):
@@ -303,7 +303,7 @@ class TestRemovedWebPlayer(IsolatedAsyncioTestCase):
         }
 
         self.device_manager.tracked_devices["1234"].device_data = {
-            "type": "web_player"
+            "type": "Web Player"
         }
 
         self.device_manager.tracked_devices["1234"].device_info = {
