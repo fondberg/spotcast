@@ -5,4 +5,7 @@ contact_links:
     about: If you are experiencing issues with the Spotify Integration (Media Broswing, playback information, etc.). Please open a a ticket with Home Assistant Core. Spotcast and its maintainers are not affiliated and do not work on the official Spotify Integration.
   - name: Spotify Card
     url: https://github.com/mikevanes/spotify-card-v2/issues/new/choose
-    about: You are experiencing issues with the Spotify Dashbord Card
+    about: You are experiencing issues with the Spotify Dashboard Card
+  - name: Home Assistant Forum
+    url: https://community.home-assistant.io/t/spotcast-custom-component-to-start-playback-on-an-idle-chromecast-device/114232/1041
+    about: For general help, from the community, on how to use Spotcast.
