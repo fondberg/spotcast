@@ -141,7 +141,7 @@ class SpotcastOptionsFlowHandler(OptionsFlow):
             options=self._options,
         )
 
-        return self.async_abort(reason="Successfull")
+        return self.async_abort(reason="success")
 
 
 class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
@@ -287,7 +287,12 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
                 )
 
         except Exception:  # pylint: disable=W0718
-            return self.async_abort(reason="connection_error")
+            return self.async_abort(
+                reason="connection_error",
+                description_placeholders={
+                    "account_type": key
+                }
+            )
 
         ids = [x["id"] for x in profiles.values()]
 
