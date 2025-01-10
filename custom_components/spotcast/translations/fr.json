@@ -6,7 +6,249 @@
                     "sp_dc": "SP DC",
                     "sp_key": "SP Key"
                 },
-                "description": "Allez sur [Spotify](open.spotify.com) et connectez-vous. Ensuite, récupérez les cookies intitulés `sp_dc` et `sp_key` dans la console de développer. Vous pouvez consulter [ce tutoriel](https://github.com/fondberg/spotcast/blob/dev/docs/config/obtaining_sp_dc_and_sp_key.md) pour plus d'information"
+                "description": "Allez sur [Spotify](https://open.spotify.com) et connectez vous. Ensuite, récupérez les valeurs de `SP_DC` et `SP_KEY` dans la console de développeur. Consultez [ce tutoriel](https://github.com/fondberg/spotcast/blob/dev/docs/config/obtaining_sp_dc_and_sp_key.md) pour plus d'information"
+            },
+            "pick_implementation": {
+                "title": "Import de la configuration YAML de Spotcast",
+                "description": "Appuyez sur ok pour continuer"
+            }
+        },
+        "abort": {
+            "connection_error": "Error de connection avec Spotify avec les informations d'identification {account_type}. Merci de vérifier l'information fourni. Pour de l'aide supplémentaire, [ouvrez un ticket](https://github.com/fondberg/spotcast/issues/new/choose).",
+            "public_private_accounts_mismatch": "Le profile lié aux informations d'identification OAuth et celui des Cookies de navigateurs web sont pour des comptes différents. Faites attention à fournir les informations pour le même compte. Si vous êtes déjà connecté à Spotify dans votre navigateur web, Home Assistant ne vous demandera pas de vous connecter à un autre compte et utilisera le compte actuel."
+        }
+    },
+    "options": {
+        "step": {
+            "apply_options": {
+                "data": {
+                    "set_default": "Définir ce compte comme compte Spotcast par défaut.",
+                    "base_refresh_rate": "Taux de rafraichissement de base"
+                },
+                "title": "Spotcast - Options"
+            }
+        },
+        "abort": {
+            "success": "Les options ont été appliquées avec succès."
+        }
+    },
+    "selector": {
+        "item_type": {
+            "options": {
+                "album": "Album",
+                "artist": "Artiste",
+                "playlist": "Liste de Lecture",
+                "track": "Piste",
+                "episode": "Épisode",
+                "audiobook": "Livre Audio"
+            }
+        },
+        "tags": {
+            "options": {
+                "hipster": "Hipster",
+                "new": "Nouveau"
+            }
+        }
+    },
+    "services": {
+        "add_to_queue": {
+            "name": "Ajouter à la file d'attente",
+            "description": "Ajoute une liste de chanson à la file d'attente active dans Spotify.",
+            "fields": {
+                "spotify_uris": {
+                    "name": "URIs Spotify",
+                    "description": "Une list de chanson à ajouter à la lecture active."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                }
+            }
+        },
+        "like_media": {
+            "name": "Aimé un Média",
+            "description": "Ajoute une liste de media à la librairie Spotify.",
+            "fields": {
+                "spotify_uris": {
+                    "name": "URIs Spotify",
+                    "description": "Une liste de média à ajouter à la librairie Spotify."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                }
+            }
+        },
+        "play_category": {
+            "name": "Liste de lecture d'une catégorie'",
+            "description": "Joue une liste de lecture aléatoir depuis une catégorie de navigation.",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "category": {
+                    "name": "Catégorie",
+                    "description": "Le nom ou l'ID d'une catégorie. Une correspondance floue est appliqué sur le nom, mais un ID doit être exact."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "play_custom_context": {
+            "name": "Lire un context personalisé",
+            "description": "Démarre une lecture avec une liste personalisé de chansons.",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "items": {
+                    "name": "Items",
+                    "description": "Une liste d'URIs de chanson Spotify"
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "play_dj": {
+            "name": "Liste de lecture du DJ Spotify",
+            "description": "Joue la liste de lecture du DJ Spotify.",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "play_from_search": {
+            "name": "Lecture depuis une recherche",
+            "description": "Démarre une lecture à partir du résultat d'une recherche.",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "search_term": {
+                    "name": "Terme de recherche",
+                    "description": "Le terme à chercher dans le catalogue de Spotify."
+                },
+                "item_type": {
+                    "name": "Type d'item",
+                    "description": "Le type d'item à retourner dans le résultat de recherche."
+                },
+                "tags": {
+                    "name": "Balises",
+                    "description": "Balises à ajouter comme filtres de recherche."
+                },
+                "filters": {
+                    "name": "Filtres",
+                    "description": "Filtres à appliquer à la requête recherche."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "play_liked_songs": {
+            "name": "Liste de lecture des chansons aimés",
+            "description": "Démarrage de la liste de lecture des chansons aimés par l'utilisateur",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "play_media": {
+            "name": "Lecture de média",
+            "description": "Joue un média Spotify",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "spotify_uri": {
+                    "name": "URI",
+                    "description": "Un URI ou URL Spotify valide"
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "play_saved_episodes": {
+            "name": "Podcast Sauvegardés",
+            "description": "Joue les épisodes de podcast sauvegardés par l'utilisateur",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
+            }
+        },
+        "transfer_playback": {
+            "name": "Transfère de la lecture en cours",
+            "description": "Transfère la lecture en cours de Spotify sur un autre appareil",
+            "fields": {
+                "media_player": {
+                    "name": "Cible",
+                    "description": "Un lecteur multimedia compatible avec Spotcast."
+                },
+                "account": {
+                    "name": "Compte Spotify",
+                    "description": "L'ID du compte Spotify à utiliser. Utilise le compte par défaut sinon."
+                },
+                "data": {
+                    "name": "Data",
+                    "description": "Modificateurs additionels lors du démarrage de la lecture."
+                }
             }
         }
     }
