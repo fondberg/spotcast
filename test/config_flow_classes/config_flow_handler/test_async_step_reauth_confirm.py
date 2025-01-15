@@ -3,10 +3,8 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, AsyncMock, patch
 
-from custom_components.spotcast.config_flow import (
-    SpotcastFlowHandler,
-    ConfigEntry
-)
+from custom_components.spotcast.config_flow_classes.config_flow_handler \
+    import SpotcastFlowHandler, ConfigEntry
 
 
 class TestFirstCall(IsolatedAsyncioTestCase):

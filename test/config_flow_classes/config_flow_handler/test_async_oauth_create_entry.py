@@ -6,15 +6,16 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import AbortFlow
 
-from custom_components.spotcast.config_flow import (
-    SpotcastFlowHandler,
-    SOURCE_REAUTH,
-    Spotify,
-    PrivateSession,
-    ConfigEntry,
-)
+from custom_components.spotcast.config_flow_classes.config_flow_handler \
+    import (
+        SpotcastFlowHandler,
+        SOURCE_REAUTH,
+        Spotify,
+        PrivateSession,
+        ConfigEntry,
+    )
 
-from test.config_flow.config_flow_handler import TEST_MODULE
+from test.config_flow_classes.config_flow_handler import TEST_MODULE
 
 
 class TestExternalApiEntry(IsolatedAsyncioTestCase):
@@ -34,7 +35,11 @@ class TestExternalApiEntry(IsolatedAsyncioTestCase):
 
         self.flow_handler = SpotcastFlowHandler()
 
-    @patch.object(SpotcastFlowHandler, "async_show_form", new_callable=MagicMock)
+    @patch.object(
+        SpotcastFlowHandler,
+        "async_show_form",
+        new_callable=MagicMock
+    )
     async def test_data_attributes_has_external_api_data(
         self,
         mock_form: MagicMock
@@ -42,7 +47,11 @@ class TestExternalApiEntry(IsolatedAsyncioTestCase):
         await self.flow_handler.async_oauth_create_entry(self.external_api)
         self.assertIn("external_api", self.flow_handler.data)
 
-    @patch.object(SpotcastFlowHandler, "async_show_form", new_callable=MagicMock)
+    @patch.object(
+        SpotcastFlowHandler,
+        "async_show_form",
+        new_callable=MagicMock
+    )
     async def test_intern_api_step_is_called(self, mock_form: MagicMock):
         await self.flow_handler.async_oauth_create_entry(self.external_api)
         try:

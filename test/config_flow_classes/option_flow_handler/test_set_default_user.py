@@ -6,9 +6,8 @@ from unittest.mock import MagicMock
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
-from custom_components.spotcast.config_flow import (
-    SpotcastOptionsFlowHandler
-)
+from custom_components.spotcast.config_flow_classes \
+    import SpotcastOptionsFlowHandler
 from custom_components.spotcast.spotify.account import SpotifyAccount
 
 

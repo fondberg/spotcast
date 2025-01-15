@@ -5,10 +5,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.spotcast.config_flow import (
-    SpotcastFlowHandler,
-    vol,
-)
+from custom_components.spotcast.config_flow_classes.config_flow_handler \
+    import (
+        SpotcastFlowHandler,
+        vol,
+    )
 
 
 class TestImportOfYAMLConfig(IsolatedAsyncioTestCase):

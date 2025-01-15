@@ -3,9 +3,8 @@
 from unittest import TestCase
 
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.config_flow import (
-    SpotcastFlowHandler
-)
+from custom_components.spotcast.config_flow_classes.config_flow_handler \
+    import SpotcastFlowHandler
 
 
 class TestScopeValue(TestCase):

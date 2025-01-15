@@ -3,11 +3,12 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock
 
-from custom_components.spotcast.config_flow import (
-    SpotcastFlowHandler,
-    ConfigEntry,
-    SpotcastOptionsFlowHandler,
-)
+from custom_components.spotcast.config_flow_classes.config_flow_handler\
+    import (
+        SpotcastFlowHandler,
+        ConfigEntry,
+        SpotcastOptionsFlowHandler,
+    )
 
 
 class TestCreationOfOptionFlow(IsolatedAsyncioTestCase):
