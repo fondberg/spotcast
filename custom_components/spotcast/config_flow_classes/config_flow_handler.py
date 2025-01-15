@@ -94,7 +94,8 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
             "Spotcast YAML configuration is deprecated. The main profile has "
             "been imported to UI config entry. Please remove the YAML "
             "configuration for Spotcast from your `configuration.yaml` file "
-            "for future reboot"
+            "for future reboot and add additional accounts directly through "
+            "the UI"
         )
 
         await self.hass.services.async_call(
@@ -104,8 +105,10 @@ class SpotcastFlowHandler(SpotifyFlowHandler, domain=DOMAIN):
                 "title": "Spotcast - YAML Configuration Import",
                 "message": (
                     "Your YAML configuration for Spotcast has been "
-                    "imported. To avoid issues on future reboots, please "
-                    "remove the YAML configuration from your "
+                    "imported. Only the main acount has been imported. For "
+                    "additional account, please Add additional entries "
+                    "directly from the UI.To avoid issues on future reboots, "
+                    "please remove the YAML configuration from your "
                     "`configuration.yaml` file."
                 ),
                 "notification_id": f"{DOMAIN}_yaml_import",
