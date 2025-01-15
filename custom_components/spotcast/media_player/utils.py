@@ -148,7 +148,7 @@ async def async_entities_from_integration(
 
 def need_to_quit_app(
     media_player: Chromecast,
-    active_device: str,
+    account: SpotifyAccount,
     app_id: str = SpotifyController.APP_ID,
 ) -> bool:
     """Returns True if the CastDevice needs to quit the app its
@@ -156,8 +156,8 @@ def need_to_quit_app(
 
     Args:
         - media_player(Chromecast): the cast device to check
-        - active_device(str): The id of the currently active device
-            on the account
+        - account(SpotifyAccount):  the account requesting to start
+            Spotify playback on the media_player
         - app_id(str, optional): The spotify App ID. Defaults to the
             app_id set in the SpotifyController
 
@@ -165,11 +165,12 @@ def need_to_quit_app(
         - bool: True if needs to quit the app
     """
 
-    return (
-        (
-            media_player.app_id == app_id
-            and media_player.id != active_device
-        ) or media_player.app_id is not None
+    if media_player.app_id is None:
+        return False
+
+    return not (
+        media_player.app_id == app_id
+        and media_player.id == account.active_device
     )
 
 
@@ -202,7 +203,7 @@ async def async_build_from_type(
         media_player.register_handler(spotify_controller)
         await account.async_playback_state()
 
-        do_quit = need_to_quit_app(media_player, account.active_device)
+        do_quit = need_to_quit_app(media_player, account)
         running_spotify = media_player.app_id == spotify_controller.APP_ID
 
         if do_quit:

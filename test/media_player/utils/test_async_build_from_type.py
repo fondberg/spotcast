@@ -58,27 +58,39 @@ class TestCastDeviceNotRunningAnApp(IsolatedAsyncioTestCase):
 
 class TestCastDeviceRunningSpotifyForCurrentUser(IsolatedAsyncioTestCase):
 
-    async def asyncSetUp(self):
+    @patch(f"{TEST_MODULE}.Chromecast")
+    async def asyncSetUp(self, mock_player: MagicMock):
 
-        self.mock_account = MagicMock(spec=SpotifyAccount)
-        self.mock_hass = MagicMock(spec=HomeAssistant)
-        self.mock_cast_info = MagicMock()
-        self.mock_cast_info.cast_type = "foo"
+        mock_player.return_value = MagicMock(spec=Chromecast)
 
-        self.mock_hass.async_add_executor_job = AsyncMock()
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount),
+            "hass": MagicMock(spec=HomeAssistant),
+            "cast_info": MagicMock(),
+            "entity": MagicMock(spec=CastDevice),
+            "media_player": mock_player.return_value,
+        }
 
-        self.mock_entity = MagicMock(spec=CastDevice)
-        self.mock_entity._cast_info = MagicMock()
-        self.mock_entity._cast_info.cast_info = self.mock_cast_info
-        self.mock_entity.app_id = SpotifyController.APP_ID
-        self.mock_entity.quit_app = MagicMock()
-        self.mock_account.active_device = "12345"
-        self.mock_entity.id = "12345"
+        self.mocks["account"] = MagicMock(spec=SpotifyAccount)
+        self.mocks["hass"] = MagicMock(spec=HomeAssistant)
+        self.mocks["cast_info"] = MagicMock()
+        self.mocks["cast_info"].cast_type = "foo"
+
+        self.mocks["hass"].async_add_executor_job = AsyncMock()
+
+        self.mocks["entity"] = MagicMock(spec=CastDevice)
+        self.mocks["entity"]._cast_info = MagicMock()
+        self.mocks["entity"]._cast_info.cast_info = self.mocks["cast_info"]
+        self.mocks["media_player"].app_id = SpotifyController.APP_ID
+        self.mocks["entity"].quit_app = MagicMock()
+        self.mocks["account"].active_device = "12345"
+        self.mocks["media_player"].id = "12345"
+        self.mocks["media_player"].register_handler = MagicMock()
 
         self.result = await async_build_from_type(
-            self.mock_hass,
-            self.mock_entity,
-            self.mock_account,
+            hass=self.mocks["hass"],
+            entity=self.mocks["entity"],
+            account=self.mocks["account"],
         )
 
     def test_chromecast_device_returned(self):
@@ -86,9 +98,15 @@ class TestCastDeviceRunningSpotifyForCurrentUser(IsolatedAsyncioTestCase):
 
     def test_quit_app_not_run(self):
         try:
-            self.mock_entity.quit_app.assert_not_called()
+            self.mocks["entity"].quit_app.assert_not_called()
         except AssertionError:
             self.fail()
+
+    def test_launch_app_not_run(self):
+        self.assertEqual(
+            self.mocks["hass"].async_add_executor_job.call_count,
+            1,
+        )
 
 
 class TestCastDeviceRunningNonSpotifyApp(IsolatedAsyncioTestCase):
