@@ -669,6 +669,9 @@ class SpotifyAccount:
 
     async def _async_add_audio_features(self, playback_state: dict) -> dict:
         """Adds the audio_features to the current playback state"""
+
+        playback_state = {} if playback_state is None else playback_state
+
         current_uri = playback_state.get("item", {}).get("uri")
         last_uri = self.current_item["uri"]
 
