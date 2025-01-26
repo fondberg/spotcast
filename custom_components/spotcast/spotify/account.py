@@ -672,6 +672,11 @@ class SpotifyAccount:
 
         playback_state = {} if playback_state is None else playback_state
 
+        current_item = playback_state.get("item")
+
+        if current_item is None:
+            current_item = {}
+
         current_uri = playback_state.get("item", {}).get("uri")
         last_uri = self.current_item["uri"]
 

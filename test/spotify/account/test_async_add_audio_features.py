@@ -141,3 +141,51 @@ class TestNoCurrentPlayback(IsolatedAsyncioTestCase):
             self.result,
             {"item": {}}
         )
+
+
+class TestNoneTypeState(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "public": MagicMock(spec=PublicSession),
+            "private": MagicMock(spec=PrivateSession),
+        }
+
+        self.account = SpotifyAccount(
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            public_session=self.mocks["public"],
+            private_session=self.mocks["private"],
+        )
+
+        self.result = await self.account._async_add_audio_features(None)
+
+    def test_empty_dict_returned(self):
+        self.assertEqual(self.result, {})
+
+
+class TestItemKeyPointsToNoneType(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "public": MagicMock(spec=PublicSession),
+            "private": MagicMock(spec=PrivateSession),
+        }
+
+        self.account = SpotifyAccount(
+            entry_id="12345",
+            hass=self.mocks["hass"],
+            public_session=self.mocks["public"],
+            private_session=self.mocks["private"],
+        )
+
+        self.result = await self.account._async_add_audio_features(
+            {"items": None}
+        )
+
+    def test_empty_dict_returned(self):
+        self.assertEqual(self.result, {"items": None})
