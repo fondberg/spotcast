@@ -184,8 +184,8 @@ class TestItemKeyPointsToNoneType(IsolatedAsyncioTestCase):
         )
 
         self.result = await self.account._async_add_audio_features(
-            {"items": None}
+            {"item": None}
         )
 
     def test_empty_dict_returned(self):
-        self.assertEqual(self.result, {"items": None})
+        self.assertEqual(self.result, {"item": None})
