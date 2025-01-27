@@ -131,17 +131,32 @@ class PrivateSession(ConnectionSession):
         """Ensure the current token is valid or gets a new one. Returns
         True if the refcresh worked or False if it didn't
         """
+
+        not_ready = False
+
         async with self._token_lock:
 
             if not self.supervisor.is_ready:
-                raise UpstreamServerNotready("Server not ready for refresh")
+                not_ready = True
 
-            if self.valid_token:
+            elif self.valid_token:
                 return
 
-            LOGGER.debug("Token is expired. Getting a new one")
+            else:
 
-            await self.async_refresh_token()
+                LOGGER.debug("Token is expired. Getting a new one")
+
+                try:
+                    await self.async_refresh_token()
+                except InternalServerError as exc:
+                    self.supervisor._is_healthy = False
+                    self.supervisor.log_message(
+                        f"{exc.code} - {exc.message}"
+                    )
+                    not_ready = True
+
+        if not_ready:
+            raise UpstreamServerNotready("Server not ready for refresh")
 
     async def async_refresh_token(self) -> tuple[str, float]:
         """Retrives a new token, sets it in the session and returns
@@ -178,12 +193,10 @@ class PrivateSession(ConnectionSession):
                     self._is_healthy = False
                     raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
 
-                if (response.status >= 500 and response.status < 600):
-                    self.supervisor._is_healthy = False
-                    self.supervisor.log_message(
-                        f"{response.status} - {await response.text()}"
-                    )
-
+                if (
+                        (response.status >= 500 and response.status < 600)
+                        or (response.status == 104)
+                ):
                     raise InternalServerError(
                         response.status,
                         await response.text()
