@@ -84,6 +84,7 @@ class PublicSession(OAuth2Session, ConnectionSession):
             except ClientConnectorError:
                 self._is_healthy = False
                 raise InternalServerError(
+                    104,
                     "Unable to connect to Spotify Public API"
                 )
             except ClientError as exc:
