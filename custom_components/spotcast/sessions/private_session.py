@@ -10,7 +10,7 @@ Classes:
 from time import time
 from asyncio import Lock
 from aiohttp import ClientSession
-from aiohttp.client_exceptions import ContentTypeError
+from aiohttp.client_exceptions import ContentTypeError, ClientOSError
 from types import MappingProxyType
 from logging import getLogger
 
@@ -148,7 +148,7 @@ class PrivateSession(ConnectionSession):
 
                 try:
                     await self.async_refresh_token()
-                except InternalServerError as exc:
+                except (InternalServerError, ClientOSError) as exc:
                     self.supervisor._is_healthy = False
                     self.supervisor.log_message(
                         f"{exc.code} - {exc.message}"

@@ -10,6 +10,7 @@ Functions:
 
 from typing import cast
 from aiohttp import ClientError
+from aiohttp.client_exceptions import ClientConnectorError
 from asyncio import Lock
 
 from homeassistant.helpers.config_entry_oauth2_flow import (
@@ -30,6 +31,7 @@ from custom_components.spotcast.sessions.connection_session import (
 )
 from custom_components.spotcast.sessions.exceptions import (
     TokenRefreshError,
+    InternalServerError,
 )
 
 
@@ -78,6 +80,11 @@ class PublicSession(OAuth2Session, ConnectionSession):
             try:
                 new_token = await self.implementation.async_refresh_token(
                     self.token
+                )
+            except ClientConnectorError:
+                self._is_healthy = False
+                raise InternalServerError(
+                    "Unable to connect to Spotify Public API"
                 )
             except ClientError as exc:
                 self._is_healthy = False
