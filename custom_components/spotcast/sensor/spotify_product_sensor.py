@@ -5,14 +5,8 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.const import STATE_UNKNOWN
-from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready
-)
 from custom_components.spotcast.sensor.abstract_sensor import (
     SpotcastSensor,
     EntityCategory,
@@ -35,18 +29,10 @@ class SpotifyProductSensor(SpotcastSensor):
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
     STATE_CLASS = None
 
-    async def async_update(self):
+    async def _async_update_process(self):
         """Updates the substription product asynchornously"""
 
-        try:
-            profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
-            LOGGER.warning(
-                "Failed to update Spotify Product sensor. Sensor know "
-                "unavailable"
-            )
-            self._attr_state = STATE_UNKNOWN
-            return
+        profile = await self.account.async_profile()
 
         LOGGER.debug(
             "Getting Spotify Subscription Type `%s`",

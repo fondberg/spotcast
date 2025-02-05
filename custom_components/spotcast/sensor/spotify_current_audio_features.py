@@ -42,7 +42,7 @@ class AbstractAudioFeatureSensor(SpotcastSensor):
     def _cleanup(self, feature: Any) -> Any:
         return feature
 
-    async def async_update(self):
+    async def _async_update_process(self):
         audio_features = self.account.current_item["audio_features"]
         audio_feature = audio_features.get(self.FEATURE_NAME)
 

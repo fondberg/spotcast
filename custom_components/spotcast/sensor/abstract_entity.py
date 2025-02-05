@@ -2,16 +2,30 @@
 
 from abc import ABC, abstractmethod
 from logging import getLogger
+from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.components.sensor import (
     EntityCategory,
     Entity
 )
 from homeassistant.const import STATE_UNKNOWN, STATE_OFF
+from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.spotify import SpotifyAccount
+from custom_components.spotcast.sessions.exceptions import (
+    InternalServerError,
+    UpstreamServerNotready,
+    TokenError,
+)
 
 LOGGER = getLogger(__name__)
+POTENTIAL_ERRORS = (
+    ReadTimeout,
+    ReadTimeoutError,
+    InternalServerError,
+    UpstreamServerNotready,
+    TokenError,
+)
 
 
 class SpotcastEntity(ABC, Entity):
@@ -63,7 +77,6 @@ class SpotcastEntity(ABC, Entity):
     DEVICE_SOURCE: str = "account"
     ICON: str = "mdi:cube"
     ICON_OFF: str = None
-    DEFAULT_ATTRIBUTES: dict = None
     INACTIVE_STATE: str | int = STATE_OFF
     ENTITY_CATEGORY: str = None
 
@@ -77,7 +90,7 @@ class SpotcastEntity(ABC, Entity):
             self.account.name,
         )
 
-        self._attributes = self.DEFAULT_ATTRIBUTES
+        self._attributes = self._default_attributes
         self._attr_state = STATE_UNKNOWN
         self.entity_id = (
             f"{self.PLATFORM}.spotcast_{self.account.id}_{self._generic_id}"
@@ -133,11 +146,32 @@ class SpotcastEntity(ABC, Entity):
         return f"{self.PLATFORM}.{self.account.id}_{self._generic_id}"
 
     @property
+    def _default_attributes(self) -> dict:
+        """Reconstructors default attributes. If no attributes exist
+        for the sensor. None is returned"""
+        return None
+
+    @property
     @abstractmethod
     def icon(self) -> str:
         """returns the mdi name of the icon to show in Home Assistant
         """
 
     @abstractmethod
+    async def _async_update_process(self):
+        """Asynchronous method implemented by the sensor to update
+        its state and attributes"""
+
     async def async_update(self):
-        """Asynchronous method to update the sensor"""
+        """Asynchronous method to manage the update process. The
+        method does not deal with the specific update process of the
+        sensor, but is a generic handler for states and attributes for
+        all child classes. The `_async_update_process` must be the
+        implementation for the specific sensor."""
+        try:
+            await self._async_update_process()
+        except POTENTIAL_ERRORS:
+            self._attr_state = STATE_UNKNOWN
+
+            if self._default_attributes is not None:
+                self._attributes = self._default_attributes

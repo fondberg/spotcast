@@ -5,16 +5,10 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.const import STATE_UNKNOWN, STATE_OK
-from requests.exceptions import ReadTimeout
+from homeassistant.const import STATE_OK
 
 from custom_components.spotcast.utils import copy_to_dict
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready
-)
-
 from custom_components.spotcast.sensor.abstract_sensor import (
     SpotcastSensor
 )
@@ -47,14 +41,14 @@ class SpotifyProfileSensor(SpotcastSensor):
 
         return None
 
-    async def async_update(self):
+    @property
+    def _default_attributes(self) -> dict:
+        """Builds a set of default attributes for the sensor"""
+        return {}
+
+    async def _async_update_process(self):
         """Updates the profile asynchornously"""
-        try:
-            profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
-            self._attr_state = STATE_UNKNOWN
-            self._attributes = {}
-            return
+        profile = await self.account.async_profile()
 
         profile = copy_to_dict(profile)
 

@@ -5,21 +5,14 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.binary_sensor import (
-    EntityCategory,
-)
+from homeassistant.components.binary_sensor import EntityCategory
 from homeassistant.const import STATE_OK, STATE_PROBLEM
-from requests.exceptions import ReadTimeout
 
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready,
-    TokenError,
-)
 from custom_components.spotcast.binary_sensor.abstract_binary_sensor import (
     SpotcastBinarySensor
 )
+from custom_components.spotcast.sensor.abstract_entity import POTENTIAL_ERRORS
 
 LOGGER = getLogger(__name__)
 
@@ -44,12 +37,7 @@ class SpotifyProfileMalfunctionBinarySensor(SpotcastBinarySensor):
 
         try:
             profile = await self.account.async_profile()
-        except (
-                ReadTimeoutError,
-                ReadTimeout,
-                UpstreamServerNotready,
-                TokenError,
-        ) as exc:
+        except POTENTIAL_ERRORS as exc:
             LOGGER.error(exc)
             self._attr_state = STATE_PROBLEM
             return
