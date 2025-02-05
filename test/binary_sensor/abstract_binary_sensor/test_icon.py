@@ -12,7 +12,7 @@ from custom_components.spotcast.binary_sensor.abstract_binary_sensor import (
 
 
 class DummySensor(SpotcastBinarySensor):
-    async def async_update(self):
+    async def _async_update_process(self):
         ...
 
 

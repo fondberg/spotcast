@@ -172,6 +172,4 @@ class SpotcastEntity(ABC, Entity):
             await self._async_update_process()
         except POTENTIAL_ERRORS:
             self._attr_state = STATE_UNKNOWN
-
-            if self._default_attributes is not None:
-                self._attributes = self._default_attributes
+            self._attributes = self._default_attributes

@@ -16,7 +16,7 @@ class TestDataUpdate(IsolatedAsyncioTestCase):
         self.account.is_default = True
         self.account.entry_id = "1234"
         self.sensor = IsDefaultBinarySensor(self.account)
-        await self.sensor.async_update()
+        await self.sensor._async_update_process()
 
     def test_state_set_to_on(self):
         self.assertTrue(self.sensor.is_on)

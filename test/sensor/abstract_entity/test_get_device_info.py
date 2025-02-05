@@ -12,7 +12,6 @@ from custom_components.spotcast.sensor.abstract_entity import (
 
 class DummyDeviceFromAccount(SpotcastEntity):
 
-    DEFAULT_ATTRIBUTES = {"foo": []}
     PLATFORM = "dummy"
     ENTITY_CATEGORY = EntityCategory.CONFIG
 
@@ -20,7 +19,11 @@ class DummyDeviceFromAccount(SpotcastEntity):
     def icon(self):
         """Unimplemented icon property"""
 
-    async def async_update(self):
+    @property
+    def _default_attributes(self):
+        return {"foo": []}
+
+    async def _async_update_process(self):
         """Unimplemented async_update"""
 
 

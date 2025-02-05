@@ -17,7 +17,7 @@ class EntityWithoutOffIcon(SpotcastEntity):
     def icon(self):
         ...
 
-    async def async_update(self):
+    async def _async_update_process(self):
         ...
 
 

@@ -31,6 +31,12 @@ class SpotifyProfileMalfunctionBinarySensor(SpotcastBinarySensor):
     INACTIVE_STATE = STATE_OK
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
 
+    async def _async_update_process(self):
+        """The update process"""
+        raise NotImplementedError(
+            "Not implemented, use the `async_update` method directly"
+        )
+
     async def async_update(self):
         """Updates the profile and mark a problem if failing
         asynchornously"""
