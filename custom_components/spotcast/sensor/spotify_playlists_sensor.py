@@ -5,16 +5,9 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
-
-from homeassistant.const import STATE_UNKNOWN
-from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
 from custom_components.spotcast.utils import copy_to_dict
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready
-)
 
 LOGGER = getLogger(__name__)
 
@@ -35,14 +28,10 @@ class SpotifyPlaylistsSensor(SpotcastSensor):
     ICON_OFF = ICON
     UNITS_OF_MEASURE = "playlists"
 
-    async def async_update(self):
+    async def _async_update_process(self):
         """Updates the playlist count asynchornously"""
 
-        try:
-            count = await self.account.async_playlists_count()
-        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
-            self._attr_state = STATE_UNKNOWN
-            return
+        count = await self.account.async_playlists_count()
 
         LOGGER.debug(
             "Found %d playlist for spotify account `%s`",

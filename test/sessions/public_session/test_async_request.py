@@ -30,7 +30,7 @@ class TestRequestCall(IsolatedAsyncioTestCase):
             mock_implementation
         )
 
-        self.sessions.config_entry.data = {
+        self.sessions.entry.data = {
             "external_api": {
                 "token": "boo"
             }

@@ -5,20 +5,10 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
 
-from homeassistant.components.sensor import (
-    EntityCategory,
-)
-from homeassistant.const import STATE_UNKNOWN
-from requests.exceptions import ReadTimeout
+from homeassistant.components.sensor import EntityCategory
 
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready
-)
-from custom_components.spotcast.sensor.abstract_sensor import (
-    SpotcastSensor
-)
+from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
 
 LOGGER = getLogger(__name__)
 
@@ -36,19 +26,10 @@ class SpotifyAccountTypeSensor(SpotcastSensor):
     ENTITY_CATEGORY = EntityCategory.DIAGNOSTIC
     STATE_CLASS = None
 
-    async def async_update(self):
+    async def _async_update_process(self):
         """Updates the account type asynchronously"""
 
-        try:
-            profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
-            self._attr_state = STATE_UNKNOWN
-            return
-
-        LOGGER.debug(
-            "Getting Spotify account type for `%s`",
-            self.account.name
-        )
+        profile = await self.account.async_profile()
 
         LOGGER.debug(
             "Type retrieve for account id `%s`", profile["id"],

@@ -11,13 +11,16 @@ from custom_components.spotcast.sensor.abstract_entity import (
 
 class DummyEntity(SpotcastEntity):
     PLATFORM = "dummy"
-    DEFAULT_ATTRIBUTES = {"foo": []}
 
     @property
     def icon(self):
         ...
 
-    async def async_update(self):
+    @property
+    def _default_attributes(self):
+        return {"foo": []}
+
+    async def _async_update_process(self):
         ...
 
 

@@ -5,15 +5,8 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
-
-from homeassistant.const import STATE_UNKNOWN
-from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready,
-)
 
 LOGGER = getLogger(__name__)
 
@@ -31,17 +24,18 @@ class SpotifyDevicesSensor(SpotcastSensor):
 
     GENERIC_NAME = "Spotify Devices"
     ICON = "mdi:speaker"
-    DEFAULT_ATTRIBUTES = {"devices": []}
     UNITS_OF_MEASURE = "devices"
 
-    async def async_update(self):
+    @property
+    def _default_attributes(self) -> dict:
+        """Builds a set of default attributes for the sensor"""
+        return {
+            "devices": []
+        }
+
+    async def _async_update_process(self):
         """Updates the available devices asynchronously"""
-        try:
-            devices = await self.account.async_devices()
-        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
-            self._attr_state = STATE_UNKNOWN
-            self._attributes["devices"] = []
-            return
+        devices = await self.account.async_devices()
 
         LOGGER.debug(
             "Getting Spotify Device for account %s",

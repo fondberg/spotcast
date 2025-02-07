@@ -65,3 +65,9 @@ class SpotcastSensor(SpotcastEntity, SensorEntity):
             return self.ICON
 
         return self._icon_off
+
+    @property
+    def _default_attributes(self) -> dict:
+        """Reconstructors default attributes. If no attributes exist
+        for the sensor. None is returned"""
+        return None

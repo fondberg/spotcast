@@ -14,6 +14,7 @@ from custom_components.spotcast.services.exceptions import (
 )
 
 from custom_components.spotcast.services.const import SERVICE_HANDLERS
+from custom_components.spotcast.sensor.abstract_entity import POTENTIAL_ERRORS
 
 LOGGER = getLogger(__name__)
 
@@ -56,4 +57,7 @@ class ServiceHandler:
                 "spotcast"
             ) from exc
 
-        await handler(self.hass, call)
+        try:
+            await handler(self.hass, call)
+        except POTENTIAL_ERRORS as exc:
+            LOGGER.error(exc)

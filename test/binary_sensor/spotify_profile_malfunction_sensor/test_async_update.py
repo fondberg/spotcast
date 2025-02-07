@@ -3,11 +3,12 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock
 
+from urllib3.exceptions import ReadTimeoutError
+
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.binary_sensor\
     .spotify_profile_malfunction_sensor import (
         SpotifyProfileMalfunctionBinarySensor,
-        ReadTimeoutError,
     )
 
 

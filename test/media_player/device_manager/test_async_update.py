@@ -8,7 +8,73 @@ from custom_components.spotcast.media_player.device_manager import (
     SpotifyAccount,
     SpotifyDevice,
     AddEntitiesCallback,
+    RetrySupervisor,
 )
+
+
+class TestSupervisorNotReady(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount),
+            "callback": MagicMock(spec=AddEntitiesCallback),
+            "supervisor": MagicMock(spec=RetrySupervisor)
+        }
+
+        self.mocks["account"].async_devices = AsyncMock()
+
+        self.device_manager = DeviceManager(
+            account=self.mocks["account"],
+            async_add_entitites=self.mocks["callback"]
+        )
+
+        self.device_manager.supervisor = self.mocks["supervisor"]
+        self.device_manager.supervisor.is_ready = False
+        await self.device_manager.async_update()
+
+    def test_account_devices_not_called(self):
+        try:
+            self.mocks["account"].async_devices.assert_not_called()
+        except AssertionError:
+            self.fail()
+
+
+class TestFailedToRetrieveDevices(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount),
+            "callback": MagicMock(spec=AddEntitiesCallback),
+            "supervisor": MagicMock(spec=RetrySupervisor)
+        }
+
+        self.mocks["account"].async_devices = AsyncMock()
+        self.mocks["account"].async_devices.side_effect = RetrySupervisor\
+            .SUPERVISED_EXCEPTIONS[0]()
+
+        self.mocks["supervisor"].log_message = MagicMock()
+
+        self.device_manager = DeviceManager(
+            account=self.mocks["account"],
+            async_add_entitites=self.mocks["callback"]
+        )
+
+        self.device_manager.supervisor = self.mocks["supervisor"]
+        self.device_manager.supervisor.is_ready = True
+        self.device_manager.supervisor.SUPERVISED_EXCEPTIONS = RetrySupervisor\
+            .SUPERVISED_EXCEPTIONS
+        await self.device_manager.async_update()
+
+    def test_supervisor_set_to_unhealthy(self):
+        self.assertFalse(self.mocks["supervisor"]._is_healthy)
+
+    def test_error_was_logged(self):
+        try:
+            self.mocks["supervisor"].log_message.assert_called()
+        except AssertionError:
+            self.fail()
 
 
 class TestNewDevices(IsolatedAsyncioTestCase):

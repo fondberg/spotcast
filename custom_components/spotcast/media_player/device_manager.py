@@ -13,6 +13,9 @@ from homeassistant.helpers.device_registry import async_get as async_get_dr
 from custom_components.spotcast.media_player import (
     SpotifyDevice,
 )
+from custom_components.spotcast.sessions.retry_supervisor import (
+    RetrySupervisor
+)
 from custom_components.spotcast.spotify import SpotifyAccount
 
 
@@ -24,16 +27,16 @@ class DeviceManager:
     and drop from the device list
 
     Attributes:
-        - tracked_devices(dict[str, SpotifyDevice]): A dictionary of
+        tracked_devices(dict[str, SpotifyDevice]): A dictionary of
             all the currently tracked devices for the account. The Key
             being the id of the device
 
     Constants:
-        - IGNORE_DEVICE_TYPES(tuple[str]): A list of device type to
+        IGNORE_DEVICE_TYPES(tuple[str]): A list of device type to
             ignore when creating new media_players
 
     Methods:
-        - async_update
+        async_update
     """
     IGNORE_DEVICE_TYPES = (
         "CastAudio",
@@ -55,10 +58,22 @@ class DeviceManager:
 
         self._account = account
         self.async_add_entities = async_add_entitites
+        self.supervisor = RetrySupervisor()
 
     async def async_update(self, _=None):
 
-        current_devices = await self._account.async_devices()
+        if not self.supervisor.is_ready:
+            return
+
+        try:
+            current_devices = await self._account.async_devices()
+            self.supervisor._is_healthy = True
+            await self.async_manage_devices(current_devices)
+        except self.supervisor.SUPERVISED_EXCEPTIONS as exc:
+            self.supervisor._is_healthy = False
+            self.supervisor.log_message(exc)
+
+    async def async_manage_devices(self, current_devices: dict):
         current_devices = {x["id"]: x for x in current_devices}
         remove = []
 

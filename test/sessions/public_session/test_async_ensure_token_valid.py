@@ -1,17 +1,22 @@
 """Module to test async_ensure_token_valid function"""
 
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock, patch
 from time import time
+from aiohttp.client_exceptions import ClientConnectorDNSError
 
 from homeassistant.core import HomeAssistant
 
+from custom_components.spotcast.sessions.retry_supervisor import (
+    RetrySupervisor,
+)
 from custom_components.spotcast.sessions.public_session import (
     PublicSession,
     ConfigEntry,
     AbstractOAuth2Implementation,
     TokenRefreshError,
-    ClientError,
+    ClientResponseError,
+    UpstreamServerNotready,
 )
 
 
@@ -34,7 +39,7 @@ class TestTokenIsValid(IsolatedAsyncioTestCase):
 
         self.session = PublicSession(
             hass=self.mock_hass,
-            config_entry=mock_entry,
+            entry=mock_entry,
             implementation=self.mock_implementation
         )
 
@@ -73,7 +78,7 @@ class TestTokenIsNotValid(IsolatedAsyncioTestCase):
 
         self.session = PublicSession(
             hass=self.mock_hass,
-            config_entry=mock_entry,
+            entry=mock_entry,
             implementation=self.mock_implementation
         )
 
@@ -111,13 +116,80 @@ class TestTokenFailsToRefresh(IsolatedAsyncioTestCase):
 
         self.mock_implementation.async_refresh_token = AsyncMock()
         self.mock_implementation.async_refresh_token\
-            .side_effect = ClientError()
+            .side_effect = ClientResponseError(MagicMock(), MagicMock())
 
         self.session = PublicSession(
             hass=self.mock_hass,
-            config_entry=mock_entry,
+            entry=mock_entry,
             implementation=self.mock_implementation
         )
 
         with self.assertRaises(TokenRefreshError):
+            await self.session.async_ensure_token_valid()
+
+
+class TestNetworkIssues(IsolatedAsyncioTestCase):
+
+    async def test_raises_appropriate_error(self):
+
+        self.mock_hass = MagicMock(spec=HomeAssistant)
+        self.mock_implementation = MagicMock(spec=AbstractOAuth2Implementation)
+        mock_entry = MagicMock(spec=ConfigEntry)
+        mock_entry.data = {
+            "external_api": {
+                "token": {
+                    "access_token": "boo",
+                    "expires_at": 0,
+
+                }
+            }
+        }
+
+        self.mock_implementation.async_refresh_token = AsyncMock()
+        self.mock_implementation.async_refresh_token\
+            .side_effect = ClientConnectorDNSError(MagicMock(), MagicMock())
+
+        self.session = PublicSession(
+            hass=self.mock_hass,
+            entry=mock_entry,
+            implementation=self.mock_implementation
+        )
+
+        with self.assertRaises(UpstreamServerNotready):
+            await self.session.async_ensure_token_valid()
+
+
+class TestSupervisorNotReady(IsolatedAsyncioTestCase):
+
+    async def test_raises_appropriate_error(self):
+
+        self.mock_hass = MagicMock(spec=HomeAssistant)
+        self.mock_retry = MagicMock(spec=RetrySupervisor)
+        self.mock_implementation = MagicMock(spec=AbstractOAuth2Implementation)
+        mock_entry = MagicMock(spec=ConfigEntry)
+        mock_entry.data = {
+            "external_api": {
+                "token": {
+                    "access_token": "boo",
+                    "expires_at": 0,
+
+                }
+            }
+        }
+
+        self.mock_implementation.async_refresh_token = AsyncMock()
+        self.mock_implementation.async_refresh_token\
+            .side_effect = ClientConnectorDNSError(MagicMock(), MagicMock())
+
+        self.session = PublicSession(
+            hass=self.mock_hass,
+            entry=mock_entry,
+            implementation=self.mock_implementation
+        )
+        self.session.supervisor = self.mock_retry
+        self.session.supervisor.SUPERVISED_EXCEPTIONS = RetrySupervisor\
+            .SUPERVISED_EXCEPTIONS
+        self.session.supervisor.is_ready = False
+
+        with self.assertRaises(UpstreamServerNotready):
             await self.session.async_ensure_token_valid()

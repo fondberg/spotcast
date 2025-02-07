@@ -10,7 +10,7 @@ from custom_components.spotcast.spotify import SpotifyAccount
 class DummySensor(SpotcastSensor):
     UNITS_OF_MEASURE = "foos"
 
-    async def async_update(self):
+    async def _async_update_process(self):
         ...
 
 

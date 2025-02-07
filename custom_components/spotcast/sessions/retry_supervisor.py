@@ -7,11 +7,30 @@ Classes:
 
 from time import time
 from logging import getLogger, ERROR, DEBUG
+from urllib3.exceptions import ReadTimeoutError
+from aiohttp.client_exceptions import ClientOSError, ClientConnectorError
+
+from requests.exceptions import ReadTimeout, ConnectionError
+
+from custom_components.spotcast.sessions.exceptions import (
+    InternalServerError,
+    UpstreamServerNotready,
+)
 
 LOGGER = getLogger(__name__)
 
 
 class RetrySupervisor:
+
+    SUPERVISED_EXCEPTIONS = (
+        ReadTimeout,
+        ReadTimeoutError,
+        InternalServerError,
+        UpstreamServerNotready,
+        ClientConnectorError,
+        ClientOSError,
+        ConnectionError,
+    )
 
     def __init__(self):
         self._is_healthy = True

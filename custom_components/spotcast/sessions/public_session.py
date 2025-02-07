@@ -9,8 +9,10 @@ Functions:
 """
 
 from typing import cast
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientOSError, ClientResponseError
+from aiohttp.client_exceptions import ClientConnectorError
 from asyncio import Lock
+from logging import getLogger
 
 from homeassistant.helpers.config_entry_oauth2_flow import (
     OAuth2Session,
@@ -30,10 +32,13 @@ from custom_components.spotcast.sessions.connection_session import (
 )
 from custom_components.spotcast.sessions.exceptions import (
     TokenRefreshError,
+    UpstreamServerNotready,
 )
 
+LOGGER = getLogger(__name__)
 
-class PublicSession(OAuth2Session, ConnectionSession):
+
+class PublicSession(ConnectionSession, OAuth2Session):
     """Custom implementation of the OAuth2Session for Spotcast
 
     Properties:
@@ -49,20 +54,17 @@ class PublicSession(OAuth2Session, ConnectionSession):
     def __init__(
         self,
         hass: HomeAssistant,
-        config_entry: ConfigEntry,
+        entry: ConfigEntry,
         implementation: AbstractOAuth2Implementation,
     ) -> None:
         """Initialize an OAuth2 session."""
-        self.hass = hass
-        self.config_entry = config_entry
         self.implementation = implementation
-        self._is_healthy = False
-        self._token_lock = Lock()
+        super().__init__(hass, entry)
 
     @property
     def token(self) -> dict:
         """Return the token"""
-        return cast(dict, self.config_entry.data["external_api"]["token"])
+        return cast(dict, self.entry.data["external_api"]["token"])
 
     @property
     def clean_token(self) -> str:
@@ -71,29 +73,41 @@ class PublicSession(OAuth2Session, ConnectionSession):
 
     async def async_ensure_token_valid(self) -> None:
         """Ensure that the current token is valid"""
+        not_ready = False
         async with self._token_lock:
+
+            if not self.supervisor.is_ready:
+                not_ready = True
+
             if self.valid_token:
                 return
 
-            try:
-                new_token = await self.implementation.async_refresh_token(
-                    self.token
-                )
-            except ClientError as exc:
-                self._is_healthy = False
-                raise TokenRefreshError(
-                    "Unable to refresh Spotify Public API Token"
-                ) from exc
+            else:
 
-            new_data = self.config_entry.data
-            new_data["external_api"]["token"] = new_token
-            self.config_entry.data["external_api"]["token"] = new_token
+                try:
+                    new_token = await self.implementation.async_refresh_token(
+                        self.token
+                    )
+                    new_data = self.entry.data
+                    new_data["external_api"]["token"] = new_token
+                    self.entry.data["external_api"]["token"] = new_token
 
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                data=new_data,
-            )
-            self._is_healthy = True
+                    self.hass.config_entries.async_update_entry(
+                        self.entry,
+                        data=new_data,
+                    )
+                    self._is_healthy = True
+
+                except self.supervisor.SUPERVISED_EXCEPTIONS as exc:
+                    self.supervisor._is_healthy = False
+                    self.supervisor.log_message(exc)
+                    not_ready = True
+                except ClientResponseError as exc:
+                    LOGGER.error("Unable to refresh Spotify Public API Token")
+                    raise TokenRefreshError(exc)
+
+        if not_ready:
+            raise UpstreamServerNotready("Server not ready for refresh")
 
     async def async_request(
             self,
@@ -105,7 +119,7 @@ class PublicSession(OAuth2Session, ConnectionSession):
         await self.async_ensure_token_valid()
         return await async_oauth2_request(
             self.hass,
-            self.config_entry.data["external_api"]["token"],
+            self.entry.data["external_api"]["token"],
             method,
             url,
             **kwargs,

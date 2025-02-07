@@ -5,14 +5,30 @@ Classes:
 """
 
 from abc import ABC, abstractmethod
+from asyncio import Lock
+
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+
+from custom_components.spotcast.sessions.retry_supervisor import (
+    RetrySupervisor
+)
+
+SUPERVISED_ERRORS = (
+
+)
 
 
 class ConnectionSession(ABC):
 
     API_ENDPOINT = None
 
-    def __init__(self):
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
+        self.hass = hass
+        self.entry = entry
         self._is_healthy = False
+        self._token_lock = Lock()
+        self.supervisor = RetrySupervisor()
 
     @abstractmethod
     async def async_ensure_token_valid(self):
@@ -32,4 +48,4 @@ class ConnectionSession(ABC):
     @property
     def is_healthy(self) -> bool:
         """Returns True if the session is able to refresh its token"""
-        return self._is_healthy
+        return self.supervisor.is_healthy

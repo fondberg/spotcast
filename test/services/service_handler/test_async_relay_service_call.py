@@ -3,6 +3,8 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, patch, AsyncMock
 
+from urllib3.exceptions import ReadTimeoutError
+
 from custom_components.spotcast.services.service_handler import (
     ServiceHandler,
     HomeAssistant,
@@ -59,3 +61,28 @@ class TestUnknownService(IsolatedAsyncioTestCase):
 
         with self.assertRaises(UnknownServiceError):
             await handler.async_relay_service_call(self.call)
+
+
+class TestErrorDuringServiceCall(IsolatedAsyncioTestCase):
+
+    mock_play = AsyncMock()
+
+    @patch(f"{TEST_MODULE}.LOGGER.error", new_callable=MagicMock)
+    @patch(f"{TEST_MODULE}.SERVICE_HANDLERS", {"play_media": mock_play})
+    async def asyncSetUp(self, mock_log: MagicMock):
+
+        self.hass = MagicMock(spec=HomeAssistant)
+        self.call = MagicMock(spec=ServiceCall)
+        self.call.service = "play_media"
+        self.error = ReadTimeoutError(MagicMock(), MagicMock(), MagicMock())
+        self.mock_play.side_effect = self.error
+        self.mock_log = mock_log
+        self.handler = ServiceHandler(self.hass)
+
+        await self.handler.async_relay_service_call(self.call)
+
+    def test_error_log_called(self):
+        try:
+            self.mock_log.assert_called_with(self.error)
+        except AssertionError:
+            self.fail()

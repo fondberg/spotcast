@@ -3,11 +3,12 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
+from homeassistant.const import STATE_UNKNOWN
+
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.sensor.spotify_profile_sensor import (
     SpotifyProfileSensor,
     STATE_OK,
-    STATE_UNKNOWN,
 )
 
 

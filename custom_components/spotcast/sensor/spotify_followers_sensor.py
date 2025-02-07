@@ -5,15 +5,8 @@ Classes:
 """
 
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
-
-from homeassistant.const import STATE_UNKNOWN
-from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.sensor.abstract_sensor import SpotcastSensor
-from custom_components.spotcast.sessions.exceptions import (
-    UpstreamServerNotready
-)
 
 LOGGER = getLogger(__name__)
 
@@ -34,13 +27,9 @@ class SpotifyFollowersSensor(SpotcastSensor):
     ICON_OFF = ICON
     UNITS_OF_MEASURE = "followers"
 
-    async def async_update(self):
+    async def _async_update_process(self):
         """Updates the number of followers asynchornously"""
-        try:
-            self._profile = await self.account.async_profile()
-        except (ReadTimeoutError, ReadTimeout, UpstreamServerNotready):
-            self._attr_state = STATE_UNKNOWN
-            return
+        self._profile = await self.account.async_profile()
 
         LOGGER.debug(
             "Getting Spotify followers for account `%s`",
