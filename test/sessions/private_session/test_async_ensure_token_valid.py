@@ -71,6 +71,8 @@ class TestUpstreamInternalServerError(IsolatedAsyncioTestCase):
 
         self.session = PrivateSession(mock_hass, mock_entry)
         self.session.supervisor = mock_supervisor
+        self.session.supervisor.SUPERVISED_EXCEPTIONS = RetrySupervisor\
+            .SUPERVISED_EXCEPTIONS
         mock_supervisor.is_ready = True
 
         with self.assertRaises(UpstreamServerNotready):

@@ -96,13 +96,10 @@ class PrivateSession(ConnectionSession):
             - entry(ConfigEntry): Configuration entry of a Spotify
                 Account
         """
-        self.hass = hass
-        self.entry = entry
         self._access_token = None
         self._expires_at = 0
-        self._token_lock = Lock()
-        self._is_healthy = False
-        self.supervisor = RetrySupervisor()
+
+        super().__init__(hass, entry)
 
     @property
     def token(self) -> str:
@@ -148,11 +145,10 @@ class PrivateSession(ConnectionSession):
 
                 try:
                     await self.async_refresh_token()
-                except (InternalServerError, ClientOSError) as exc:
+                    self.supervisor._is_healthy = True
+                except self.supervisor.SUPERVISED_EXCEPTIONS as exc:
                     self.supervisor._is_healthy = False
-                    self.supervisor.log_message(
-                        f"{exc.code} - {exc.message}"
-                    )
+                    self.supervisor.log_message(exc)
                     not_ready = True
 
         if not_ready:

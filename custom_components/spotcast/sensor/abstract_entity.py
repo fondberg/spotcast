@@ -2,30 +2,22 @@
 
 from abc import ABC, abstractmethod
 from logging import getLogger
-from urllib3.exceptions import ReadTimeoutError
 
 from homeassistant.components.sensor import (
     EntityCategory,
     Entity
 )
 from homeassistant.const import STATE_UNKNOWN, STATE_OFF
-from requests.exceptions import ReadTimeout
 
 from custom_components.spotcast.spotify import SpotifyAccount
-from custom_components.spotcast.sessions.exceptions import (
-    InternalServerError,
-    UpstreamServerNotready,
-    TokenError,
+from custom_components.spotcast.sessions.exceptions import TokenError
+from custom_components.spotcast.sessions.retry_supervisor import (
+    RetrySupervisor
 )
 
 LOGGER = getLogger(__name__)
-POTENTIAL_ERRORS = (
-    ReadTimeout,
-    ReadTimeoutError,
-    InternalServerError,
-    UpstreamServerNotready,
-    TokenError,
-)
+POTENTIAL_ERRORS = RetrySupervisor.SUPERVISED_EXCEPTIONS + (TokenError,)
+ENTITY_CATEGORIES = EntityCategory
 
 
 class SpotcastEntity(ABC, Entity):

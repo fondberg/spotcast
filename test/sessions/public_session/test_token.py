@@ -28,7 +28,7 @@ class TestTokenValue(TestCase):
 
         self.session = PublicSession(
             hass=mock_hass,
-            config_entry=mock_entry,
+            entry=mock_entry,
             implementation=mock_implementation
         )
 

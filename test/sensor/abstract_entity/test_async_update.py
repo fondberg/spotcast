@@ -3,12 +3,13 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, patch, MagicMock
 
+
+from custom_components.spotcast.sessions.exceptions import InternalServerError
 from custom_components.spotcast.sensor.abstract_entity import (
     SpotcastEntity,
     EntityCategory,
     SpotifyAccount,
     STATE_UNKNOWN,
-    InternalServerError,
 )
 
 

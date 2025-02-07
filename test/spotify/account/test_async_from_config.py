@@ -9,7 +9,6 @@ from custom_components.spotcast.spotify.account import (
     ConfigEntry,
     PublicSession,
     PrivateSession,
-    ConfigEntry,
 )
 
 TEST_MODULE = "custom_components.spotcast.spotify.account"
