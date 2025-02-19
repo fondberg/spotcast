@@ -1,6 +1,6 @@
 # Play Transfer Playback
 
-Transfers the active playback of an account to a different media player
+Transfers the active or most recent playback of an account to a different media player
 
 ## Action
 

@@ -77,17 +77,17 @@ The spotcast custom component provides multiple services to the user for differe
 > [!TIP]
 > If you are converting script from pre `v5` services. The closest equivalence to `spotcast.start` is `spotcast.play_media`
 
-| Service Name                                                           | Description                                                                                                                                       |
-| :---                                                                  | :---                                                                                                                                              |
-| [spotcast.play_media](./docs/services/play_media.md)                   | Starts playback on a Chromecast or Spotify Connect device using the provided uri as context.                                                      |
-| [spotcast.play_liked_songs](./docs/services/play_liked_songs.md)       | Starts playback on a Chromecast or Spotify Connect device using the user's saved tracks as context.                                               |
-| [spotcast.play_dj](./docs/services/play_dj.md)                         | Starts playback on a Chromecast or Spotify Connect device using the dj feature as context.                                                        |
-| [spotcast.play_from_search](./docs/services/play_from_search.md)       | Starts playback on a Chromecast or Spotify Connect device using a search result as a context.                                                     |
-| [spotcast.play_category](./docs/services/play_category.md)             | Starts playback on a Chromecast or Spotify Connect device using a random playlist from a Browse Category as context.                              |
-| [spotcast.play_custom_context](./docs/services/play_custom_context.md) | Starts playback on a Chromecast or Spotify Connect device using a list of uris as context                                                         |
-| [spotcast.transfer_playback](./docs/services/transfer_playback.md)     | Transfers the playback to a different device. Fails and returns an error if there is no active playback or the playback is already on the device. |
-| [spotcast.add_to_queue](./docs/services/add_to_queue.md)               | Adds songs the the playback queue. Fails and returns an error if there is no active playback                                                      |
-| [spotcast.play_saved_episodes](./docs/services/play_saved_episodes.md) | Plays the list of podcast episodes part of the `Saved Episodes` playlist                                                                          |
+| Service Name                                                           | Description                                                                                                          |
+| :---                                                                   | :---                                                                                                                 |
+| [spotcast.play_media](./docs/services/play_media.md)                   | Starts playback on a Chromecast or Spotify Connect device using the provided uri as context.                         |
+| [spotcast.play_liked_songs](./docs/services/play_liked_songs.md)       | Starts playback on a Chromecast or Spotify Connect device using the user's saved tracks as context.                  |
+| [spotcast.play_dj](./docs/services/play_dj.md)                         | Starts playback on a Chromecast or Spotify Connect device using the dj feature as context.                           |
+| [spotcast.play_from_search](./docs/services/play_from_search.md)       | Starts playback on a Chromecast or Spotify Connect device using a search result as a context.                        |
+| [spotcast.play_category](./docs/services/play_category.md)             | Starts playback on a Chromecast or Spotify Connect device using a random playlist from a Browse Category as context. |
+| [spotcast.play_custom_context](./docs/services/play_custom_context.md) | Starts playback on a Chromecast or Spotify Connect device using a list of uris as context                            |
+| [spotcast.transfer_playback](./docs/services/transfer_playback.md)     | Transfers the active or most recent playback on the device provided                                                  |
+| [spotcast.add_to_queue](./docs/services/add_to_queue.md)               | Adds songs the the playback queue. Fails and returns an error if there is no active playback                         |
+| [spotcast.play_saved_episodes](./docs/services/play_saved_episodes.md) | Plays the list of podcast episodes part of the `Saved Episodes` playlist                                             |
 
 ### Data
 
