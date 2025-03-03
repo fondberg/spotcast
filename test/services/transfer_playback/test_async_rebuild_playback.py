@@ -630,3 +630,36 @@ class TestShowContext(IsolatedAsyncioTestCase):
 
     def test_context_changed_to_episode(self):
         self.assertEqual(self.result["spotify_uri"], "spotify:episode:bar")
+
+
+class TestArtistContext(IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self):
+
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount)
+        }
+
+        self.mocks["account"].last_playback_state = {
+            "context": {
+                "uri": "spotify:artist:foo",
+                "type": "artist"
+            },
+            "item": {
+                "uri": "spotify:song:bar"
+            },
+            "repeat_state": "context",
+            "shuffle_state": False,
+            "progress_ms": 2000,
+        }
+
+        self.result = await async_rebuild_playback(
+            {"data": {}},
+            self.mocks["account"]
+        )
+
+    def test_context_unchanged(self):
+        self.assertEqual(self.result["spotify_uri"], "spotify:artist:foo")
+
+    def test_offset_removed(self):
+        self.assertIsNone(self.result["data"]["offset"])

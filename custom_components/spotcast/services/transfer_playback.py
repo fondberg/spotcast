@@ -150,5 +150,9 @@ async def async_rebuild_playback(
         except ValueError:
             pass
 
-    call_data["data"]["offset"] = track_index
+    if context_type == "artist":
+        call_data["data"]["offset"] = None
+    else:
+        call_data["data"]["offset"] = track_index
+
     return call_data
