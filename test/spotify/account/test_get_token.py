@@ -8,6 +8,7 @@ from custom_components.spotcast.spotify.account import (
     PublicSession,
     PrivateSession,
     HomeAssistant,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -15,12 +16,14 @@ from test.spotify.account import TEST_MODULE
 
 class TestDataRetention(TestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.run_coroutine_threadsafe")
     @patch(f"{TEST_MODULE}.Spotify")
     def setUp(
             self,
             mock_spotify: MagicMock,
             mock_coroutine: MagicMock,
+            mock_store: MagicMock,
     ):
 
         mock_internal = MagicMock(spec=PrivateSession)

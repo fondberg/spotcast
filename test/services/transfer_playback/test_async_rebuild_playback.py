@@ -19,7 +19,8 @@ class TestRepeatOveride(IsolatedAsyncioTestCase):
             "account": MagicMock(spec=SpotifyAccount),
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -66,7 +67,7 @@ class TestShuffleOveride(IsolatedAsyncioTestCase):
             "account": MagicMock(spec=SpotifyAccount),
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"]._last_playback_state = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -115,7 +116,8 @@ class TestCurrentItemIsPartOfAlbumContext(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -178,7 +180,8 @@ class TestCurrentItemNotPartOfAlbumContext(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -241,7 +244,8 @@ class TestCurrentItemPartOfPlaylist(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -316,7 +320,8 @@ class TestCurrentItemNotPartOfPlaylist(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -391,7 +396,8 @@ class TestCurrentItemPartOfCollection(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "progress_ms": 31415,
@@ -465,7 +471,8 @@ class TestCurrentItemNotPartOfCollection(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -540,7 +547,8 @@ class TestUnknownContentType(IsolatedAsyncioTestCase):
             "index": mock_index,
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "repeat_state": "context",
             "shuffle_state": True,
             "context": {
@@ -613,7 +621,8 @@ class TestShowContext(IsolatedAsyncioTestCase):
             "account": MagicMock(spec=SpotifyAccount)
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "context": {
                 "uri": "spotify:show:foo",
                 "type": "show"
@@ -640,7 +649,8 @@ class TestArtistContext(IsolatedAsyncioTestCase):
             "account": MagicMock(spec=SpotifyAccount)
         }
 
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "context": {
                 "uri": "spotify:artist:foo",
                 "type": "artist"

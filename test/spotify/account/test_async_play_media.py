@@ -12,6 +12,7 @@ from custom_components.spotcast.spotify.account import (
     PlaybackError,
     SpotifyException,
     Spotify,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -19,10 +20,12 @@ from test.spotify.account import TEST_MODULE
 
 class TestMediaPlayback(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -75,10 +78,12 @@ class TestMediaPlayback(IsolatedAsyncioTestCase):
 
 class TestEmptyContext(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -125,10 +130,12 @@ class TestEmptyContext(IsolatedAsyncioTestCase):
 
 class TestFailedTransfer(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -178,10 +185,12 @@ class TestFailedTransfer(IsolatedAsyncioTestCase):
 
 class TestMediaPlaybackWithExtras(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -236,10 +245,12 @@ class TestMediaPlaybackWithExtras(IsolatedAsyncioTestCase):
 
 class TestPlaybackError(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_error_raised(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {

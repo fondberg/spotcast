@@ -45,7 +45,8 @@ class TestTransferOfActivePlayback(IsolatedAsyncioTestCase):
             }
         )
 
-        self.mocks["account"].last_playback_state = {}
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {}
 
         self.mocks["call"].data = {
             "media_player": {
@@ -110,7 +111,8 @@ class TestTransferOfInactivePlayback(IsolatedAsyncioTestCase):
         self.mocks["account"].async_playback_state = AsyncMock(
             return_value={}
         )
-        self.mocks["account"].last_playback_state = {
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {
             "device": "foo",
             "context": {"uri": "bar"},
         }
@@ -165,7 +167,8 @@ class TestTransferOfMissingPlayback(IsolatedAsyncioTestCase):
         self.mocks["account"].async_playback_state = AsyncMock(
             return_value={}
         )
-        self.mocks["account"].last_playback_state = {}
+        self.mocks["account"].async_last_playback_state = AsyncMock()
+        self.mocks["account"].async_last_playback_state.return_value = {}
 
         self.mocks["rebuild"].return_value = {"context": "modified"}
         self.mocks["account"].liked_songs_uri = "spotify:user:foo:collection"

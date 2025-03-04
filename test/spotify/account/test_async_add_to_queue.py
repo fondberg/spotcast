@@ -11,6 +11,7 @@ from custom_components.spotcast.spotify.account import (
     HomeAssistant,
     PlaybackError,
     SpotifyException,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -18,10 +19,12 @@ from test.spotify.account import TEST_MODULE
 
 class TestAddToQueueJob(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -70,10 +73,12 @@ class TestAddToQueueJob(IsolatedAsyncioTestCase):
 
 class TestAddToQueueFails(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify")
     async def test_error_raised(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {

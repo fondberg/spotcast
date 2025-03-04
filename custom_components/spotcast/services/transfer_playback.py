@@ -52,7 +52,9 @@ async def async_transfer_playback(hass: HomeAssistant, call: ServiceCall):
     playback_state = await account.async_playback_state(force=True)
     call_data = copy_to_dict(call.data)
     call_data["data"] = call_data.get("data", {})
-    last_uri_context = _get_context_uri(account.last_playback_state)
+    last_uri_context = _get_context_uri(
+        await account.async_last_playback_state()
+    )
 
     # check if no active playback
     if playback_state == {} and last_uri_context is None:
@@ -95,7 +97,7 @@ async def async_rebuild_playback(
         - dict: the call_data modified with the last known state
             information
     """
-    last_playback_state: dict = account.last_playback_state
+    last_playback_state: dict = await account.async_last_playback_state()
     context_uri: str = last_playback_state["context"]["uri"]
     context_type: str = last_playback_state["context"]["type"]
     extras = call_data.get("data", {})

@@ -9,6 +9,7 @@ from custom_components.spotcast.spotify.account import (
     ConfigEntry,
     PublicSession,
     PrivateSession,
+    Store,
 )
 
 TEST_MODULE = "custom_components.spotcast.spotify.account"
@@ -16,6 +17,7 @@ TEST_MODULE = "custom_components.spotcast.spotify.account"
 
 class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_profile")
     @patch.object(PrivateSession, "async_ensure_token_valid")
     @patch.object(PublicSession, "async_ensure_token_valid")
@@ -26,6 +28,7 @@ class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
         mock_ensure_external: AsyncMock,
         mock_ensure_internal: AsyncMock,
         mock_profile: AsyncMock,
+        mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -68,6 +71,7 @@ class TestAccountCreationWithoutDomainData(IsolatedAsyncioTestCase):
 
 class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_profile")
     @patch.object(PrivateSession, "async_ensure_token_valid")
     @patch.object(PublicSession, "async_ensure_token_valid")
@@ -78,6 +82,7 @@ class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
         mock_ensure_external: AsyncMock,
         mock_ensure_internal: AsyncMock,
         mock_profile: AsyncMock,
+        mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -117,6 +122,7 @@ class TestAccountCreationWithDomainData(IsolatedAsyncioTestCase):
 
 class TestPreexistingAccount(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_profile")
     @patch.object(PrivateSession, "async_ensure_token_valid")
     @patch.object(PublicSession, "async_ensure_token_valid")
@@ -127,6 +133,7 @@ class TestPreexistingAccount(IsolatedAsyncioTestCase):
         mock_ensure_external: AsyncMock,
         mock_ensure_internal: AsyncMock,
         mock_profile: AsyncMock,
+        mock_store: MagicMock,
     ):
 
         self.mocks = {

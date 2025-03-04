@@ -9,13 +9,17 @@ from custom_components.spotcast.spotify.account import (
     HomeAssistant,
     PrivateSession,
     PublicSession,
+    Store,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestSongRetrieval(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch.object(SpotifyAccount, "async_ensure_tokens_valid")
-    async def asyncSetUp(self, mock_valid: AsyncMock):
+    async def asyncSetUp(self, mock_valid: AsyncMock, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),

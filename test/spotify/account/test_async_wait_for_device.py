@@ -11,6 +11,7 @@ from custom_components.spotcast.spotify.account import (
     HomeAssistant,
     TimeoutError,
     Spotify,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -18,10 +19,12 @@ from test.spotify.account import TEST_MODULE
 
 class TestDeviceBecomingAvailable(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_return_without_error(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -65,10 +68,12 @@ class TestDeviceBecomingAvailable(IsolatedAsyncioTestCase):
 
 class TestDeviceNeverAvailable(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
     async def test_return_without_error(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {

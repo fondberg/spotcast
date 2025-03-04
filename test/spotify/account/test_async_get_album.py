@@ -10,6 +10,7 @@ from custom_components.spotcast.spotify.account import (
     PublicSession,
     HomeAssistant,
     Spotify,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -87,8 +88,9 @@ API_RESULT = {
 
 class TestPlayslistRetrieval(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
-    async def asyncSetUp(self, mock_spotify: MagicMock):
+    async def asyncSetUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),

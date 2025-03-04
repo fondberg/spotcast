@@ -17,6 +17,7 @@ from spotipy import Spotify, SpotifyException
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry, SOURCE_REAUTH
 from homeassistant.helpers.device_registry import DeviceInfo, DeviceEntryType
+from homeassistant.helpers.storage import Store
 
 from custom_components.spotcast.const import DOMAIN
 from custom_components.spotcast.sessions import (
@@ -180,7 +181,12 @@ class SpotifyAccount:
         self._base_refresh_rate = 30
 
         self._datasets: dict[str, Dataset] = {}
-        self.last_playback_state = {}
+        self._last_playback_state = {}
+        self._playback_store = Store(
+            hass,
+            1,
+            f"spotcast_{entry_id}_last_state"
+        )
         self.current_item = {
             "uri": None,
             "audio_features": {}
@@ -634,6 +640,14 @@ class SpotifyAccount:
 
         return result
 
+    async def async_last_playback_state(self) -> dict:
+        """The last known playback state"""
+
+        if self._last_playback_state != {}:
+            return self._last_playback_state
+
+        return await self._playback_store.async_load() or {}
+
     async def async_playback_state(self, force: bool = False) -> dict:
         """Returns the current playback state"""
         await self.async_ensure_tokens_valid()
@@ -659,7 +673,8 @@ class SpotifyAccount:
 
                 else:
                     data = await self._async_add_audio_features(data)
-                    self.last_playback_state = data
+                    self._last_playback_state = data
+                    await self._playback_store.async_save(data)
 
                 dataset.update(data)
             else:

@@ -9,6 +9,7 @@ from custom_components.spotcast.spotify.account import (
     PublicSession,
     HomeAssistant,
     Spotify,
+    Store,
 )
 
 
@@ -17,8 +18,9 @@ from test.spotify.account import TEST_MODULE
 
 class TestNewItem(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
-    async def asyncSetUp(self, mock_spotify: MagicMock):
+    async def asyncSetUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
@@ -62,8 +64,9 @@ class TestNewItem(IsolatedAsyncioTestCase):
 
 class TestSameItem(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
-    async def asyncSetUp(self, mock_spotify: MagicMock):
+    async def asyncSetUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
@@ -107,8 +110,9 @@ class TestSameItem(IsolatedAsyncioTestCase):
 
 class TestNoCurrentPlayback(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
-    async def asyncSetUp(self, mock_spotify: MagicMock):
+    async def asyncSetUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
@@ -145,7 +149,8 @@ class TestNoCurrentPlayback(IsolatedAsyncioTestCase):
 
 class TestNoneTypeState(IsolatedAsyncioTestCase):
 
-    async def asyncSetUp(self):
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
+    async def asyncSetUp(self, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),
@@ -168,7 +173,8 @@ class TestNoneTypeState(IsolatedAsyncioTestCase):
 
 class TestItemKeyPointsToNoneType(IsolatedAsyncioTestCase):
 
-    async def asyncSetUp(self):
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
+    async def asyncSetUp(self, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),

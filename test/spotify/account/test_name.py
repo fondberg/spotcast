@@ -10,6 +10,7 @@ from custom_components.spotcast.spotify.account import (
     PublicSession,
     PrivateSession,
     Spotify,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -17,8 +18,9 @@ from test.spotify.account import TEST_MODULE
 
 class TestDisplayNamePresent(TestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
-    def setUp(self, mock_spotify: MagicMock):
+    def setUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         mock_internal = MagicMock(spec=PrivateSession)
         mock_external = MagicMock(spec=PublicSession)
@@ -52,8 +54,9 @@ class TestDisplayNamePresent(TestCase):
 
 class TestDisplayNameMissing(TestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
-    def setUp(self, mock_spotify: MagicMock):
+    def setUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         mock_internal = MagicMock(spec=PrivateSession)
         mock_external = MagicMock(spec=PublicSession)

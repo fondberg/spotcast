@@ -9,7 +9,8 @@ from custom_components.spotcast.spotify.account import (
     HomeAssistant,
     PublicSession,
     PrivateSession,
-    Spotify
+    Spotify,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -17,8 +18,9 @@ from test.spotify.account import TEST_MODULE
 
 class TestPlaylists(TestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify)
-    def setUp(self, mock_spotify: MagicMock):
+    def setUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         mock_internal = MagicMock(spec=PrivateSession)
         mock_external = MagicMock(spec=PublicSession)

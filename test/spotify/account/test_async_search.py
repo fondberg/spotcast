@@ -10,13 +10,17 @@ from custom_components.spotcast.spotify.account import (
     PublicSession,
     PrivateSession,
     SearchQuery,
+    Store,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestSearchQuery(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch.object(SpotifyAccount, "_async_pager")
-    async def asyncSetUp(self, mock_pager: AsyncMock):
+    async def asyncSetUp(self, mock_pager: AsyncMock, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),

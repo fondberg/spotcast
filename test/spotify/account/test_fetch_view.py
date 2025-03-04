@@ -1,6 +1,6 @@
 """Module to test the fetch_view function"""
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from time import time
 
 from custom_components.spotcast.spotify.account import (
@@ -8,12 +8,16 @@ from custom_components.spotcast.spotify.account import (
     HomeAssistant,
     PublicSession,
     PrivateSession,
+    Store,
 )
+
+from test.spotify.account import TEST_MODULE
 
 
 class TestPlaylistRetrieval(TestCase):
 
-    def setUp(self):
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
+    def setUp(self, mock_store: MagicMock):
 
         self.mocks = {
             "hass": MagicMock(spec=HomeAssistant),

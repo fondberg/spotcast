@@ -12,6 +12,7 @@ from custom_components.spotcast.spotify.account import (
     DeviceInfo,
     DeviceEntryType,
     Spotify,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -19,8 +20,9 @@ from test.spotify.account import TEST_MODULE
 
 class TestProfile(TestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
-    def setUp(self, mock_spotify: MagicMock):
+    def setUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
         mock_internal = MagicMock(spec=PrivateSession)
         mock_external = MagicMock(spec=PublicSession)

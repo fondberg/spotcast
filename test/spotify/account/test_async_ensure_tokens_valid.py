@@ -11,6 +11,7 @@ from custom_components.spotcast.spotify.account import (
     TokenError,
     ConfigEntry,
     SOURCE_REAUTH,
+    Store,
 )
 
 from test.spotify.account import TEST_MODULE
@@ -18,10 +19,12 @@ from test.spotify.account import TEST_MODULE
 
 class TestWithProfileRefresh(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -72,10 +75,12 @@ class TestWithProfileRefresh(IsolatedAsyncioTestCase):
 
 class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def asyncSetUp(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -134,10 +139,12 @@ class TestWithoutProfileRefresh(IsolatedAsyncioTestCase):
 
 class TestTokenErrorHandling(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def test_reauth_process_not_called_when_not_requested(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {
@@ -174,10 +181,12 @@ class TestTokenErrorHandling(IsolatedAsyncioTestCase):
         except AssertionError:
             self.fail()
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", new_callable=MagicMock)
     async def test_reauth_process_called_when_requested(
             self,
             mock_spotify: MagicMock,
+            mock_store: MagicMock,
     ):
 
         self.mocks = {

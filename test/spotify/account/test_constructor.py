@@ -3,6 +3,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from homeassistant.helpers.storage import Store
+
 from custom_components.spotcast.spotify.account import (
     SpotifyAccount,
     PublicSession,
@@ -17,24 +19,29 @@ from test.spotify.account import TEST_MODULE
 
 class TestDataRetention(TestCase):
 
+    @patch(f"{TEST_MODULE}.Store", spec=Store, new_callable=MagicMock)
     @patch(f"{TEST_MODULE}.Spotify", spec=Spotify, new_callable=MagicMock)
-    def setUp(self, mock_spotify: MagicMock):
+    def setUp(self, mock_spotify: MagicMock, mock_store: MagicMock):
 
-        mock_internal = MagicMock(spec=PrivateSession)
-        mock_external = MagicMock(spec=PublicSession)
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "private": MagicMock(spec=PrivateSession),
+            "public": MagicMock(spec=PublicSession),
+            "spotify": mock_spotify,
+        }
 
-        self.mock_spotify = mock_spotify
+        self.mocks["hass"].data = {}
 
-        mock_external.token = {
+        self.mocks["public"].token = {
             "access_token": "12345",
             "expires_at": 12345.61,
         }
 
         self.account = SpotifyAccount(
             entry_id="12345",
-            hass=MagicMock(spec=HomeAssistant),
-            public_session=mock_external,
-            private_session=mock_internal,
+            hass=self.mocks["hass"],
+            public_session=self.mocks["public"],
+            private_session=self.mocks["private"],
             is_default=True
         )
 
@@ -71,3 +78,6 @@ class TestDataRetention(TestCase):
 
     def test_entry_id_saved(self):
         self.assertEqual(self.account.entry_id, "12345")
+
+    def test_store_not_initialized(self):
+        self.assertIsInstance(self.account._playback_store, Store)
