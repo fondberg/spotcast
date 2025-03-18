@@ -9,6 +9,7 @@ Classes:
 
 from time import time
 from asyncio import Lock
+from random import randrange
 from aiohttp import ClientSession
 from aiohttp.client_exceptions import (
     ContentTypeError,
@@ -141,6 +142,21 @@ class PrivateSession(ConnectionSession):
             "sp_key": sp_key,
         }
 
+    @property
+    def headers(self) -> dict:
+        """Returns the headers to user in the token refresh process"""
+        return {
+            "user-agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_"
+                f"{randrange(11, 15)}_{randrange(4, 9)}) AppleWebKit/"
+                f"{randrange(530, 537)}.{randrange(30, 37)} (KHTML, like "
+                f"Gecko) Chrome/{randrange(80, 105)}.0.{randrange(3000, 4500)}"
+                f".{randrange(60, 125)} Safari/{randrange(530, 537)}"
+                f".{randrange(30, 36)}"
+            ),
+            "Accept": "application/json",
+        }
+
     async def async_ensure_token_valid(self) -> bool:
         """Ensure the current token is valid or gets a new one. Returns
         True if the refcresh worked or False if it didn't
@@ -201,7 +217,7 @@ class PrivateSession(ConnectionSession):
             # get server time
             async with session.get(
                 url=self._endpoint(self.SERVER_TIME_ENDPOINT),
-                headers=self.HEADERS
+                headers=self.headers
             ) as response:
                 data = await response.json()
                 self.raise_for_status(
@@ -220,7 +236,7 @@ class PrivateSession(ConnectionSession):
                 async with session.get(
                         url=self._endpoint(self.TOKEN_ENDPOINT),
                         allow_redirects=False,
-                        headers=self.HEADERS,
+                        headers=self.headers,
                         params={
                             "reason": "transport",
                             "productType": "web-player",
@@ -237,9 +253,8 @@ class PrivateSession(ConnectionSession):
 
                 try:
                     self.raise_for_status(status, data, headers)
-                    self.raise_for_invalid_token(
+                    self._test_token(
                         token=json.loads(data).get(self.TOKEN_KEY, ""),
-                        content=data
                     )
                     break
                 except TokenRefreshError as exc:
@@ -289,8 +304,22 @@ class PrivateSession(ConnectionSession):
             self._is_healthy = False
             raise TokenRefreshError(content)
 
-    def raise_for_invalid_token(self, token: str, content: str) -> bool:
-        """Returns True if the token is valid"""
-        if len(token) != PrivateSession.TOKEN_LENGTH:
-            self._is_healthy = False
-            raise TokenRefreshError(content)
+    async def _test_token(self, token: str):
+        """Test the token and returns if valid. Otherwise raises a
+        TokenRefreshError. Must be call only with fresh token"""
+
+        headers = self.headers
+        headers |= {"Authorization": f"Bearer {token}"}
+
+        async with ClientSession(cookies=self.cookies) as session:
+
+            # get server time
+            async with session.get(
+                url="https://api.spotify.com/v1/me",
+                headers=headers
+            ) as response:
+                await response.json()
+
+        if not response.ok:
+            LOGGER.debug("Token received is not valid. Retrying")
+            raise TokenRefreshError("Token received is not valid. Retrying")
