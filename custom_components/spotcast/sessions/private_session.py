@@ -97,7 +97,7 @@ class PrivateSession(ConnectionSession):
     )
 
     TOKEN_KEY = "accessToken"
-    TOKEN_LENGTH = 374
+    TOKEN_LENGTH = 362
     EXPIRATION_KEY = "accessTokenExpirationTimestampMs"
     API_ENDPOINT = "https://spclient.wg.spotify.com"
 
