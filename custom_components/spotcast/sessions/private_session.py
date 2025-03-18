@@ -10,9 +10,14 @@ Classes:
 from time import time
 from asyncio import Lock
 from aiohttp import ClientSession
-from aiohttp.client_exceptions import ContentTypeError, ClientOSError
+from aiohttp.client_exceptions import (
+    ContentTypeError,
+    ClientOSError,
+    ClientResponseError,
+)
 from types import MappingProxyType
 from logging import getLogger
+import json
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.config_entry_oauth2_flow import (
@@ -33,6 +38,7 @@ from custom_components.spotcast.sessions.exceptions import (
     InternalServerError,
     UpstreamServerNotready,
 )
+from custom_components.spotcast.utils import is_valid_json
 
 LOGGER = getLogger(__name__)
 
@@ -73,17 +79,7 @@ class PrivateSession(ConnectionSession):
             "Gecko/20100101 "
             "Firefox/136.0"
         ),
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, defalte, br, zstd",
-        "Accept-Language": "en-US,en;q=0.5",
-        "baggage": (
-            "sentry-environment=production,"
-            "sentry-release=web-player_2025-03-17_1742227223106_b68bcd7,"
-            "sentry-public_key=de32132fc06e4b28965ecf25332c3a25,"
-            "sentry-trace_id=e0d6b0af78cf44cb94453ce3bec73054,"
-            "sentry-sample_rate=0.008,"
-            "sentry-sampled=false"
-        )
+        "Accept": "application/json",
     })
 
     BASE_URL = "https://open.spotify.com"
@@ -101,6 +97,7 @@ class PrivateSession(ConnectionSession):
     )
 
     TOKEN_KEY = "accessToken"
+    TOKEN_LENGTH = 374
     EXPIRATION_KEY = "accessTokenExpirationTimestampMs"
     API_ENDPOINT = "https://spclient.wg.spotify.com"
 
@@ -178,9 +175,16 @@ class PrivateSession(ConnectionSession):
         """Returns a spotify API endpoint"""
         return f"{self.BASE_URL}/{endpoint}"
 
-    async def async_refresh_token(self) -> tuple[str, float]:
+    async def async_refresh_token(
+        self,
+        max_retries: int = 5
+    ) -> tuple[str, float]:
         """Retrives a new token, sets it in the session and returns
         the token and when it expires
+
+        Args:
+            - max_retries(int, optional): the maximum number of retries
+                before raising an error
 
         Returns:
             - tuple[str, int]: the token and a timestamp of when it
@@ -204,56 +208,34 @@ class PrivateSession(ConnectionSession):
 
             totp_value = self._totp.at(server_time)
 
-            async with session.get(
-                    url=self._endpoint(self.TOKEN_ENDPOINT),
-                    allow_redirects=False,
-                    headers=self.HEADERS,
-                    params={
-                        "reason": "transport",
-                        "productType": "web-player",
-                        "totp": totp_value,
-                        "totpServer": totp_value,
-                        "totpVer": 5,
-                        "sTime": server_time,
-                        "cTime": server_time,
-                    },
-            ) as response:
+            for retry_count in range(max_retries):
 
-                location = response.headers.get("Location")
-
-                if (
-                        response.status == 302
-                        and location == self.EXPIRED_LOCATION
-                ):
-                    LOGGER.error(
-                        "Unsuccessful token request. Location header %s. "
-                        "sp_dc and sp_key are likely expired",
-                        location
-                    )
-                    self._is_healthy = False
-                    raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
-
-                if (
-                        (response.status >= 500 and response.status < 600)
-                        or (response.status == 104)
-                ):
-                    raise InternalServerError(
-                        response.status,
-                        await response.text()
-                    )
+                async with session.get(
+                        url=self._endpoint(self.TOKEN_ENDPOINT),
+                        allow_redirects=False,
+                        headers=self.HEADERS,
+                        params={
+                            "reason": "transport",
+                            "productType": "web-player",
+                            "totp": totp_value,
+                            "totpServer": totp_value,
+                            "totpVer": 5,
+                            "sTime": server_time,
+                            "cTime": server_time,
+                        },
+                ) as response:
+                    data = await response.text()
+                    headers = response.headers
+                    status = response.status
 
                 try:
-                    data = await response.json()
-                except ContentTypeError as exc:
-                    self._is_healthy = False
-                    error_message = await response.text()
-                    raise TokenRefreshError(error_message) from exc
+                    self.raise_for_status(status, data, headers)
+                    break
+                except TokenRefreshError as exc:
+                    if retry_count >= max_retries - 1:
+                        raise exc
 
-                if not response.ok:
-                    self._is_healthy = False
-                    raise TokenRefreshError(
-                        f"{response.status}: {data}"
-                    )
+            data = json.load(data)
 
             self._access_token = data[self.TOKEN_KEY]
             self._expires_at = int(data[self.EXPIRATION_KEY]) // 1000
@@ -264,3 +246,42 @@ class PrivateSession(ConnectionSession):
                 "access_token": self._access_token,
                 "expires_at": self._expires_at
             }
+
+    def raise_for_status(self, status: int, content: str, headers: dict):
+        """Raises an error for error statuses. Otherwise returns
+
+        Raises:
+            InternalServerError: Raised when the Spotify server is
+                experiencing issues
+            ExpiredSpotifyCookiesError: Raised when the sp_dc and
+                sp_key are expired
+            TokenRefreshError: Raised when a client error is raised
+        """
+
+        if (500 <= status < 600) or status == 104:
+            raise InternalServerError(status, content)
+
+        if status == 302 and headers.get("Location") == self.EXPIRED_LOCATION:
+            LOGGER.error(
+                "Unsuccessful token request. Location header %s. "
+                "sp_dc and sp_key are likely expired",
+                self.EXPIRED_LOCATION,
+            )
+            self._is_healthy = False
+            raise ExpiredSpotifyCookiesError("Expired sp_dc, sp_key")
+
+        if (
+                not is_valid_json(content)
+                or (400 <= status < 500)
+                or not self.is_valid_token(json.loads(content)[self.TOKEN_KEY])
+        ):
+            self._is_healthy = False
+            raise TokenRefreshError(content)
+
+    @staticmethod
+    def is_valid_token(token: str) -> bool:
+        """Returns True if the token is valid"""
+        if len(token) != PrivateSession.TOKEN_LENGTH:
+            return False
+
+        return True

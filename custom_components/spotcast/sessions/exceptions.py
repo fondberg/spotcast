@@ -33,3 +33,7 @@ class InternalServerError(HomeAssistantError):
 class UpstreamServerNotready(HomeAssistantError):
     """Raised when the upstream server is not ready to receive
     communication again"""
+
+
+class TOTPError(TokenRefreshError):
+    """Raised when the time based one time password is invalid"""
