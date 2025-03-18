@@ -7,6 +7,7 @@ Functions:
 from logging import getLogger
 from types import MappingProxyType
 import json
+from json.decoder import JSONDecodeError
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -204,5 +205,5 @@ def is_valid_json(raw_data: str) -> bool:
     try:
         json.loads(raw_data)
         return True
-    except (TypeError, OverflowError):
+    except JSONDecodeError:
         return False

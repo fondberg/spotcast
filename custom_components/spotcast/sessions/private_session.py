@@ -204,11 +204,18 @@ class PrivateSession(ConnectionSession):
                 headers=self.HEADERS
             ) as response:
                 data = await response.json()
+                self.raise_for_status(
+                    response.status,
+                    json.dumps(data),
+                    response.headers,
+                )
                 server_time = data["serverTime"]
 
             totp_value = self._totp.at(server_time)
 
-            for retry_count in range(max_retries):
+            retry_count = 0
+
+            while True:
 
                 async with session.get(
                         url=self._endpoint(self.TOKEN_ENDPOINT),
@@ -230,12 +237,17 @@ class PrivateSession(ConnectionSession):
 
                 try:
                     self.raise_for_status(status, data, headers)
+                    self.raise_for_invalid_token(
+                        token=json.loads(data).get(self.TOKEN_KEY, ""),
+                        content=data
+                    )
                     break
                 except TokenRefreshError as exc:
                     if retry_count >= max_retries - 1:
                         raise exc
+                    retry_count += 1
 
-            data = json.load(data)
+            data = json.loads(data)
 
             self._access_token = data[self.TOKEN_KEY]
             self._expires_at = int(data[self.EXPIRATION_KEY]) // 1000
@@ -273,15 +285,12 @@ class PrivateSession(ConnectionSession):
         if (
                 not is_valid_json(content)
                 or (400 <= status < 500)
-                or not self.is_valid_token(json.loads(content)[self.TOKEN_KEY])
         ):
             self._is_healthy = False
             raise TokenRefreshError(content)
 
-    @staticmethod
-    def is_valid_token(token: str) -> bool:
+    def raise_for_invalid_token(self, token: str, content: str) -> bool:
         """Returns True if the token is valid"""
         if len(token) != PrivateSession.TOKEN_LENGTH:
-            return False
-
-        return True
+            self._is_healthy = False
+            raise TokenRefreshError(content)
