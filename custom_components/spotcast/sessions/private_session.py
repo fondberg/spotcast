@@ -142,9 +142,6 @@ class PrivateSession(ConnectionSession):
         return {
             "sp_dc": sp_dc,
             "sp_key": sp_key,
-            "sp_t": "344a4884-e69f-4115-8110-509d621352b8",
-            "sp_adid": "b48835ed-dda5-457f-8795-7a26eb62aeed",
-            "sp_gaid": "bb0992a5-99db-4b98-9de6-e1fb9a1174b5",
         }
 
     async def async_ensure_token_valid(self) -> bool:
