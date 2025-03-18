@@ -19,7 +19,9 @@ def get_totp(
     """Provides a time-based OTP manager compliant for spotify TOTP
     scheme"""
 
-    secret_hex = ''.join(f"{x:02x}" for x in CIPHER_BYTES)
+    secret_hex = ''.join(str(x) for x in CIPHER_BYTES)
+    secret_hex = secret_hex.encode()
+    secret_hex = "".join(format(x, 'x') for x in secret_hex)
     secret_bytes = hex_to_bytes(secret_hex)
     secret = b32encode(secret_bytes).decode().strip('=')
 
