@@ -5,3 +5,4 @@ PyChromecast>=14.0.1
 requests>=2.32.3
 spotifyaio>=0.8.8
 RapidFuzz>=3.10.1
+pyotp==2.9.0

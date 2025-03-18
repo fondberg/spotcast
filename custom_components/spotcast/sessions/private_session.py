@@ -20,6 +20,7 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 )
 from homeassistant.config_entries import ConfigEntry
 
+from custom_components.spotcast.crypto import spotify_totp
 from custom_components.spotcast.sessions.connection_session import (
     ConnectionSession,
 )
@@ -68,11 +69,26 @@ class PrivateSession(ConnectionSession):
 
     HEADERS = MappingProxyType({
         "user-agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 "
-            "Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) "
+            "Gecko/20100101 "
+            "Firefox/136.0"
+        ),
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, defalte, br, zstd",
+        "Accept-Language": "en-US,en;q=0.5",
+        "baggage": (
+            "sentry-environment=production,"
+            "sentry-release=web-player_2025-03-17_1742227223106_b68bcd7,"
+            "sentry-public_key=de32132fc06e4b28965ecf25332c3a25,"
+            "sentry-trace_id=e0d6b0af78cf44cb94453ce3bec73054,"
+            "sentry-sample_rate=0.008,"
+            "sentry-sampled=false"
         )
     })
+
+    BASE_URL = "https://open.spotify.com"
+    TOKEN_ENDPOINT = "get_access_token"
+    SERVER_TIME_ENDPOINT = "server-time"
 
     REQUEST_URL = (
         "https://open.spotify.com/get_access_token?"
@@ -98,6 +114,7 @@ class PrivateSession(ConnectionSession):
         """
         self._access_token = None
         self._expires_at = 0
+        self._totp = spotify_totp.get_totp()
 
         super().__init__(hass, entry)
 
@@ -122,7 +139,13 @@ class PrivateSession(ConnectionSession):
         internal_api = self.entry.data["internal_api"]
         sp_dc = internal_api["sp_dc"]
         sp_key = internal_api["sp_key"]
-        return {"sp_dc": sp_dc, "sp_key": sp_key}
+        return {
+            "sp_dc": sp_dc,
+            "sp_key": sp_key,
+            "sp_t": "344a4884-e69f-4115-8110-509d621352b8",
+            "sp_adid": "b48835ed-dda5-457f-8795-7a26eb62aeed",
+            "sp_gaid": "bb0992a5-99db-4b98-9de6-e1fb9a1174b5",
+        }
 
     async def async_ensure_token_valid(self) -> bool:
         """Ensure the current token is valid or gets a new one. Returns
@@ -154,6 +177,10 @@ class PrivateSession(ConnectionSession):
         if not_ready:
             raise UpstreamServerNotready("Server not ready for refresh")
 
+    def _endpoint(self, endpoint: str) -> str:
+        """Returns a spotify API endpoint"""
+        return f"{self.BASE_URL}/{endpoint}"
+
     async def async_refresh_token(self) -> tuple[str, float]:
         """Retrives a new token, sets it in the session and returns
         the token and when it expires
@@ -169,10 +196,30 @@ class PrivateSession(ConnectionSession):
                 token
         """
         async with ClientSession(cookies=self.cookies) as session:
+
+            # get server time
             async with session.get(
-                self.REQUEST_URL,
-                allow_redirects=False,
+                url=self._endpoint(self.SERVER_TIME_ENDPOINT),
                 headers=self.HEADERS
+            ) as response:
+                data = await response.json()
+                server_time = data["serverTime"]
+
+            totp_value = self._totp.at(server_time)
+
+            async with session.get(
+                    url=self._endpoint(self.TOKEN_ENDPOINT),
+                    allow_redirects=False,
+                    headers=self.HEADERS,
+                    params={
+                        "reason": "transport",
+                        "productType": "web-player",
+                        "totp": totp_value,
+                        "totpServer": totp_value,
+                        "totpVer": 5,
+                        "sTime": server_time,
+                        "cTime": server_time,
+                    },
             ) as response:
 
                 location = response.headers.get("Location")
