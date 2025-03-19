@@ -243,9 +243,8 @@ class SpotifyToken:
                         raise exc
                     retry_count += 1
 
-        config = json.loads(data)
-        access_token = config["accessToken"]
-        expires_timestamp = config["accessTokenExpirationTimestampMs"]
+        access_token = data["accessToken"]
+        expires_timestamp = data["accessTokenExpirationTimestampMs"]
         expiration_date = int(expires_timestamp) // 1000
 
         return access_token, expiration_date
