@@ -117,3 +117,4 @@ venv.bak/
 .vscode/
 
 config/*
+test/live_testing.py
