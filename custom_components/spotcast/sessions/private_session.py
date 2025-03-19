@@ -253,16 +253,16 @@ class PrivateSession(ConnectionSession):
 
                 try:
                     self.raise_for_status(status, data, headers)
-                    self._test_token(
-                        token=json.loads(data).get(self.TOKEN_KEY, ""),
+                    data = json.loads(data)
+                    await self._test_token(
+                        session=session,
+                        token=data.get(self.TOKEN_KEY, ""),
                     )
                     break
                 except TokenRefreshError as exc:
                     if retry_count >= max_retries - 1:
                         raise exc
                     retry_count += 1
-
-            data = json.loads(data)
 
             self._access_token = data[self.TOKEN_KEY]
             self._expires_at = int(data[self.EXPIRATION_KEY]) // 1000
@@ -304,21 +304,18 @@ class PrivateSession(ConnectionSession):
             self._is_healthy = False
             raise TokenRefreshError(content)
 
-    async def _test_token(self, token: str):
+    async def _test_token(self, session: ClientSession, token: str):
         """Test the token and returns if valid. Otherwise raises a
         TokenRefreshError. Must be call only with fresh token"""
 
         headers = self.headers
         headers |= {"Authorization": f"Bearer {token}"}
 
-        async with ClientSession(cookies=self.cookies) as session:
-
-            # get server time
-            async with session.get(
-                url="https://api.spotify.com/v1/me",
-                headers=headers
-            ) as response:
-                await response.json()
+        async with session.get(
+            url="https://api.spotify.com/v1/me",
+            headers=headers
+        ) as response:
+            await response.json()
 
         if not response.ok:
             LOGGER.debug("Token received is not valid. Retrying")

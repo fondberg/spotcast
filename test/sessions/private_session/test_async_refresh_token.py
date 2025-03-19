@@ -26,7 +26,11 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
             "hass": MagicMock(spec=HomeAssistant),
             "entry": MagicMock(spec=ConfigEntry),
             "get": mock_get,
-            "responses": [MagicMock()]*2
+            "responses": [
+                MagicMock(),
+                MagicMock(),
+                MagicMock(),
+            ]
         }
 
         self.mocks["entry"].data = {
