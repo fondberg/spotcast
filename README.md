@@ -8,7 +8,7 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![spotcast](https://img.shields.io/github/release/fondberg/spotcast.svg?1)](https://github.com/fondberg/spotcast)
-![Maintenance](https://img.shields.io/maintenance/yes/2024.svg)
+![Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
 
 Home Assistant custom component to start Spotify playback on an idle Chromecast or a Spotify Connect device. Meaning you can target automation for chromecast as well as connect devices.
 

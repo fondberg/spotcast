@@ -8,6 +8,7 @@ from homeassistant.components.sensor import (
     Entity
 )
 from homeassistant.const import STATE_UNKNOWN, STATE_OFF
+from requests.exceptions import RetryError
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.sessions.exceptions import TokenError
@@ -16,7 +17,10 @@ from custom_components.spotcast.sessions.retry_supervisor import (
 )
 
 LOGGER = getLogger(__name__)
-POTENTIAL_ERRORS = RetrySupervisor.SUPERVISED_EXCEPTIONS + (TokenError,)
+ENTITY_SPECIFIC_ERRORS = (TokenError, RetryError)
+POTENTIAL_ERRORS = (
+    RetrySupervisor.SUPERVISED_EXCEPTIONS + ENTITY_SPECIFIC_ERRORS
+)
 ENTITY_CATEGORIES = EntityCategory
 
 
