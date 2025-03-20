@@ -180,8 +180,8 @@ class SpotifyToken:
                 "expired. Please update in config."
             )
             raise HomeAssistantError("Expired sp_dc, sp_key")
-        except (TokenError, Exception):  # noqa: E722
-            raise HomeAssistantError("Could not get spotify token.")
+        except (TokenError, Exception) as exc:  # noqa: E722
+            raise HomeAssistantError(exc)
 
     @property
     def headers(self) -> dict:
@@ -230,7 +230,7 @@ class SpotifyToken:
                     }
                 ) as response:
                     data = await response.text()
-                    headers = response.headers()
+                    headers = response.headers
                     status = response.status
 
                 try:
