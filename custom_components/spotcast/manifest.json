@@ -20,5 +20,5 @@
         "spotifyaio>=0.8.8",
         "RapidFuzz>=3.10.1"
     ],
-    "version": "v5.0.0-b33"
+    "version": "v5.0.0-b34"
 }
