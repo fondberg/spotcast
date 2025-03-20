@@ -6,14 +6,6 @@ labels:
 assignees:
   - fcusson
 body:
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Current outage
-      description: Spotcast is currently in global outage
-      options:
-        - label: I am aware that spotcast is in global outage and have reviewed [ticket 524](https://github.com/fondberg/spotcast/issues/524). I confirm this issue is not related to this issue. 
-          required: true
   - type: markdown
     attributes:
       value: |
