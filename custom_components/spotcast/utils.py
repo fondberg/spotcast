@@ -8,6 +8,7 @@ from logging import getLogger
 from types import MappingProxyType
 import json
 from json.decoder import JSONDecodeError
+from urllib.parse import unquote as urldecode
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -207,3 +208,15 @@ def is_valid_json(raw_data: str) -> bool:
         return True
     except JSONDecodeError:
         return False
+
+
+def query_from_url(url: str) -> dict[str, str]:
+    """Extracts the query part from a url"""
+
+    if url is None or url == "":
+        return {}
+
+    query = url.split('?', maxsplit=1)[-1]
+    query = dict([x.split('=') for x in query.split('&')])
+    query = {urldecode(x): urldecode(y) for x, y in query.items()}
+    return query

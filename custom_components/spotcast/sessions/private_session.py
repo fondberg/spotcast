@@ -39,7 +39,7 @@ from custom_components.spotcast.sessions.exceptions import (
     InternalServerError,
     UpstreamServerNotready,
 )
-from custom_components.spotcast.utils import is_valid_json
+from custom_components.spotcast.utils import is_valid_json, query_from_url
 
 LOGGER = getLogger(__name__)
 
@@ -288,7 +288,9 @@ class PrivateSession(ConnectionSession):
         if (500 <= status < 600) or status == 104:
             raise InternalServerError(status, content)
 
-        if status == 302 and headers.get("Location") == self.EXPIRED_LOCATION:
+        location_query = query_from_url(headers.get("Location"))
+
+        if status == 302 and location_query.get("_authfailed", "0") == "1":
             LOGGER.error(
                 "Unsuccessful token request. Location header %s. "
                 "sp_dc and sp_key are likely expired",
