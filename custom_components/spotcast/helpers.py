@@ -5,6 +5,7 @@ import logging
 import requests
 import urllib.parse
 import difflib
+from urllib.parse import unquote as urldecode
 import random
 import time
 from functools import partial, wraps
@@ -349,7 +350,8 @@ def search_tracks(
 def add_tracks_to_queue(
     spotify_client: spotipy.Spotify, tracks: list = [], limit: int = 20
 ):
-    filtered = list(filter(lambda x: isinstance(x, dict) and x.get("type") == "track", tracks))
+    filtered = list(filter(lambda x: isinstance(x, dict)
+                    and x.get("type") == "track", tracks))
 
     if len(filtered) == 0:
         _LOGGER.debug("Cannot add ZERO tracks to the queue!")
@@ -513,3 +515,15 @@ def is_valid_uri(uri: str) -> bool:
 
 def is_empty_str(string: str) -> bool:
     return string is None or string.strip() == ""
+
+
+def query_from_url(url: str) -> dict[str, str]:
+    """Extracts the query part from a url"""
+
+    if url is None or url == "":
+        return {}
+
+    query = url.split('?', maxsplit=1)[-1]
+    query = dict([x.split('=') for x in query.split('&')])
+    query = {urldecode(x): urldecode(y) for x, y in query.items()}
+    return query

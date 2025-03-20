@@ -19,7 +19,7 @@ from requests import TooManyRedirects
 from .spotify_controller import SpotifyController
 from .error import TokenError
 from .const import CONF_SP_DC, CONF_SP_KEY
-from .helpers import get_cast_devices, get_spotify_devices, get_spotify_media_player
+from .helpers import get_cast_devices, get_spotify_devices, get_spotify_media_player, query_from_url
 from .spotify_controller import SpotifyController
 from .crypto import get_totp
 
@@ -251,11 +251,10 @@ class SpotifyToken:
 
     def raise_for_status(self, status: int, content: str, headers: dict):
         """Raises an error for invalid response"""
-        if (
-            status == 302
-            and headers["Location"]
-            == "/get_access_token?reason=transport&productType=web_player&_authfailed=1"
-        ):
+
+        location_query = query_from_url(headers.get("Location"))
+
+        if status == 302 and location_query.get("_authfailed", "0") == "1":
             _LOGGER.error(
                 "Unsuccessful token request, received code 302 and "
                 "Location header %s. sp_dc and sp_key could be "
