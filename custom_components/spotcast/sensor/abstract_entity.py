@@ -2,13 +2,14 @@
 
 from abc import ABC, abstractmethod
 from logging import getLogger
+from asyncio import exceptions as asyncio_errors
 
 from homeassistant.components.sensor import (
     EntityCategory,
     Entity
 )
 from homeassistant.const import STATE_UNKNOWN, STATE_OFF
-from requests.exceptions import RetryError
+from requests import exceptions as requests_errors
 
 from custom_components.spotcast.spotify import SpotifyAccount
 from custom_components.spotcast.sessions.exceptions import TokenError
@@ -17,7 +18,11 @@ from custom_components.spotcast.sessions.retry_supervisor import (
 )
 
 LOGGER = getLogger(__name__)
-ENTITY_SPECIFIC_ERRORS = (TokenError, RetryError)
+ENTITY_SPECIFIC_ERRORS = (
+    TokenError,
+    requests_errors.RetryError,
+    asyncio_errors.TimeoutError,
+)
 POTENTIAL_ERRORS = (
     RetrySupervisor.SUPERVISED_EXCEPTIONS + ENTITY_SPECIFIC_ERRORS
 )
