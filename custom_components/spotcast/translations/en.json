@@ -15,6 +15,8 @@
         },
         "abort": {
             "connection_error": "Unable to connect to Spotify using the {account_type} credentials. Please verify the information provide. For more help, [Open a ticket](https://github.com/fondberg/spotcast/issues/new/choose).",
+            "already_configured": "This account is already configured in Home Assistant",
+            "reauth_account_mismatch": "The account provided does not match the account being reauthenticated",
             "public_private_accounts_mismatch": "The profile from the OAuth credentials and the Browser cookies are for 2 different accounts. Make sure to provide information from the same account. If you are already logged in to Spotify on your browser. Home Assistant won,t ask you to connect to a different account and will use the currently logged in user."
         }
     },
