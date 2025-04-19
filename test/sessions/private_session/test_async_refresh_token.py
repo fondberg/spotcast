@@ -44,7 +44,9 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
             mock_response.text = AsyncMock()
             mock_response.json = AsyncMock()
 
-        self.mocks["responses"][0].json.return_value = {"serverTime": 12345}
+        self.mocks["responses"][0].text.return_value = json.dumps(
+            {"serverTime": 12345}
+        )
         self.mocks["responses"][0].status = 200
         self.mocks["responses"][0].headers = {}
         self.mocks["responses"][1].text.return_value = json.dumps({
@@ -69,6 +71,44 @@ class TestSuccessfulRefresh(IsolatedAsyncioTestCase):
                 "expires_at": 123456,
             }
         )
+
+
+class TestServerTimeError(IsolatedAsyncioTestCase):
+
+    @patch.object(ClientSession, "get", new_callable=MagicMock)
+    async def test_error_raised(self, mock_get: MagicMock):
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "entry": MagicMock(spec=ConfigEntry),
+            "get": mock_get,
+            "responses": [
+                MagicMock(),
+            ]
+        }
+
+        self.mocks["entry"].data = {
+            "internal_api": {
+                "sp_dc": "foo",
+                "sp_key": "bar",
+            }
+        }
+
+        for mock_response in self.mocks["responses"]:
+            mock_response.text = AsyncMock()
+            mock_response.json = AsyncMock()
+
+        self.mocks["responses"][0].text.return_value = "invalid json"
+        self.mocks["responses"][0].status = 200
+        self.mocks["responses"][0].headers = {}
+
+        self.mocks["get"].return_value.__aenter__\
+            .side_effect = self.mocks["responses"]
+
+        self.session = PrivateSession(self.mocks["hass"], self.mocks["entry"])
+
+        with self.assertRaises(TokenRefreshError):
+            self.result = await self.session.async_refresh_token()
 
 
 class TestUnsuccessfulRefresh(IsolatedAsyncioTestCase):
@@ -97,7 +137,9 @@ class TestUnsuccessfulRefresh(IsolatedAsyncioTestCase):
             mock_response.text = AsyncMock()
             mock_response.json = AsyncMock()
 
-        self.mocks["responses"][0].json.return_value = {"serverTime": 12345}
+        self.mocks["responses"][0].text.return_value = json.dumps(
+            {"serverTime": 12345}
+        )
         self.mocks["responses"][0].status = 200
         self.mocks["responses"][0].headers = {}
         self.mocks["responses"][1].text.return_value = json.dumps({

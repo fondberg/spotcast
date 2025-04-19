@@ -58,8 +58,8 @@ class PrivateSession(ConnectionSession):
             the api request
 
     Constants:
-        - HEADERS(dict): dictionary of headers to include in all API
-            call.
+        - CONTENT_TYPE(str): the default expected content-type to use
+            for api calls
         - REQUEST_URL(str): the url where to make an authentication
             request
         - EXPIRED_LOCATION(str): The location header value when an
@@ -74,14 +74,7 @@ class PrivateSession(ConnectionSession):
         - async_refresh_tokne
     """
 
-    HEADERS = MappingProxyType({
-        "user-agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) "
-            "Gecko/20100101 "
-            "Firefox/136.0"
-        ),
-        "Accept": "application/json",
-    })
+    CONTENT_TYPE = "application/json"
 
     BASE_URL = "https://open.spotify.com"
     TOKEN_ENDPOINT = "get_access_token"
@@ -154,7 +147,7 @@ class PrivateSession(ConnectionSession):
                 f".{randrange(60, 125)} Safari/{randrange(530, 537)}"
                 f".{randrange(30, 36)}"
             ),
-            "Accept": "application/json",
+            "Accept": self.CONTENT_TYPE,
         }
 
     async def async_ensure_token_valid(self) -> bool:
@@ -219,12 +212,16 @@ class PrivateSession(ConnectionSession):
                 url=self._endpoint(self.SERVER_TIME_ENDPOINT),
                 headers=self.headers
             ) as response:
-                data = await response.json()
+
+                data = await response.text()
+
                 self.raise_for_status(
-                    response.status,
-                    json.dumps(data),
-                    response.headers,
+                    status=response.status,
+                    content=data,
+                    headers=response.headers,
                 )
+
+                data = json.loads(data)
                 server_time = data["serverTime"]
 
             totp_value = self._totp.at(server_time)
