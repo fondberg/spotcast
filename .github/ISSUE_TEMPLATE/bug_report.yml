@@ -10,6 +10,18 @@ body:
     attributes:
       value: |
         This issue form is for reporting bugs only!
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Notice**: Spotcast is currently experiencing a known outage. See [#543](https://github.com/fondberg/spotcast/issues/543) for details.
+  - type: checkboxes
+    id: outage_ack
+    attributes:
+      label: Outage Acknowledgement
+      description: Please confirm you've read and understood the above notice.
+      options:
+        - label: "I confirm that I have read issue #543 and this report is **not** related to the current outage."
+          required: true
   - type: textarea
     validations:
       required: true
