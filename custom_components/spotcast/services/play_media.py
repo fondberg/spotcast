@@ -71,6 +71,8 @@ async def async_play_media(hass: HomeAssistant, call: ServiceCall):
     elif uri.startswith("spotify:track:"):
         if extras.get("track_context") == "track":
             LOGGER.debug("Using track context")
+        elif extras.get("track_context").startswith('spotify:'):
+            LOGGER.debug("Using custom context")
         else:
             uri, index = await async_track_index(account, uri)
             LOGGER.debug(

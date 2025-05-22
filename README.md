@@ -91,16 +91,16 @@ curl -sSL https://raw.githubusercontent.com/fondberg/spotcast/refs/heads/dev/scr
 
 Multiple options originally in the `spotcast.start` service has been moved to the `data` section. Here is a list of common ones. Some service could have additional options. Look at the service definition for more information on them.
 
-| Option          | type                      | default | description                                                                                                         |
-| :---:           | :---:                     | :---:   | :---                                                                                                                |
-| `position`      | `positive_float`          | `0.000` | The position to start playback (in seconds) of where to start the playback of the first item in the context         |
-| `offset`        | `positive_int`            | `0`     | The item in the context to start the playback at. The position is zero based and cannot be negative                 |
-| `volume`        | `int`, `range 0-100`      | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`      |
-| `repeat`        | `track \| context \| off` | `null`  | The repeat mode is kept the same if `null`                                                                          |
-| `shuffle`       | `bool`                    | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                |
-| `limit`         | `positive_int`            | `null`  | sets the maximum amount of items that can be retrieved from a spotify api endpoint. Retrieves all items if `null`.  |
-| `random`        | `bool`                    | `False` | Sets the context playback to a random song of the context. Only available for albums, playlists and custom contexts |
-| `track_context` | `track \| album`          | `album` | Sets the context of a track. If it's `album` other songs from the album will play when the song ends. If it's `track` nothing will play when the song ends.  |
+| Option          | type                            | default | description                                                                                                         |
+| :---:           | :---:                           | :---:   | :---                                                                                                                |
+| `position`      | `positive_float`                | `0.000` | The position to start playback (in seconds) of where to start the playback of the first item in the context         |
+| `offset`        | `positive_int`                  | `0`     | The item in the context to start the playback at. The position is zero based and cannot be negative                 |
+| `volume`        | `int`, `range 0-100`            | `null`  | The percentage (as an integer of the percentage value) to start plaback at. Volume is kept unchanged if `null`      |
+| `repeat`        | `track \| context \| off`       | `null`  | The repeat mode is kept the same if `null`                                                                          |
+| `shuffle`       | `bool`                          | `null`  | Sets the playback to shuffle if `True`. Is kept unchanged if `null`.                                                |
+| `limit`         | `positive_int`                  | `null`  | sets the maximum amount of items that can be retrieved from a spotify api endpoint. Retrieves all items if `null`.  |
+| `random`        | `bool`                          | `False` | Sets the context playback to a random song of the context. Only available for albums, playlists and custom contexts |
+| `track_context` | `track \| album \| spotify_url` | `album` | Sets the context of a track. If it's `album` other songs from the album will play when the song ends. If it's `track` nothing will play when the song ends. If it's any spotify_ufl (spotify:playlist:xxxx), then play the song in the context of the custom url, if the song exists in that context      |
 
 
 ## Entitites
