@@ -39,9 +39,10 @@ async def async_tracks_handler(
 
     formatted_tracks = []
 
-    for track in tracks:
-
-        track = track["track"]
+    for item in tracks:
+        track = item.get("item") or item.get("track")
+        if not track:
+            continue
 
         formatted_tracks.append({
             "id": track.get("id"),

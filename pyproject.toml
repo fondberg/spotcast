@@ -13,7 +13,7 @@ maintainers = [
 ]
 dependencies = [
     "atomicwrites-homeassistant>=1.4.1",
-    "spotipy>=2.24.0",
+    "spotipy>=2.26.0",
     "PyChromecast>=14.0.1",
     "requests>=2.32.3",
     "spotifyaio>=0.8.8",

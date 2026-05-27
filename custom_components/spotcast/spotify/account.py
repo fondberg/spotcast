@@ -609,13 +609,16 @@ class SpotifyAccount:
         await self.async_ensure_tokens_valid()
         LOGGER.debug("Fetching Top Tracks for artist `%s`", uri)
 
-        result = await self.hass.async_add_executor_job(
-            self.apis["public"].artist_top_tracks,
-            uri,
-            self.country,
-        )
-
-        return result["tracks"]
+        try:
+            result = await self.hass.async_add_executor_job(
+                self.apis["public"].artist_top_tracks,
+                uri,
+                self.country,
+            )
+            return result["tracks"]
+        except SpotifyException as exc:
+            LOGGER.warning("Could not fetch top tracks for artist `%s`. Your Spotify app might be in Development Mode, which no longer supports artist top-tracks endpoint: %s", uri, exc)
+            return []
 
     async def async_get_playlist_tracks(self, uri: str) -> list[dict]:
         """Retrieves the list of tracks inside a playlist."""
@@ -625,7 +628,7 @@ class SpotifyAccount:
         playlist_id = self._id_from_uri(uri)
 
         result = await self._async_pager(
-            function=self.apis["public"].playlist_tracks,
+            function=self.apis["public"].playlist_items,
             prepends=[playlist_id, None],
             appends=[self.country],
         )
@@ -1077,20 +1080,24 @@ class SpotifyAccount:
 
         dataset = self._datasets["categories"]
 
-        async with dataset.lock:
-            if force or dataset.is_expired():
-                LOGGER.debug("Refreshing Browse Categories dataset")
+        try:
+            async with dataset.lock:
+                if force or dataset.is_expired():
+                    LOGGER.debug("Refreshing Browse Categories dataset")
 
-                categories = await self._async_pager(
-                    self.apis["public"].categories,
-                    prepends=[self.country, None],
-                    sub_layer="categories",
-                    max_items=limit,
-                )
+                    categories = await self._async_pager(
+                        self.apis["public"].categories,
+                        prepends=[self.country, None],
+                        sub_layer="categories",
+                        max_items=limit,
+                    )
 
-                dataset.update(categories)
-            else:
-                LOGGER.debug("Using cached Browse Categories dataset")
+                    dataset.update(categories)
+                else:
+                    LOGGER.debug("Using cached Browse Categories dataset")
+        except SpotifyException as exc:
+            LOGGER.warning("Could not fetch browse categories. Your Spotify app might be in Development Mode, which no longer supports browse categories endpoints: %s", exc)
+            return []
 
         return self.categories
 
@@ -1117,14 +1124,17 @@ class SpotifyAccount:
             category_id,
         )
 
-        playlists = await self._async_pager(
-            self.apis["public"].category_playlists,
-            prepends=[category_id, self.country],
-            sub_layer="playlists",
-            max_items=limit,
-        )
-
-        return playlists
+        try:
+            playlists = await self._async_pager(
+                self.apis["public"].category_playlists,
+                prepends=[category_id, self.country],
+                sub_layer="playlists",
+                max_items=limit,
+            )
+            return playlists
+        except SpotifyException as exc:
+            LOGGER.warning("Could not fetch category playlists for category `%s`. Your Spotify app might be in Development Mode, which no longer supports browse category endpoints: %s", category_id, exc)
+            return []
 
     async def async_view(
         self,

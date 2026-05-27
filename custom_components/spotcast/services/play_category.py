@@ -9,6 +9,7 @@ from logging import getLogger
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 from homeassistant.util.read_only_dict import ReadOnlyDict
+from homeassistant.exceptions import ServiceValidationError
 import voluptuous as vol
 from random import choice
 
@@ -53,9 +54,23 @@ async def async_play_category(hass: HomeAssistant, call: ServiceCall):
 
     categories = await account.async_categories()
 
+    if not categories:
+        raise ServiceValidationError(
+            "Could not fetch browse categories from Spotify. "
+            "This may be because your Spotify App is in Development Mode, "
+            "which does not support browse category endpoints."
+        )
+
     category = find_category(categories, category_str)
 
     playlists = await account.async_category_playlists(category["id"])
+
+    if not playlists:
+        raise ServiceValidationError(
+            f"No playlists found in category `{category_str}`. "
+            "This may be because your Spotify App is in Development Mode, "
+            "which does not support category-based playback."
+        )
 
     # remove dj playlist if present
     playlists = [x for x in playlists if x["uri"] != account.DJ_URI]

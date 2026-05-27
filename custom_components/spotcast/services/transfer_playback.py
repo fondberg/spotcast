@@ -143,7 +143,11 @@ async def async_rebuild_playback(
 
         if context_type == "playlist":
             tracks = await account.async_get_playlist_tracks(context_uri)
-            tracks = [x["track"]["uri"] for x in tracks]
+            tracks = [
+                (x.get("item") or x.get("track"))["uri"]
+                for x in tracks
+                if x.get("item") or x.get("track")
+            ]
         else:
             tracks = await account.async_liked_songs()
 

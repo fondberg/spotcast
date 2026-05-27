@@ -55,7 +55,7 @@ class TestPlaylistTrackRetrieval(IsolatedAsyncioTestCase):
     def test_pager_properly_called(self):
         try:
             self.account._async_pager.assert_called_with(
-                function=self.account.apis["public"].playlist_tracks,
+                function=self.account.apis["public"].playlist_items,
                 prepends=["foo", None],
                 appends=["CA"]
             )
