@@ -75,6 +75,38 @@ class TestPlaylistRandInt(IsolatedAsyncioTestCase):
             self.fail()
 
 
+class TestPlaylistItemsRandInt(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.randint", new_callable=MagicMock)
+    async def asyncSetUp(self, mock_random: MagicMock):
+
+        mock_random.return_value = 7
+
+        self.mocks = {
+            "account": MagicMock(spec=SpotifyAccount)
+        }
+
+        self.mocks["account"].async_get_playlist = AsyncMock()
+        self.mocks["account"].async_get_playlist.return_value = {
+            "items": {
+                "total": 53
+            }
+        }
+        self.resut = await async_random_index(
+            self.mocks["account"],
+            "spotify:playlist:foo",
+        )
+
+    def test_received_expected_index(self):
+        self.assertEqual(self.resut, 7)
+
+    def test_get_playlist_called(self):
+        try:
+            self.mocks["account"].async_get_playlist.assert_called()
+        except AssertionError:
+            self.fail()
+
+
 class TestUserLikedSongs(IsolatedAsyncioTestCase):
 
     @patch(f"{TEST_MODULE}.randint", new_callable=MagicMock)

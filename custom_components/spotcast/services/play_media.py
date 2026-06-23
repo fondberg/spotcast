@@ -190,7 +190,14 @@ async def async_random_index(account: SpotifyAccount, uri: str) -> int:
         count = album["total_tracks"]
     elif uri.startswith("spotify:playlist:"):
         playlist = await account.async_get_playlist(uri)
-        count = playlist["tracks"]["total"]
+        if "tracks" in playlist:
+            count = playlist["tracks"]["total"]
+        elif "items" in playlist:
+            count = playlist["items"]["total"]
+        else:
+            raise ServiceValidationError(
+                f"Could not get track count for {uri}"
+            )
     elif uri == account.liked_songs_uri:
         count = await account.async_liked_songs_count()
     else:
