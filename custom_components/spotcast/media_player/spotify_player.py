@@ -13,6 +13,7 @@ from homeassistant.const import (
     STATE_OFF,
     STATE_UNAVAILABLE
 )
+from homeassistant.util import slugify
 
 from custom_components.spotcast.media_player import MediaPlayer
 from custom_components.spotcast.spotify import SpotifyAccount
@@ -113,14 +114,6 @@ class SpotifyDevice(MediaPlayer, MediaPlayerEntity):
     def _define_entity_id(self):
         """Define the entity ID based on the account profile"""
 
-        removals = "()"
-
-        name: str = self.device_data["name"]
-
-        name = name.lower()
-        name = name.replace(" ", "_")
-
-        for char in removals:
-            name = name.replace(char, "")
+        name = slugify(self.device_data["name"])
 
         return f"media_player.{name}_{self._account.id}_spotcast"

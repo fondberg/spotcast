@@ -58,3 +58,53 @@ class TestComplexName(TestCase):
             self.device._define_entity_id(),
             "media_player.dummy_device_chrome_dummy_spotcast"
         )
+
+
+class TestNonAsciiName(TestCase):
+
+    def setUp(self):
+
+        self.mock_account = MagicMock(spec=SpotifyAccount)
+        self.mock_account.id = "dummy"
+        self.mock_account.name = "Dummy User"
+
+        self.device = SpotifyDevice(
+            self.mock_account,
+            {
+                "id": "12345",
+                "name": "Echo Dot Küche",
+                "type": "dummy",
+                "is_active": True,
+            }
+        )
+
+    def test_umlaut_transliterated(self):
+        self.assertEqual(
+            self.device._define_entity_id(),
+            "media_player.echo_dot_kuche_dummy_spotcast"
+        )
+
+
+class TestUmlautOnlyName(TestCase):
+
+    def setUp(self):
+
+        self.mock_account = MagicMock(spec=SpotifyAccount)
+        self.mock_account.id = "dummy"
+        self.mock_account.name = "Dummy User"
+
+        self.device = SpotifyDevice(
+            self.mock_account,
+            {
+                "id": "12345",
+                "name": "Überall",
+                "type": "dummy",
+                "is_active": True,
+            }
+        )
+
+    def test_umlaut_transliterated(self):
+        self.assertEqual(
+            self.device._define_entity_id(),
+            "media_player.uberall_dummy_spotcast"
+        )
