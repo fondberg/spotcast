@@ -8,7 +8,7 @@
 > **This project is abandoned and no longer maintained.**
 > Due to Spotify's hostility toward third-party developers, their political stances, and a lack of time on my part, I have decided to discontinue Spotcast indefinitely. No PRs will be reviewed or merged.
 >
-> If you wish to continue development, please fork this repository. A maintained fork may be listed here in the future.
+> A maintained fork now lives at **[Mincka/spotcast](https://github.com/Mincka/spotcast)**. See the [migration guide](https://github.com/Mincka/spotcast#coming-from-the-original-fondbergspotcast) to move over. Your accounts, tokens, entities and automations carry over untouched.
 
 Home Assistant custom component to start Spotify playback on an idle chromecast device or a Spotify Connect device (thanks to @kleinc80) which means that you can target your automation for chromecast as well as connect devices.
 
