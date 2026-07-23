@@ -1,6 +1,6 @@
 [project]
 name = "spotcast"
-version = "6.0.0-a16"
+version = "6.0.0-a17"
 description = "Home Assistant custom component to start Spotify playback on an idle Chromecast or a Spotify Connect device. Meaning you can target automation for chromecast as well as connect devices."
 readme = "README.md"
 requires-python = ">=3.13"

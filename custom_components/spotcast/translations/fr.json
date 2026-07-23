@@ -1,4 +1,10 @@
 {
+    "issues": {
+        "spotcast_moved": {
+            "title": "Spotcast a déménagé vers un nouveau dépôt",
+            "description": "Spotcast est désormais maintenu sur github.com/Mincka/spotcast. Cette copie, installée depuis le dépôt d'origine fondberg/spotcast, est abandonnée et ne reçoit plus de mises à jour. Sélectionnez **En savoir plus** pour les étapes de migration. Vos comptes, jetons, entités et automatisations sont conservés tels quels."
+        }
+    },
     "config": {
         "step": {
             "desktop_api": {

@@ -11,6 +11,9 @@ from custom_components.spotcast import (
     ConfigEntryAuthFailed,
     InternalServerError,
     ConfigEntryNotReady,
+    DOMAIN,
+    MOVED_ISSUE_ID,
+    MOVED_LEARN_MORE_URL,
 )
 from custom_components.spotcast.spotify import SpotifyAccount
 
@@ -19,6 +22,7 @@ TEST_MODULE = "custom_components.spotcast"
 
 class TestEntryRegistration(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.ir")
     @patch(f"{TEST_MODULE}.async_cleanup_entities")
     @patch(f"{TEST_MODULE}.async_setup_websocket")
     @patch.object(SpotifyAccount, "async_from_config_entry")
@@ -27,6 +31,7 @@ class TestEntryRegistration(IsolatedAsyncioTestCase):
         mock_account: AsyncMock,
         mock_websocket: AsyncMock,
         mock_cleanup: AsyncMock,
+        mock_ir: MagicMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
@@ -79,6 +84,7 @@ class TestEntryRegistration(IsolatedAsyncioTestCase):
 
 class TestDefaultOptionsSet(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.ir")
     @patch(f"{TEST_MODULE}.async_cleanup_entities")
     @patch(f"{TEST_MODULE}.async_setup_websocket")
     @patch.object(SpotifyAccount, "async_from_config_entry")
@@ -87,6 +93,7 @@ class TestDefaultOptionsSet(IsolatedAsyncioTestCase):
         mock_account: MagicMock,
         mock_websocket: AsyncMock,
         mock_cleanup: AsyncMock,
+        mock_ir: MagicMock,
     ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
@@ -135,8 +142,13 @@ class TestDefaultOptionsSet(IsolatedAsyncioTestCase):
 
 class TestTokensErrorAtRefresh(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.ir")
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    async def test_token_error_raised(self, mock_account: AsyncMock):
+    async def test_token_error_raised(
+        self,
+        mock_account: AsyncMock,
+        mock_ir: MagicMock,
+    ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
 
@@ -169,10 +181,89 @@ class TestTokensErrorAtRefresh(IsolatedAsyncioTestCase):
             )
 
 
+class TestMovedIssueCreated(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.ir")
+    @patch(f"{TEST_MODULE}.async_cleanup_entities")
+    @patch(f"{TEST_MODULE}.async_setup_websocket")
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    async def asyncSetUp(
+        self,
+        mock_account: AsyncMock,
+        mock_websocket: AsyncMock,
+        mock_cleanup: AsyncMock,
+        mock_ir: MagicMock,
+    ):
+
+        mock_account.return_value = MagicMock(spec=SpotifyAccount)
+
+        self.mocks = {
+            "hass": MagicMock(spec=HomeAssistant),
+            "entry": MagicMock(spec=ConfigEntry),
+            "forward_entry": AsyncMock(),
+            "ir": mock_ir,
+            "cleanup": mock_cleanup,
+        }
+
+        self.mocks["hass"].data = {}
+        self.mocks["entry"].entry_id = "foo"
+        self.mocks["entry"].options = {"is_default": True}
+        self.mocks["account"] = mock_account.return_value
+        self.mocks["account"].is_default = True
+        self.mocks["hass"].config_entries\
+            .async_forward_entry_setups = self.mocks["forward_entry"]
+        self.mocks["hass"].services = MagicMock()
+        self.mocks["cleanup"].return_value = 0
+
+        await async_setup_entry(self.mocks["hass"], self.mocks["entry"])
+
+    def test_moved_issue_created(self):
+        self.mocks["ir"].async_create_issue.assert_called_once_with(
+            self.mocks["hass"],
+            DOMAIN,
+            MOVED_ISSUE_ID,
+            is_fixable=False,
+            severity=self.mocks["ir"].IssueSeverity.WARNING,
+            translation_key=MOVED_ISSUE_ID,
+            learn_more_url=MOVED_LEARN_MORE_URL,
+        )
+
+
+class TestMovedIssueCreatedBeforeAuthFailure(IsolatedAsyncioTestCase):
+
+    @patch(f"{TEST_MODULE}.ir")
+    @patch.object(SpotifyAccount, "async_from_config_entry")
+    async def test_issue_created_even_when_auth_fails(
+        self,
+        mock_account: AsyncMock,
+        mock_ir: MagicMock,
+    ):
+
+        mock_account.side_effect = TokenRefreshError
+
+        hass = MagicMock(spec=HomeAssistant)
+        hass.data = {}
+        entry = MagicMock(spec=ConfigEntry)
+        entry.entry_id = "foo"
+        entry.options = {}
+
+        with self.assertRaises(ConfigEntryAuthFailed):
+            await async_setup_entry(hass, entry)
+
+        # The migration notice must reach abandoned installs that can no
+        # longer authenticate, so it is created before token validation.
+        mock_ir.async_create_issue.assert_called_once()
+
+
 class TestGatewayError(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.ir")
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    async def test_token_error_raised(self, mock_account: AsyncMock):
+    async def test_token_error_raised(
+        self,
+        mock_account: AsyncMock,
+        mock_ir: MagicMock,
+    ):
 
         mock_account.return_value = MagicMock(spec=SpotifyAccount)
 
@@ -207,8 +298,13 @@ class TestGatewayError(IsolatedAsyncioTestCase):
 
 class TestTokensErrorAtAccountBuild(IsolatedAsyncioTestCase):
 
+    @patch(f"{TEST_MODULE}.ir")
     @patch.object(SpotifyAccount, "async_from_config_entry")
-    async def test_token_error_raised(self, mock_account: AsyncMock):
+    async def test_token_error_raised(
+        self,
+        mock_account: AsyncMock,
+        mock_ir: MagicMock,
+    ):
 
         mock_account.side_effect = TokenRefreshError
 

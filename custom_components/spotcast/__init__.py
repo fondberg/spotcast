@@ -16,6 +16,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.const import Platform
 from homeassistant.helpers import entity_registry
+from homeassistant.helpers import issue_registry as ir
 
 from .const import DOMAIN
 from .services import ServiceHandler
@@ -27,7 +28,13 @@ from .spotify import SpotifyAccount
 from .sensor.abstract_entity import SpotcastEntity
 from .sensor.spotify_current_audio_features import SENSORS as AF_SENSORS
 
-__version__ = "6.0.0-a16"
+__version__ = "6.0.0-a17"
+
+MOVED_ISSUE_ID = "spotcast_moved"
+MOVED_LEARN_MORE_URL = (
+    "https://github.com/Mincka/spotcast"
+    "#coming-from-the-original-fondbergspotcast"
+)
 
 
 LOGGER = getLogger(__name__)
@@ -49,6 +56,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     if updated_options != entry.options:
         hass.config_entries.async_update_entry(entry, options=updated_options)
+
+    # Spotcast has moved to Mincka/spotcast. Surface a one-time repair so
+    # users on this legacy fondberg/spotcast build know where to migrate.
+    # Created before token validation so it shows even when this abandoned
+    # build can no longer authenticate. The issue registry remembers the
+    # dismissed state, so this is safe to call on every setup.
+    ir.async_create_issue(
+        hass,
+        DOMAIN,
+        MOVED_ISSUE_ID,
+        is_fixable=False,
+        severity=ir.IssueSeverity.WARNING,
+        translation_key=MOVED_ISSUE_ID,
+        learn_more_url=MOVED_LEARN_MORE_URL,
+    )
 
     try:
         account = await SpotifyAccount.async_from_config_entry(

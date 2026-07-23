@@ -6,6 +6,17 @@
 
 ------------------------------------------------------------------------------
 
+> **Spotcast has moved to [Mincka/spotcast](https://github.com/Mincka/spotcast)**
+>
+> This repository is abandoned and no longer maintained. This release only adds
+> this migration notice, so there is no need to install it. Switch to the
+> maintained repository instead; your accounts, tokens, entities and automations
+> carry over untouched.
+>
+> **Migration guide:** https://github.com/Mincka/spotcast#coming-from-the-original-fondbergspotcast
+
+------------------------------------------------------------------------------
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![spotcast](https://img.shields.io/github/release/fondberg/spotcast.svg?1)](https://github.com/fondberg/spotcast)
 ![Maintenance](https://img.shields.io/maintenance/yes/2024.svg)
