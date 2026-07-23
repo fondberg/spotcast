@@ -1,5 +1,13 @@
 # Spotcast
 
+> **Spotcast has moved to [Mincka/spotcast](https://github.com/Mincka/spotcast)**
+>
+> This v4 build is abandoned and no longer works with Spotify's current
+> authentication. This release only adds this migration notice, so there is no
+> need to install it. Switch to the maintained repository instead.
+>
+> **Migration guide:** https://github.com/Mincka/spotcast#coming-from-the-original-fondbergspotcast
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs) [![spotcast](https://img.shields.io/github/release/fondberg/spotcast.svg?1)](https://github.com/fondberg/spotcast) ![Maintenance](https://img.shields.io/maintenance/yes/2024.svg)
 
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/fondberg)

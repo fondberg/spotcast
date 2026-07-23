@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-__version__ = "4.0.1"
+__version__ = "4.0.2"
 
 import collections
 import logging
+import os
 import time
 
 import homeassistant.core as ha_core
-from homeassistant.components import websocket_api
+from homeassistant.components import persistent_notification, websocket_api
 from homeassistant.const import CONF_ENTITY_ID, CONF_OFFSET, CONF_REPEAT
 from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
@@ -73,6 +74,38 @@ DEBUG = True
 
 _LOGGER = logging.getLogger(__name__)
 
+MOVED_NOTIFICATION_ID = "spotcast_moved"
+MOVED_MARKER = ".spotcast_moved_notified"
+MOVED_MESSAGE = (
+    "Spotcast is now maintained at https://github.com/Mincka/spotcast . "
+    "This version, installed from the original fondberg/spotcast "
+    "repository, is abandoned and no longer works with Spotify's current "
+    "authentication. See the migration guide: "
+    "https://github.com/Mincka/spotcast"
+    "#coming-from-the-original-fondbergspotcast"
+)
+
+
+def _notify_spotcast_moved(hass: ha_core.HomeAssistant) -> None:
+    """Show the migration notice once, remembered across restarts."""
+    marker = hass.config.path(MOVED_MARKER)
+
+    if os.path.exists(marker):
+        return
+
+    persistent_notification.create(
+        hass,
+        MOVED_MESSAGE,
+        title="Spotcast has moved",
+        notification_id=MOVED_NOTIFICATION_ID,
+    )
+
+    try:
+        with open(marker, "w", encoding="utf-8"):
+            pass
+    except OSError:
+        _LOGGER.warning("Could not write the Spotcast migration marker")
+
 
 def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     """setup method for integration with Home Assistant
@@ -86,6 +119,13 @@ def setup(hass: ha_core.HomeAssistant, config: collections.OrderedDict) -> bool:
     Returns:
         bool: returns a bollean based on if the setup wroked or not
     """
+
+    # Spotcast has moved to Mincka/spotcast. This v4 build is abandoned
+    # and no longer works with Spotify's current authentication, so show
+    # a one-time notification pointing users to the migration guide. A
+    # marker file makes it fire only once (persistent notifications do
+    # not survive a restart, so recreating on every setup would nag).
+    _notify_spotcast_moved(hass)
 
     # get spotify core integration status
     # if return false, could indicate a bad spotify integration. Race
