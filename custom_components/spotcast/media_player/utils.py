@@ -30,6 +30,12 @@ from custom_components.spotcast.chromecast import SpotifyController
 
 LOGGER = getLogger(__name__)
 
+# Seconds to wait for a cast device to accept the connection and report
+# a status before giving up (pychromecast default is to wait forever).
+CAST_CONNECT_TIMEOUT = 15
+# Seconds to wait for the cast worker thread to stop after disconnecting.
+CAST_DISCONNECT_TIMEOUT = 10
+
 PLAYER_TYPES = (
     Chromecast,
     SpotifyDevice,
@@ -197,23 +203,47 @@ async def async_build_from_type(
             zconf=ChromeCastZeroconf.get_zeroconf()
         )
 
-        await hass.async_add_executor_job(media_player.wait)
-
-        spotify_controller = SpotifyController(account)
-        media_player.register_handler(spotify_controller)
-        await account.async_playback_state()
-
-        do_quit = need_to_quit_app(media_player, account)
-        running_spotify = media_player.app_id == spotify_controller.APP_ID
-
-        if do_quit:
-            media_player.quit_app()
-
-        if not running_spotify or do_quit:
+        try:
+            # Bounded wait: a refused or dead endpoint raises RequestTimeout
+            # after CAST_CONNECT_TIMEOUT seconds instead of blocking the
+            # executor thread forever.
             await hass.async_add_executor_job(
-                spotify_controller.launch_app,
-                media_player,
+                media_player.wait,
+                CAST_CONNECT_TIMEOUT,
             )
+
+            spotify_controller = SpotifyController(account)
+            media_player.register_handler(spotify_controller)
+            await account.async_playback_state()
+
+            do_quit = need_to_quit_app(media_player, account)
+            running_spotify = media_player.app_id == spotify_controller.APP_ID
+
+            if do_quit:
+                media_player.quit_app()
+
+            if not running_spotify or do_quit:
+                await hass.async_add_executor_job(
+                    spotify_controller.launch_app,
+                    media_player,
+                )
+        finally:
+            # Release this call's socket and worker thread. Without this every
+            # call leaves a permanent sender connection on the cast device
+            # (the worker thread keeps the object alive), and the device
+            # eventually refuses new connections. The object's `name` and `id`
+            # (md5 of the name) stay usable for the Web API calls that follow;
+            # playback itself runs over Spotify Connect, not over this socket.
+            try:
+                await hass.async_add_executor_job(
+                    media_player.disconnect,
+                    CAST_DISCONNECT_TIMEOUT,
+                )
+            except Exception:  # pylint: disable=broad-except
+                LOGGER.warning(
+                    "Could not release the cast connection to `%s`",
+                    media_player.name,
+                )
 
         return media_player
 
